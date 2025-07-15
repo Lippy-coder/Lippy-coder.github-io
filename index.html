@@ -40,6 +40,24 @@
             text-decoration: line-through;
             opacity: 0.6;
         }
+        .profile-pic-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+        .profile-pic-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            border-radius: 9999px;
+        }
+        .profile-pic-wrapper:hover .profile-pic-overlay {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -93,7 +111,10 @@
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <h1 class="text-3xl font-bold text-blue-600">Splitify</h1>
                 <div class="flex items-center">
-                    <span id="welcome-message" class="text-gray-600 mr-4 text-center"></span>
+                    <div id="profile-area" class="flex items-center">
+                        <!-- Profile picture will be inserted here -->
+                    </div>
+                    <span id="welcome-message" class="text-gray-600 mx-4 text-center"></span>
                     <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 text-sm">Logout</button>
                 </div>
             </header>
@@ -338,9 +359,11 @@
             <p id="message-text"></p>
         </div>
 
+        <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg">
+
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 1.5.0
+              Version 1.7.0
             </p>
         </footer>
     </div>
@@ -349,7 +372,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- Firebase Config Keys ---
         const firebaseConfig = {
@@ -369,6 +393,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         setLogLevel('debug');
 
         // --- State ---
@@ -379,8 +404,9 @@
         let allTripExpenses = [];
         let tripsUnsubscribe = null;
         let expensesUnsubscribe = null;
-        let currentBaseAmount = 0; // State for the converted expense amount
+        let currentBaseAmount = 0;
         let currentExchangeRate = 1;
+        const userProfilesCache = new Map();
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -397,6 +423,8 @@
         const welcomeMessage = document.getElementById('welcome-message');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
+        const profileArea = document.getElementById('profile-area');
+        const profilePicInput = document.getElementById('profile-pic-input');
 
         const tripsList = document.getElementById('trips-list');
         const noTripsMessage = document.getElementById('no-trips-message');
@@ -485,10 +513,10 @@
         }
 
         // --- View Navigation & Trip Selection ---
-        function selectTrip(trip) {
+        async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
-            renderTripMembers(trip.members);
+            await renderTripMembers(trip.memberIds);
             if (expensesUnsubscribe) expensesUnsubscribe();
             listenForExpenses(trip.id);
             showView('trip-detail-view');
@@ -500,10 +528,52 @@
             showView('dashboard-view');
         });
 
-        // --- Authentication ---
+        // --- User Profile Management ---
+        async function fetchUserProfiles(uids) {
+            const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
+            if (profilesToFetch.length > 0) {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("uid", "in", profilesToFetch));
+                const snapshot = await getDocs(q);
+                snapshot.forEach(doc => {
+                    userProfilesCache.set(doc.id, doc.data());
+                });
+            }
+            const profiles = {};
+            uids.forEach(uid => {
+                profiles[uid] = userProfilesCache.get(uid);
+            });
+            return profiles;
+        }
+
+        function renderProfile(user) {
+            welcomeMessage.textContent = `Hi, ${user.displayName || user.email}`;
+            profileArea.innerHTML = '';
+            const profilePicWrapper = document.createElement('div');
+            profilePicWrapper.className = 'profile-pic-wrapper';
+
+            let avatar;
+            if (user.photoURL) {
+                avatar = `<img src="${user.photoURL}" alt="Profile Picture" class="w-10 h-10 rounded-full object-cover">`;
+            } else {
+                const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
+                avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
+            }
+
+            profilePicWrapper.innerHTML = `
+                ${avatar}
+                <div class="profile-pic-overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+            `;
+            profilePicWrapper.addEventListener('click', () => profilePicInput.click());
+            profileArea.appendChild(profilePicWrapper);
+        }
+
         onAuthStateChanged(auth, (user) => {
             if (user && user.emailVerified) {
-                welcomeMessage.textContent = `Hi, ${user.displayName || user.email}`;
+                userProfilesCache.set(user.uid, { uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL });
+                renderProfile(user);
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
                 showView('dashboard-view');
@@ -511,6 +581,7 @@
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 if (expensesUnsubscribe) expensesUnsubscribe();
                 currentTrip = null;
+                userProfilesCache.clear();
                 showView('auth-view');
             }
         });
@@ -519,15 +590,14 @@
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberIds", "array-contains", userId));
-            tripsUnsubscribe = onSnapshot(q, (snapshot) => {
+            tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
                 const trips = [];
                 snapshot.forEach((doc) => {
                     trips.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Filter out archived trips on the client-side
                 const activeTrips = trips.filter(trip => !trip.isArchived);
-                renderTrips(activeTrips);
+                await renderTrips(activeTrips);
 
             }, (error) => {
                 console.error("Error listening for trips:", error);
@@ -535,77 +605,102 @@
             });
         }
 
-        function renderTrips(trips) {
+        async function renderTrips(trips) {
             tripsList.innerHTML = '';
             if (trips.length === 0) {
                 tripsList.appendChild(noTripsMessage);
                 noTripsMessage.classList.remove('hidden');
-            } else {
-                noTripsMessage.classList.add('hidden');
-                trips.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-                trips.forEach(trip => {
-                    const tripElement = document.createElement('div');
-                    const isSettled = trip.isSettled || false;
-                    tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${isSettled ? 'bg-green-100' : 'bg-white'}`;
-                    
-                    const archiveBtn = (auth.currentUser && auth.currentUser.uid === trip.ownerId && !isSettled) ? 
-                        `<button data-trip-id="${trip.id}" data-trip-name="${trip.name}" class="archive-trip-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-orange-100 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                                <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </button>` : '';
+                return;
+            } 
+            
+            noTripsMessage.classList.add('hidden');
+            
+            const allMemberIds = [...new Set(trips.flatMap(trip => trip.memberIds))];
+            const memberProfiles = await fetchUserProfiles(allMemberIds);
 
-                    const settledBadge = isSettled ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
+            trips.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            trips.forEach(trip => {
+                const tripElement = document.createElement('div');
+                const isSettled = trip.isSettled || false;
+                tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${isSettled ? 'bg-green-100' : 'bg-white'}`;
+                
+                const archiveBtn = (auth.currentUser && auth.currentUser.uid === trip.ownerId && !isSettled) ? 
+                    `<button data-trip-id="${trip.id}" data-trip-name="${trip.name}" class="archive-trip-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-orange-100 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                            <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>` : '';
 
-                    tripElement.innerHTML = `
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h3 class="text-xl font-bold ${isSettled ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
-                                <p class="text-sm ${isSettled ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                ${settledBadge}
-                                <div class="flex -space-x-2 overflow-hidden">
-                                    ${trip.members.slice(0, 4).map(m => `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${m.displayName.charAt(0)}</div>`).join('')}
-                                    ${trip.members.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.members.length - 4}</div>` : ''}
-                                </div>
+                const settledBadge = isSettled ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
+
+                const memberAvatars = trip.memberIds.slice(0, 4).map(uid => {
+                    const profile = memberProfiles[uid];
+                    if (profile && profile.photoURL) {
+                        return `<img src="${profile.photoURL}" class="inline-block h-8 w-8 rounded-full object-cover ring-2 ring-white">`;
+                    }
+                    const initial = profile ? profile.displayName.charAt(0).toUpperCase() : '?';
+                    return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
+                }).join('');
+
+                tripElement.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold ${isSettled ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
+                            <p class="text-sm ${isSettled ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            ${settledBadge}
+                            <div class="flex -space-x-2 overflow-hidden">
+                                ${memberAvatars}
+                                ${trip.memberIds.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.memberIds.length - 4}</div>` : ''}
                             </div>
                         </div>
-                        ${archiveBtn}
-                    `;
-                    
-                    tripElement.addEventListener('click', (e) => {
-                        if (!e.target.closest('.archive-trip-btn')) {
-                           selectTrip(trip);
-                        }
-                    });
-
-                    const archBtn = tripElement.querySelector('.archive-trip-btn');
-                    if (archBtn) {
-                        archBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            tripToArchive = { id: archBtn.dataset.tripId, name: archBtn.dataset.tripName };
-                            archiveTripNameSpan.textContent = tripToArchive.name;
-                            archiveTripModal.classList.remove('hidden-view');
-                        });
+                    </div>
+                    ${archiveBtn}
+                `;
+                
+                tripElement.addEventListener('click', (e) => {
+                    if (!e.target.closest('.archive-trip-btn')) {
+                       selectTrip(trip);
                     }
-                    tripsList.appendChild(tripElement);
                 });
-            }
+
+                const archBtn = tripElement.querySelector('.archive-trip-btn');
+                if (archBtn) {
+                    archBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        tripToArchive = { id: archBtn.dataset.tripId, name: archBtn.dataset.tripName };
+                        archiveTripNameSpan.textContent = tripToArchive.name;
+                        archiveTripModal.classList.remove('hidden-view');
+                    });
+                }
+                tripsList.appendChild(tripElement);
+            });
         }
 
-        function renderTripMembers(members) {
+        async function renderTripMembers(memberIds) {
             tripMembersList.innerHTML = '';
-            members.forEach(member => {
+            const profiles = await fetchUserProfiles(memberIds);
+            
+            memberIds.forEach(uid => {
+                const profile = profiles[uid];
+                if (!profile) return;
+
                 const memberEl = document.createElement('div');
                 memberEl.className = 'flex flex-col items-center text-center';
-                const initial = member.displayName ? member.displayName.charAt(0).toUpperCase() : '?';
+                
+                let avatar;
+                if (profile.photoURL) {
+                    avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
+                } else {
+                    const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
+                    avatar = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
+                }
+
                 memberEl.innerHTML = `
-                    <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">
-                        ${initial}
-                    </div>
-                    <span class="text-xs text-gray-600 w-20 truncate">${member.displayName}</span>
+                    ${avatar}
+                    <span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>
                 `;
                 tripMembersList.appendChild(memberEl);
             });
@@ -670,8 +765,8 @@
                 expenseWrapper.classList.add('deleted-item');
             }
 
-            const paidByMember = currentTrip.members.find(m => m.uid === expense.paidBy);
-            const paidByName = paidByMember ? paidByMember.displayName : 'Unknown';
+            const paidByProfile = userProfilesCache.get(expense.paidBy);
+            const paidByName = paidByProfile ? paidByProfile.displayName : 'Unknown';
             const ad = expense.amountDetails;
             const amountDisplay = (ad.originalCurrency === ad.baseCurrency) ?
                 `<span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span>` :
@@ -685,14 +780,13 @@
 
             const splitWithNames = Object.keys(expense.splitBetween)
                 .map(uid => {
-                    const memberName = currentTrip.members.find(m => m.uid === uid)?.displayName || 'Unknown';
+                    const memberProfile = userProfilesCache.get(uid);
+                    const memberName = memberProfile ? memberProfile.displayName : 'Unknown';
                     const splitValue = expense.splitBetween[uid];
                     
-                    // Backward compatibility: Handle old data (boolean) and new data (number)
                     if (typeof splitValue === 'number') {
                         return `${memberName} (${splitValue.toFixed(2)})`;
                     } else {
-                        // Old format, calculate equal share
                         const numberOfSharers = Object.keys(expense.splitBetween).length;
                         if (numberOfSharers > 0) {
                             const equalShare = (expense.amountDetails.baseAmount / numberOfSharers).toFixed(2);
@@ -747,8 +841,8 @@
 
         function renderPaymentItem(payment) {
             const isDeleted = payment.isDeleted || false;
-            const fromUser = currentTrip.members.find(m => m.uid === payment.from)?.displayName || 'Unknown';
-            const toUser = currentTrip.members.find(m => m.uid === payment.to)?.displayName || 'Unknown';
+            const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown';
+            const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown';
             const date = payment.paidAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' });
             const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to;
@@ -821,7 +915,6 @@
             const originalCurrency = expenseCurrencySelect.value;
             const baseCurrency = currentTrip.baseCurrency;
 
-            // Re-render the split inputs for the selected currency
             rebuildSplitInputs();
 
             if (originalAmount <= 0) {
@@ -846,7 +939,7 @@
                     updateAndValidateSplit(true);
                 } catch (error) {
                     fxConversionDisplay.innerHTML = `<span class="text-red-600">Could not get rate.</span>`;
-                    currentBaseAmount = 0; // Invalidate amount if rate fails
+                    currentBaseAmount = 0;
                     updateAndValidateSplit(true);
                 }
             }
@@ -968,34 +1061,37 @@
             expenseSplitBetweenDiv.innerHTML = '';
             const isForeign = expenseCurrencySelect.value !== currentTrip.baseCurrency;
 
-            currentTrip.members.forEach(member => {
+            currentTrip.memberIds.forEach(uid => {
+                const profile = userProfilesCache.get(uid);
+                if (!profile) return;
+
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'flex items-center justify-between split-input-group';
-                groupDiv.dataset.uid = member.uid;
+                groupDiv.dataset.uid = uid;
 
                 let inputsHtml;
                 if (isForeign) {
                     inputsHtml = `
                         <div class="flex items-center space-x-2">
-                            <input type="number" step="0.01" data-role="foreign" data-uid="${member.uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
+                            <input type="number" step="0.01" data-role="foreign" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
                             <span class="text-xs text-gray-500">${expenseCurrencySelect.value}</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-gray-400">=</span>
-                            <input type="number" step="0.01" data-role="base" data-uid="${member.uid}" class="w-24 px-2 py-1 border-gray-200 bg-gray-100 rounded-md text-sm" disabled>
+                            <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border-gray-200 bg-gray-100 rounded-md text-sm" disabled>
                             <span class="text-xs text-gray-500">${currentTrip.baseCurrency}</span>
                         </div>
                     `;
                 } else {
                     inputsHtml = `
-                        <input type="number" step="0.01" data-role="base" data-uid="${member.uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
+                        <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
                     `;
                 }
 
                 groupDiv.innerHTML = `
                     <div class="flex items-center">
-                        <input id="split-${member.uid}" type="checkbox" value="${member.uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="split-${member.uid}" class="ml-2 block text-sm text-gray-900 w-28 truncate">${member.displayName}</label>
+                        <input id="split-${uid}" type="checkbox" value="${uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 w-28 truncate">${profile.displayName}</label>
                     </div>
                     <div class="flex items-center">${inputsHtml}</div>
                 `;
@@ -1003,7 +1099,7 @@
             });
         }
 
-        function populateExpenseModal() {
+        async function populateExpenseModal() {
             if (!currentTrip) return;
             const currencies = ["GBP", "USD", "EUR", "JPY", "CAD", "AUD", "CHF", "CNY", "SEK", "NZD", "CZK", "THB"];
             expenseCurrencySelect.innerHTML = currencies.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -1014,10 +1110,12 @@
             currentBaseAmount = 0;
             currentExchangeRate = 1;
 
-            currentTrip.members.forEach(member => {
+            const profiles = await fetchUserProfiles(currentTrip.memberIds);
+            Object.values(profiles).forEach(profile => {
+                if (!profile) return;
                 const option = document.createElement('option');
-                option.value = member.uid;
-                option.textContent = member.displayName;
+                option.value = profile.uid;
+                option.textContent = profile.displayName;
                 expensePaidBySelect.appendChild(option);
             });
             expensePaidBySelect.value = auth.currentUser.uid;
@@ -1026,7 +1124,6 @@
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('expense-occurred-at').value = now.toISOString().slice(0,16);
             
-            // Set up event listeners
             expenseAmountInput.addEventListener('input', handleCurrencyChange);
             expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
             expenseSplitBetweenDiv.addEventListener('change', (e) => {
@@ -1041,14 +1138,13 @@
             });
             document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
 
-            // Initial build and calculation
             handleCurrencyChange();
         }
 
         // --- Settlement Logic ---
         function calculateSettlement() {
             const balances = new Map();
-            currentTrip.members.forEach(member => balances.set(member.uid, 0));
+            currentTrip.memberIds.forEach(uid => balances.set(uid, 0));
 
             const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
             activeExpenses.forEach(expense => {
@@ -1061,14 +1157,12 @@
                     const isOldFormat = typeof splitBetween[sharerIds[0]] !== 'number';
 
                     if (isOldFormat) {
-                        // Old format (value is `true`): split equally
                         const numberOfSharers = sharerIds.length;
                         const equalShare = expense.amountDetails.baseAmount / numberOfSharers;
                         sharerIds.forEach(memberId => {
                             balances.set(memberId, (balances.get(memberId) || 0) - equalShare);
                         });
                     } else {
-                        // New format (value is a number): use stored amounts
                         for (const memberId in splitBetween) {
                             const share = splitBetween[memberId];
                             balances.set(memberId, (balances.get(memberId) || 0) - share);
@@ -1104,14 +1198,14 @@
             return transactions;
         }
 
-        function calculateAndShowSettlement() {
+        async function calculateAndShowSettlement() {
             if (!currentTrip) return;
             const transactions = calculateSettlement();
-            renderSettlement(transactions);
+            await renderSettlement(transactions);
             settleUpModal.classList.remove('hidden-view');
         }
 
-        function renderSettlement(transactions) {
+        async function renderSettlement(transactions) {
             settlementList.innerHTML = '';
             
             if (transactions.length === 0) {
@@ -1122,10 +1216,14 @@
 
             const totalToSettle = transactions.reduce((sum, tx) => sum + tx.amount, 0);
             settlementSummary.textContent = `Total remaining to be settled: ${totalToSettle.toFixed(2)} ${currentTrip.baseCurrency}.`;
+            
+            const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
+            const profiles = await fetchUserProfiles(allMemberIds);
 
             transactions.forEach(tx => {
-                const fromUser = currentTrip.members.find(m => m.uid === tx.from);
-                const toUser = currentTrip.members.find(m => m.uid === tx.to);
+                const fromUser = profiles[tx.from];
+                const toUser = profiles[tx.to];
+                if (!fromUser || !toUser) return;
                 
                 const transactionEl = document.createElement('div');
                 transactionEl.className = 'p-3 rounded-lg bg-gray-100';
@@ -1287,9 +1385,8 @@
                 const newTrip = {
                     name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
                     memberIds: [user.uid],
-                    members: [{ uid: user.uid, displayName: user.displayName, photoURL: user.photoURL || null }],
                     isSettled: false,
-                    isArchived: false, // Initialize as not archived
+                    isArchived: false,
                     settledPayments: []
                 };
                 await addDoc(collection(db, "trips"), newTrip);
@@ -1376,13 +1473,12 @@
                 const q = query(usersRef, where("email", "==", emailToInvite));
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) throw new Error("User with that email address not found.");
-                const userDoc = querySnapshot.docs[0];
-                const userToInvite = userDoc.data();
+                const userToInvite = querySnapshot.docs[0].data();
                 if (currentTrip.memberIds.includes(userToInvite.uid)) throw new Error("This user is already a member of the trip.");
+                
                 const tripRef = doc(db, "trips", currentTrip.id);
                 await updateDoc(tripRef, {
-                    memberIds: arrayUnion(userToInvite.uid),
-                    members: arrayUnion({ uid: userToInvite.uid, displayName: userToInvite.displayName, photoURL: userToInvite.photoURL || null })
+                    memberIds: arrayUnion(userToInvite.uid)
                 });
                 showMessage("Friend invited successfully!", false);
                 inviteMemberForm.reset();
@@ -1390,6 +1486,40 @@
             } catch (error) {
                 console.error("Error inviting member:", error);
                 showMessage(error.message);
+            }
+        };
+
+        const handleProfilePicUpload = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const user = auth.currentUser;
+            if (!user) return;
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                showMessage("File is too large. Please select an image under 5MB.");
+                return;
+            }
+
+            showMessage("Uploading photo...", false);
+            try {
+                const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+                const snapshot = await uploadBytes(storageRef, file);
+                const photoURL = await getDownloadURL(snapshot.ref);
+
+                await updateProfile(user, { photoURL });
+                
+                const userDocRef = doc(db, "users", user.uid);
+                await updateDoc(userDocRef, { photoURL });
+
+                userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
+
+                renderProfile(user); 
+                showMessage("Profile picture updated!", false);
+
+            } catch (error) {
+                console.error("Error uploading profile picture:", error);
+                showMessage("Failed to upload profile picture.");
             }
         };
 
@@ -1410,6 +1540,7 @@
         submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
 
         logoutBtn.addEventListener('click', () => signOut(auth));
+        profilePicInput.addEventListener('change', handleProfilePicUpload);
 
         tripItemsList.addEventListener('click', (e) => {
             const deleteExpenseBtn = e.target.closest('.delete-expense-btn');
@@ -1488,9 +1619,9 @@
         }
 
         // --- Mobile-First Visualisation Logic ---
-        function initializeVisualisation() {
+        async function initializeVisualisation() {
             const balances = new Map();
-            currentTrip.members.forEach(member => balances.set(member.uid, 0));
+            currentTrip.memberIds.forEach(uid => balances.set(uid, 0));
 
             const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
             activeExpenses.forEach(expense => {
@@ -1523,10 +1654,13 @@
                 balances.set(payment.to, (balances.get(payment.to) || 0) - payment.amount);
             });
 
+            const allMemberIds = [...new Set(currentTrip.memberIds)];
+            const profiles = await fetchUserProfiles(allMemberIds);
+
             const creditors = [];
             const debtors = [];
             balances.forEach((amount, uid) => {
-                const user = currentTrip.members.find(m => m.uid === uid);
+                const user = profiles[uid];
                 if (!user) return;
 
                 if (amount > 0.01) {
@@ -1541,8 +1675,8 @@
             vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div>${d.name} owes <span class="font-bold">${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div>${c.name} is owed <span class="font-bold">${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizPaymentsList.innerHTML = transactions.length > 0 ? transactions.map(tx => {
-                const from = currentTrip.members.find(m => m.uid === tx.from).displayName;
-                const to = currentTrip.members.find(m => m.uid === tx.to).displayName;
+                const from = profiles[tx.from].displayName;
+                const to = profiles[tx.to].displayName;
                 return `<div class="flex items-center justify-between">
                             <span>${from}</span>
                             <svg class="w-4 h-4 text-indigo-500 mx-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
