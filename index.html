@@ -340,7 +340,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 1.1.0
+              Version 1.2.0
             </p>
         </footer>
     </div>
@@ -851,16 +851,42 @@
 
         function updateAndValidateSplit(isEqualSplit = false) {
             const totalAmount = currentBaseAmount; // Use the converted base amount
-            const checkedBoxes = expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked');
             const memberInputs = expenseSplitBetweenDiv.querySelectorAll('input[type="number"]');
+            const checkedMemberInputs = Array.from(memberInputs).filter(input => {
+                return input.previousElementSibling.querySelector('input[type="checkbox"]').checked;
+            });
             const submitBtn = document.getElementById('submit-expense-btn');
 
-            if (isEqualSplit && checkedBoxes.length > 0 && totalAmount > 0) {
-                const share = totalAmount / checkedBoxes.length;
+            if (isEqualSplit && checkedMemberInputs.length > 0 && totalAmount > 0) {
+                const numSharers = checkedMemberInputs.length;
+                const totalInCents = Math.round(totalAmount * 100);
+                const baseShareInCents = Math.floor(totalInCents / numSharers);
+                let remainderInCents = totalInCents % numSharers;
+
+                const shares = {};
+                checkedMemberInputs.forEach(input => {
+                    shares[input.dataset.uid] = baseShareInCents;
+                });
+                
+                // Distribute remainder cents randomly
+                let sharerUids = checkedMemberInputs.map(input => input.dataset.uid);
+                while (remainderInCents > 0) {
+                    const randomIndex = Math.floor(Math.random() * sharerUids.length);
+                    const randomUid = sharerUids[randomIndex];
+                    shares[randomUid]++;
+                    // Remove the UID to prevent getting another cent until others have
+                    sharerUids.splice(randomIndex, 1);
+                    if (sharerUids.length === 0) { // Reset if remainder > numSharers
+                        sharerUids = checkedMemberInputs.map(input => input.dataset.uid);
+                    }
+                    remainderInCents--;
+                }
+
+                // Update the inputs with final values
                 memberInputs.forEach(input => {
                     const checkbox = input.previousElementSibling.querySelector('input[type="checkbox"]');
                     if (checkbox.checked) {
-                        input.value = share.toFixed(2);
+                        input.value = (shares[input.dataset.uid] / 100).toFixed(2);
                     }
                 });
             }
