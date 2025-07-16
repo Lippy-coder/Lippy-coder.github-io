@@ -374,7 +374,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.3
+              Version 2.0.4
             </p>
         </footer>
     </div>
@@ -753,7 +753,6 @@
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
             
-            // --- UPDATED: Personal balance calculation ---
             const balances = new Map();
             currentTrip.memberIds.forEach(uid => balances.set(uid, 0));
 
@@ -800,7 +799,6 @@
                 tripOutstandingBalance.textContent = 'All settled for me';
                 tripOutstandingBalance.className = 'font-semibold text-gray-500';
             }
-            // --- END of update ---
 
             allItems.forEach(item => {
                 if (item.type === 'expense') {
@@ -1315,16 +1313,13 @@
                 }
 
                 transactionEl.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 font-semibold text-gray-800">${fromUser.displayName}</div>
-                        <div class="flex-1 flex items-center justify-center text-gray-500">
-                            <span class="mx-2">pays</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <div class="flex-1 font-semibold text-gray-800">${toUser.displayName}</div>
-                        <div class="w-28 text-right font-bold text-lg text-purple-600">${tx.amount.toFixed(2)} ${currentTrip.baseCurrency}</div>
+                    <div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center mb-2">
+                        <span class="font-semibold text-gray-800 break-words">${fromUser.displayName}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        <span class="font-semibold text-gray-800 break-words">${toUser.displayName}</span>
+                        <span class="font-bold text-lg text-purple-600 text-right">${tx.amount.toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-end items-center mt-2">${actionControl}</div>
+                    <div class="flex justify-end items-center">${actionControl}</div>
                 `;
                 settlementList.appendChild(transactionEl);
             });
