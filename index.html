@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Splitify - Bill Splitting Made Easypeasy</title>
+    <title>Splitify - Bill Splitting Made Easy</title>
     
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -161,7 +161,7 @@
                         <!-- Members will be dynamically inserted here -->
                     </div>
                 </div>
-                <div id="trip-items-list" class="space-y-3">
+                <div id="trip-items-list" class="space-y-2">
                     <p id="no-items-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">No expenses or payments logged for this trip yet.</p>
                 </div>
             </main>
@@ -374,7 +374,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.6
+              Version 2.0.7
             </p>
         </footer>
     </div>
@@ -845,7 +845,7 @@
                         const numberOfSharers = Object.keys(expense.splitBetween).length;
                         shareText = (expense.amountDetails.baseAmount / numberOfSharers).toFixed(2);
                     }
-                    return `<div class="flex justify-between items-center text-sm text-gray-600 py-1"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
+                    return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
                 }).join('');
             
             const deleteBtn = (paidByMe && !isDeleted) ? 
@@ -876,7 +876,7 @@
                 <div class="p-4 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
                     <div class="text-xs text-gray-500 mb-3">On: ${formattedDate}</div>
                     <h4 class="font-semibold text-sm mb-2 text-gray-700">Shared Between:</h4>
-                    <div class="space-y-1">${splitWithLines}</div>
+                    <div>${splitWithLines}</div>
                 </div>
                 ${deleteBtn}
             `;
@@ -1773,3 +1773,4 @@
     </script>
 </body>
 </html>
+
