@@ -58,6 +58,9 @@
         .profile-pic-wrapper:hover .profile-pic-overlay {
             opacity: 1;
         }
+        .modal-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -308,13 +311,18 @@
         
         <!-- Settle Up Modal -->
         <div id="settle-up-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8">
-                <h3 class="text-2xl font-bold mb-4">Time to Settle Up!</h3>
-                <p id="settlement-summary" class="text-gray-600 mb-6"></p>
-                <div id="settlement-list" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h3 class="text-2xl font-bold">Time to Settle Up!</h3>
+                    <button type="button" id="close-settle-up-btn-x" class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p id="settlement-summary" class="text-gray-600 mb-6 flex-shrink-0"></p>
+                <div id="settlement-list" class="space-y-4 overflow-y-auto flex-grow">
                     <!-- Settlement instructions will be inserted here -->
                 </div>
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end mt-8 flex-shrink-0">
                      <button type="button" id="close-settle-up-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Close</button>
                 </div>
             </div>
@@ -322,12 +330,15 @@
 
         <!-- Mobile-First Settlement Visualisation Modal -->
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">Optimised Payments</h3>
-                    <button type="button" id="close-visualisation-btn" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col">
+                <div class="flex-shrink-0">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">Optimised Payments</h3>
+                        <button type="button" id="close-visualisation-btn" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                    </div>
                 </div>
-                <div class="space-y-3">
+                <!-- This container is now scrollable -->
+                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                     <div id="viz-debtors" class="p-3 bg-red-50 rounded-lg">
                         <h4 class="font-bold text-red-800">Who Owes</h4>
                         <div id="viz-debtors-list" class="mt-2 space-y-1 text-sm"></div>
@@ -363,7 +374,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 1.7.0
+              Version 2.0.2
             </p>
         </footer>
     </div>
@@ -478,6 +489,7 @@
         const settlementSummary = document.getElementById('settlement-summary');
         const settlementList = document.getElementById('settlement-list');
         const closeSettleUpBtn = document.getElementById('close-settle-up-btn');
+        const closeSettleUpBtnX = document.getElementById('close-settle-up-btn-x');
         
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
@@ -672,7 +684,7 @@
                         e.stopPropagation();
                         tripToArchive = { id: archBtn.dataset.tripId, name: archBtn.dataset.tripName };
                         archiveTripNameSpan.textContent = tripToArchive.name;
-                        archiveTripModal.classList.remove('hidden-view');
+                        openModal(archiveTripModal);
                     });
                 }
                 tripsList.appendChild(tripElement);
@@ -877,38 +889,53 @@
         }
 
         // --- Modal Logic ---
-        createTripBtn.addEventListener('click', () => createTripModal.classList.remove('hidden-view'));
-        cancelCreateTripBtn.addEventListener('click', () => createTripModal.classList.add('hidden-view'));
+        function openModal(modalElement) {
+            document.body.classList.add('modal-open');
+            modalElement.classList.remove('hidden-view');
+        }
+
+        function closeModal(modalElement) {
+            document.body.classList.remove('modal-open');
+            modalElement.classList.add('hidden-view');
+        }
+
+        createTripBtn.addEventListener('click', () => openModal(createTripModal));
+        cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
+        
         addExpenseBtn.addEventListener('click', () => {
             addExpenseForm.reset();
             populateExpenseModal();
-            addExpenseModal.classList.remove('hidden-view');
+            openModal(addExpenseModal);
         });
-        cancelAddExpenseBtn.addEventListener('click', () => addExpenseModal.classList.add('hidden-view'));
-        inviteMemberBtn.addEventListener('click', () => inviteMemberModal.classList.remove('hidden-view'));
-        cancelInviteBtn.addEventListener('click', () => inviteMemberModal.classList.add('hidden-view'));
+        cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
+        
+        inviteMemberBtn.addEventListener('click', () => openModal(inviteMemberModal));
+        cancelInviteBtn.addEventListener('click', () => closeModal(inviteMemberModal));
+        
         cancelArchiveTripBtn.addEventListener('click', () => {
-            archiveTripModal.classList.add('hidden-view');
+            closeModal(archiveTripModal);
             tripToArchive = null;
         });
+        
         cancelDeleteExpenseBtn.addEventListener('click', () => {
-            deleteExpenseModal.classList.add('hidden-view');
+            closeModal(deleteExpenseModal);
             expenseToDelete = null;
         });
+        
         cancelDeletePaymentBtn.addEventListener('click', () => {
-            deletePaymentModal.classList.add('hidden-view');
+            closeModal(deletePaymentModal);
             paymentToDeleteId = null;
         });
+        
         settleUpBtn.addEventListener('click', () => calculateAndShowSettlement());
-        closeSettleUpBtn.addEventListener('click', () => settleUpModal.classList.add('hidden-view'));
+        closeSettleUpBtn.addEventListener('click', () => closeModal(settleUpModal));
+        closeSettleUpBtnX.addEventListener('click', () => closeModal(settleUpModal));
         
         visualiseSettlementBtn.addEventListener('click', () => {
-            settlementVisualisationModal.classList.remove('hidden-view');
             initializeVisualisation();
+            openModal(settlementVisualisationModal);
         });
-        closeVisualisationBtn.addEventListener('click', () => {
-            settlementVisualisationModal.classList.add('hidden-view');
-        });
+        closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
 
         async function handleCurrencyChange() {
             const originalAmount = parseFloat(expenseAmountInput.value) || 0;
@@ -1202,7 +1229,7 @@
             if (!currentTrip) return;
             const transactions = calculateSettlement();
             await renderSettlement(transactions);
-            settleUpModal.classList.remove('hidden-view');
+            openModal(settleUpModal);
         }
 
         async function renderSettlement(transactions) {
@@ -1308,7 +1335,7 @@
                     await updateDoc(tripRef, updateData);
 
                     showMessage("Payment recorded!", false);
-                    settleUpModal.classList.add('hidden-view');
+                    closeModal(settleUpModal);
                 } catch (error) {
                     console.error("Error recording payment:", error);
                     showMessage("Could not record payment.");
@@ -1324,7 +1351,7 @@
                 const tripRef = doc(db, 'trips', tripToArchive.id);
                 await updateDoc(tripRef, { isArchived: true });
                 showMessage('Trip archived successfully!', false);
-                archiveTripModal.classList.add('hidden-view');
+                closeModal(archiveTripModal);
                 tripToArchive = null;
             } catch (error) {
                 console.error("Error archiving trip:", error);
@@ -1391,7 +1418,7 @@
                 };
                 await addDoc(collection(db, "trips"), newTrip);
                 createTripForm.reset();
-                createTripModal.classList.add('hidden-view');
+                closeModal(createTripModal);
                 showMessage("Trip created successfully!", false);
             } catch (error) { showMessage(error.message); }
         };
@@ -1453,7 +1480,7 @@
                 await batch.commit();
 
                 addExpenseForm.reset();
-                addExpenseModal.classList.add('hidden-view');
+                closeModal(addExpenseModal);
                 showMessage("Expense added successfully!", false);
             } catch (error) {
                 console.error("Error adding expense:", error);
@@ -1482,7 +1509,7 @@
                 });
                 showMessage("Friend invited successfully!", false);
                 inviteMemberForm.reset();
-                inviteMemberModal.classList.add('hidden-view');
+                closeModal(inviteMemberModal);
             } catch (error) {
                 console.error("Error inviting member:", error);
                 showMessage(error.message);
@@ -1546,12 +1573,12 @@
             const deleteExpenseBtn = e.target.closest('.delete-expense-btn');
             if (deleteExpenseBtn) {
                 expenseToDelete = deleteExpenseBtn.dataset.expenseId;
-                deleteExpenseModal.classList.remove('hidden-view');
+                openModal(deleteExpenseModal);
             }
             const deletePaymentBtn = e.target.closest('.delete-payment-btn');
             if (deletePaymentBtn) {
                 paymentToDeleteId = parseInt(deletePaymentBtn.dataset.paymentId, 10);
-                deletePaymentModal.classList.remove('hidden-view');
+                openModal(deletePaymentModal);
             }
         });
 
@@ -1573,7 +1600,7 @@
                 showMessage("Could not delete expense.");
             } finally {
                 expenseToDelete = null;
-                deleteExpenseModal.classList.add('hidden-view');
+                closeModal(deleteExpenseModal);
             }
         });
 
@@ -1599,7 +1626,7 @@
                 showMessage("Could not delete payment.");
             } finally {
                 paymentToDeleteId = null;
-                deletePaymentModal.classList.add('hidden-view');
+                closeModal(deletePaymentModal);
             }
         });
 
@@ -1672,17 +1699,17 @@
 
             const transactions = calculateSettlement();
 
-            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div>${d.name} owes <span class="font-bold">${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
-            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div>${c.name} is owed <span class="font-bold">${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
+            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
+            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizPaymentsList.innerHTML = transactions.length > 0 ? transactions.map(tx => {
                 const from = profiles[tx.from].displayName;
                 const to = profiles[tx.to].displayName;
-                return `<div class="flex items-center justify-between">
-                            <span>${from}</span>
-                            <svg class="w-4 h-4 text-indigo-500 mx-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
-                            <span>${to}</span>
-                            <span class="font-bold ml-auto">${tx.amount.toFixed(2)}</span>
-                        </div>`;
+                return `<div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center">
+                    <span class="break-words text-left">${from}</span>
+                    <svg class="w-4 h-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
+                    <span class="break-words text-left">${to}</span>
+                    <span class="font-bold text-right">${tx.amount.toFixed(2)}</span>
+                </div>`;
             }).join('') : '<p>All settled!</p>';
         }
         
