@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Image Compression Library -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
+    
     <style>
         /* Custom styles */
         body {
@@ -366,11 +369,11 @@
             <p id="message-text"></p>
         </div>
 
-        <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg">
+        <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.16
+              Version 2.0.18
             </p>
         </footer>
     </div>
@@ -387,7 +390,7 @@
             apiKey: "AIzaSyAi2llnXf_VloWUL6mZgdJMa1W1EOTwLE4",
             authDomain: "splitify-2ec5e.firebaseapp.com",
             projectId: "splitify-2ec5e",
-            storageBucket: "splitify-2ec5e.firebasestorage.app", // CORRECTED BUCKET URL
+            storageBucket: "splitify-2ec5e.firebasestorage.app",
             messagingSenderId: "1038415606946",
             appId: "1:1038415606946:web:a17be9b5dbbd9a715013fb",
             measurementId: "G-DTBQM17BV6"
@@ -837,7 +840,7 @@
                     }
                     return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
                 }).join('');
-            
+
             const deleteBtn = (paidByMe && !isDeleted) ? 
                 `<button data-expense-id="${expense.id}" class="delete-expense-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -1602,9 +1605,9 @@
             }
         };
 
-        const handleProfilePicUpload = (e) => {
+        const handleProfilePicUpload = async (e) => {
             const file = e.target.files[0];
-            if (!file) { return; }
+            if (!file) return;
 
             const user = auth.currentUser;
             if (!user) {
@@ -1612,44 +1615,48 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                showMessage("File is too large. Please select an image under 5MB.");
-                return;
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1024,
+              useWebWorker: true,
+              fileType: 'image/jpeg'
             }
             
-            const storagePath = `profile-pictures/${user.uid}`;
-            const storageRef = ref(storage, storagePath);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            showMessage("Compressing and uploading photo...", false);
+            
+            try {
+                const compressedFile = await imageCompression(file, options);
+                const storagePath = `profile-pictures/${user.uid}`;
+                const storageRef = ref(storage, storagePath);
+                const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
-            showMessage("Uploading photo...", false);
-
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                // Optional: You can add progress bar logic here if you want
-              }, 
-              (error) => {
-                console.error("Error during photo upload:", error);
-                if (error.code === 'storage/unauthorized') {
-                    showMessage("Permission error: You are not authorized to upload files.");
-                } else {
+                uploadTask.on('state_changed', 
+                  (snapshot) => {
+                    // Optional: You can add progress bar logic here if you want
+                  }, 
+                  (error) => {
+                    console.error("Error during photo upload:", error);
                     showMessage("An error occurred during upload.");
-                }
-              }, 
-              async () => {
-                try {
-                    const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    await updateProfile(user, { photoURL });
-                    const userDocRef = doc(db, "users", user.uid);
-                    await updateDoc(userDocRef, { photoURL });
-                    userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
-                    renderProfile(user); 
-                    showMessage("Profile picture updated!", false);
-                } catch (error) {
-                    console.error("Error updating profile with new photo URL:", error);
-                    showMessage("Could not save profile picture after upload.");
-                }
-              }
-            );
+                  }, 
+                  async () => {
+                    try {
+                        const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await updateProfile(user, { photoURL });
+                        const userDocRef = doc(db, "users", user.uid);
+                        await updateDoc(userDocRef, { photoURL });
+                        userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
+                        renderProfile(user); 
+                        showMessage("Profile picture updated!", false);
+                    } catch (error) {
+                        console.error("Error updating profile with new photo URL:", error);
+                        showMessage("Could not save profile picture after upload.");
+                    }
+                  }
+                );
+            } catch (error) {
+                console.error("Error compressing image:", error);
+                showMessage("Could not process image. Please try a different one.");
+            }
         };
 
         // Attach all event listeners
