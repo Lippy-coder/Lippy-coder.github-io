@@ -374,7 +374,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.2
+              Version 2.0.3
             </p>
         </footer>
     </div>
@@ -753,10 +753,54 @@
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
             
-            const transactions = calculateSettlement();
-            const totalToSettle = transactions.reduce((sum, tx) => sum + tx.amount, 0);
-            tripOutstandingBalance.textContent = `Outstanding: ${totalToSettle.toFixed(2)} ${currentTrip.baseCurrency}`;
-            tripOutstandingBalance.className = `font-semibold ${totalToSettle < 0.01 ? 'text-green-600' : 'text-red-600'}`;
+            // --- UPDATED: Personal balance calculation ---
+            const balances = new Map();
+            currentTrip.memberIds.forEach(uid => balances.set(uid, 0));
+
+            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
+            activeExpenses.forEach(expense => {
+                const paidBy = expense.paidBy;
+                const splitBetween = expense.splitBetween;
+                balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
+                
+                const sharerIds = Object.keys(splitBetween);
+                if (sharerIds.length > 0) {
+                    const isOldFormat = typeof splitBetween[sharerIds[0]] !== 'number';
+
+                    if (isOldFormat) {
+                        const numberOfSharers = sharerIds.length;
+                        const equalShare = expense.amountDetails.baseAmount / numberOfSharers;
+                        sharerIds.forEach(memberId => {
+                            balances.set(memberId, (balances.get(memberId) || 0) - equalShare);
+                        });
+                    } else {
+                        for (const memberId in splitBetween) {
+                            const share = splitBetween[memberId];
+                            balances.set(memberId, (balances.get(memberId) || 0) - share);
+                        }
+                    }
+                }
+            });
+
+            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
+            activePayments.forEach(payment => {
+                balances.set(payment.from, (balances.get(payment.from) || 0) + payment.amount);
+                balances.set(payment.to, (balances.get(payment.to) || 0) - payment.amount);
+            });
+
+            const myBalance = balances.get(auth.currentUser.uid) || 0;
+
+            if (myBalance > 0.01) {
+                tripOutstandingBalance.textContent = `I am owed: ${myBalance.toFixed(2)} ${currentTrip.baseCurrency}`;
+                tripOutstandingBalance.className = 'font-semibold text-green-600';
+            } else if (myBalance < -0.01) {
+                tripOutstandingBalance.textContent = `I owe: ${Math.abs(myBalance).toFixed(2)} ${currentTrip.baseCurrency}`;
+                tripOutstandingBalance.className = 'font-semibold text-red-600';
+            } else {
+                tripOutstandingBalance.textContent = 'All settled for me';
+                tripOutstandingBalance.className = 'font-semibold text-gray-500';
+            }
+            // --- END of update ---
 
             allItems.forEach(item => {
                 if (item.type === 'expense') {
