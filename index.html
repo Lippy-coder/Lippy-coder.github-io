@@ -373,7 +373,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.18
+              Version 2.0.19
             </p>
         </footer>
     </div>
@@ -857,6 +857,12 @@
             }
 
             const detailsContentHTML = `
+                <div class="text-xs text-gray-500 mb-2">On: ${formattedDate}</div>
+                <h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4>
+                <div>${splitWithLines}</div>
+            `;
+            
+            const deletedDetailsContentHTML = `
                 <div class="flex items-center mb-2">
                     ${avatarHTML}
                     <div>
@@ -865,9 +871,7 @@
                     </div>
                 </div>
                 ${amountDisplay}
-                <div class="text-xs text-gray-500 my-2">On: ${formattedDate}</div>
-                <h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4>
-                <div>${splitWithLines}</div>
+                ${detailsContentHTML}
             `;
 
             if (isDeleted) {
@@ -879,7 +883,7 @@
                         </svg>
                     </div>
                     <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
-                        <div class="opacity-60">${detailsContentHTML}</div>
+                        <div class="opacity-60">${deletedDetailsContentHTML}</div>
                     </div>
                 `;
             } else {
