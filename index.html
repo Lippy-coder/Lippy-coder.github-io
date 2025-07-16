@@ -370,7 +370,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 2.0.12
+              Version 2.0.16
             </p>
         </footer>
     </div>
@@ -380,14 +380,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- Firebase Config Keys ---
         const firebaseConfig = {
             apiKey: "AIzaSyAi2llnXf_VloWUL6mZgdJMa1W1EOTwLE4",
             authDomain: "splitify-2ec5e.firebaseapp.com",
             projectId: "splitify-2ec5e",
-            storageBucket: "splitify-2ec5e.appspot.com",
+            storageBucket: "splitify-2ec5e.firebasestorage.app", // CORRECTED BUCKET URL
             messagingSenderId: "1038415606946",
             appId: "1:1038415606946:web:a17be9b5dbbd9a715013fb",
             measurementId: "G-DTBQM17BV6"
@@ -887,9 +887,7 @@
                         </div>
                     </div>
                     <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
-                        <div class="text-xs text-gray-500 mb-2">On: ${formattedDate}</div>
-                        <h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4>
-                        <div>${splitWithLines}</div>
+                        ${detailsContentHTML}
                     </div>
                     ${deleteBtn}
                 `;
@@ -1594,38 +1592,54 @@
             }
         };
 
-        const handleProfilePicUpload = async (e) => {
+        const handleProfilePicUpload = (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) { return; }
 
             const user = auth.currentUser;
-            if (!user) return;
+            if (!user) {
+                showMessage("You must be logged in to upload a photo.");
+                return;
+            }
 
             if (file.size > 5 * 1024 * 1024) { // 5MB limit
                 showMessage("File is too large. Please select an image under 5MB.");
                 return;
             }
+            
+            const storagePath = `profile-pictures/${user.uid}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
 
             showMessage("Uploading photo...", false);
-            try {
-                const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const photoURL = await getDownloadURL(snapshot.ref);
 
-                await updateProfile(user, { photoURL });
-                
-                const userDocRef = doc(db, "users", user.uid);
-                await updateDoc(userDocRef, { photoURL });
-
-                userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
-
-                renderProfile(user); 
-                showMessage("Profile picture updated!", false);
-
-            } catch (error) {
-                console.error("Error uploading profile picture:", error);
-                showMessage("Failed to upload profile picture.");
-            }
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                // Optional: You can add progress bar logic here if you want
+              }, 
+              (error) => {
+                console.error("Error during photo upload:", error);
+                if (error.code === 'storage/unauthorized') {
+                    showMessage("Permission error: You are not authorized to upload files.");
+                } else {
+                    showMessage("An error occurred during upload.");
+                }
+              }, 
+              async () => {
+                try {
+                    const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    await updateProfile(user, { photoURL });
+                    const userDocRef = doc(db, "users", user.uid);
+                    await updateDoc(userDocRef, { photoURL });
+                    userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
+                    renderProfile(user); 
+                    showMessage("Profile picture updated!", false);
+                } catch (error) {
+                    console.error("Error updating profile with new photo URL:", error);
+                    showMessage("Could not save profile picture after upload.");
+                }
+              }
+            );
         };
 
         // Attach all event listeners
