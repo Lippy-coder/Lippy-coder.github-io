@@ -425,7 +425,7 @@
                 
             } catch (error) {
                 console.error('AI Scan failed:', error);
-                alert('AI analysis failed. Please enter the expense manually.');
+                alert(`AI analysis failed: ${error.message}. Please enter the expense manually.`);
                 closeCameraView();
             }
         }
