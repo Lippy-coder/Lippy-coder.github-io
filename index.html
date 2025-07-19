@@ -67,6 +67,14 @@
             max-height: 70vh;
             border-radius: 0.5rem;
         }
+        /* Toggle Switch Styles */
+        #show-deleted-toggle:checked ~ .dot {
+          transform: translateX(100%);
+          background-color: #4f46e5; /* Tailwind indigo-600 */
+        }
+        #show-deleted-toggle:checked ~ .block {
+            background-color: #a5b4fc; /* Tailwind indigo-300 */
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -157,12 +165,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l-1 1 1 1 1-1-1-1zM1 11l1-1 1 1-1 1-1-1zM21 11l1-1 1 1-1 1-1-1zM12 21l-1 1 1 1 1-1-1-1zM12 3a9 9 0 015.657 15.343" />
                             </svg>
                         </button>
-                        <!-- Add Expense Button -->
-                        <button id="add-expense-btn" title="Add Expense" class="h-10 w-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </button>
                         <!-- Visualise Button -->
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-10 w-10 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,10 +190,29 @@
                         <!-- Members will be dynamically inserted here -->
                     </div>
                 </div>
+                
+                <div class="flex justify-end items-center mb-4">
+                    <label for="show-deleted-toggle" class="flex items-center cursor-pointer">
+                        <span class="mr-3 text-sm font-medium text-gray-700">Display Deleted Items</span>
+                        <div class="relative">
+                            <input type="checkbox" id="show-deleted-toggle" class="sr-only" checked>
+                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+
                 <div id="trip-items-list" class="space-y-1">
                     <p id="no-items-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">No expenses or payments logged for this trip yet.</p>
                 </div>
             </main>
+
+            <!-- Floating Add Expense Button -->
+            <button id="add-expense-btn-fab" title="Add Expense" class="fixed bottom-8 right-8 h-14 w-14 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+            </button>
         </div>
 
         <!-- Create Trip Modal -->
@@ -470,6 +491,7 @@
         const userProfilesCache = new Map();
         let cameraStream = null;
         let userLocation = null;
+        let showDeletedItems = true; // New state for the toggle
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -505,7 +527,7 @@
         const tripItemsList = document.getElementById('trip-items-list');
         const noItemsMessage = document.getElementById('no-items-message');
         
-        const addExpenseBtn = document.getElementById('add-expense-btn');
+        const addExpenseBtnFab = document.getElementById('add-expense-btn-fab');
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
         const cancelAddExpenseBtn = document.getElementById('cancel-add-expense-btn');
@@ -562,6 +584,9 @@
         const videoElement = document.getElementById('camera-feed');
         const canvasElement = document.getElementById('camera-canvas');
         const aiLoadingOverlay = document.getElementById('ai-scan-loading-overlay');
+
+        // Deleted Items Toggle
+        const showDeletedToggle = document.getElementById('show-deleted-toggle');
 
         // --- UI Logic ---
         function showView(viewId) {
@@ -620,7 +645,7 @@
         }
 
         function renderProfile(user) {
-            welcomeMessage.textContent = `Hi, ${user.displayName || user.email}`;
+            welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
             profileArea.innerHTML = '';
             const profilePicWrapper = document.createElement('div');
             profilePicWrapper.className = 'profile-pic-wrapper';
@@ -798,7 +823,12 @@
             const expenses = allTripExpenses.map(e => ({ type: 'expense', data: e, date: e.occurredAt.toDate() }));
             const payments = (currentTrip.settledPayments || []).map(p => ({ type: 'payment', data: p, date: p.paidAt.toDate() }));
             
-            const allItems = [...expenses, ...payments];
+            let allItems = [...expenses, ...payments];
+
+            // Filter out deleted items if the toggle is off
+            if (!showDeletedItems) {
+                allItems = allItems.filter(item => !item.data.isDeleted);
+            }
 
             if (allItems.length === 0) {
                 tripItemsList.appendChild(noItemsMessage);
@@ -919,7 +949,7 @@
             }
 
             const detailsContentHTML = `
-                <div class="text-xs text-gray-500 mb-2">On: ${formattedDate}</div>
+                <div class="text-xs text-gray-500 mb-2">${formattedDate}</div>
                 <h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4>
                 <div>${splitWithLines}</div>
             `;
@@ -1060,7 +1090,7 @@
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
         cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
         
-        addExpenseBtn.addEventListener('click', () => {
+        addExpenseBtnFab.addEventListener('click', () => {
             addExpenseForm.reset();
             populateExpenseModal();
             openModal(addExpenseModal);
@@ -1392,20 +1422,23 @@
 
         async function renderSettlement(transactions) {
             settlementList.innerHTML = '';
+            const currentUserId = auth.currentUser.uid;
             
-            if (transactions.length === 0) {
-                settlementSummary.textContent = "Everyone is already settled up!";
+            const userTransactions = transactions.filter(tx => tx.from === currentUserId || tx.to === currentUserId);
+
+            if (userTransactions.length === 0) {
+                settlementSummary.textContent = "You are all settled up!";
                 settlementList.innerHTML = '';
                 return;
             }
 
             const totalToSettle = transactions.reduce((sum, tx) => sum + tx.amount, 0);
-            settlementSummary.textContent = `Total remaining to be settled: ${totalToSettle.toFixed(2)} ${currentTrip.baseCurrency}.`;
+            settlementSummary.textContent = `Total remaining to be settled for the trip: ${totalToSettle.toFixed(2)} ${currentTrip.baseCurrency}.`;
             
-            const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
+            const allMemberIds = [...new Set(userTransactions.flatMap(tx => [tx.from, tx.to]))];
             const profiles = await fetchUserProfiles(allMemberIds);
 
-            transactions.forEach(tx => {
+            userTransactions.forEach(tx => {
                 const fromUser = profiles[tx.from];
                 const toUser = profiles[tx.to];
                 if (!fromUser || !toUser) return;
@@ -1424,8 +1457,6 @@
                     actionControl = `
                         <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-blue-600">Confirm Payment</button>
                     `;
-                } else {
-                     actionControl = `<span class="text-sm text-gray-500">Owed ${tx.amount.toFixed(2)}</span>`;
                 }
 
                 transactionEl.innerHTML = `
@@ -1803,6 +1834,11 @@
                 paymentToDeleteId = null;
                 closeModal(deletePaymentModal);
             }
+        });
+
+        showDeletedToggle.addEventListener('change', () => {
+            showDeletedItems = showDeletedToggle.checked;
+            renderTripItems();
         });
 
         // --- Currency Exchange API ---
