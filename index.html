@@ -741,7 +741,12 @@
             if (user && user.emailVerified) {
                 userProfilesCache.set(user.uid, { uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL });
                 renderProfile(user);
-                await loadUserPreferences(user.uid);
+                try {
+                    await loadUserPreferences(user.uid);
+                } catch (error) {
+                    console.error("Failed to load user preferences on login:", error);
+                    // The function itself handles the warning and sets a default
+                }
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
                 showView('dashboard-view');
@@ -1430,7 +1435,7 @@
                     updateAndValidateSplit(false, e.target);
                 }
             });
-            document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
+            
             document.getElementById('deselect-all-btn').addEventListener('click', () => {
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 updateAndValidateSplit(true);
@@ -2061,7 +2066,7 @@
                     console.log('Location acquired:', userLocation);
                 },
                 (error) => {
-                    console.error("Error getting location (will proceed without it):", error);
+                    console.warn("Could not get user location. This might be due to browser permissions or running in a secure environment. Proceeding without location data.");
                     userLocation = null; 
                 }
             );
