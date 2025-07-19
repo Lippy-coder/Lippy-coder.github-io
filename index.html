@@ -172,23 +172,23 @@
                             <p id="trip-outstanding-balance" class="font-semibold"></p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-3">
                         <!-- AI Scan Button -->
-                        <button id="ai-scan-btn" title="AI Scan Receipt" class="h-10 w-10 flex items-center justify-center bg-teal-500 text-white rounded-full hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <button id="ai-scan-btn" title="AI Scan Receipt" class="h-12 w-12 flex items-center justify-center bg-teal-500 text-white rounded-full hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-transform transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </button>
                         <!-- Visualise Button -->
-                        <button id="visualise-settlement-btn" title="Visualise Summary" class="h-10 w-10 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </button>
                         <!-- Settle Up Button -->
-                        <button id="settle-up-btn" title="Settle Up" class="h-10 w-10 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button id="settle-up-btn" title="Settle Up" class="h-12 w-12 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </button>
@@ -290,9 +290,12 @@
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-gray-700">Split Between</label>
-                            <button type="button" id="distribute-equally-btn" class="text-sm text-blue-600 hover:underline font-semibold">Distribute Equally</button>
+                            <div class="space-x-4">
+                                <button type="button" id="select-all-btn" class="text-sm text-blue-600 hover:underline font-semibold">Select All</button>
+                                <button type="button" id="deselect-all-btn" class="text-sm text-red-600 hover:underline font-semibold">Deselect All</button>
+                            </div>
                         </div>
-                        <div id="expense-split-between" class="space-y-2 max-h-40 overflow-y-auto p-2 border rounded-md bg-gray-50">
+                        <div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50">
                             <!-- Member inputs will be inserted here -->
                         </div>
                         <div id="split-total-validation" class="text-xs text-right mt-1 h-4"></div>
@@ -364,12 +367,13 @@
         <!-- Settle Up Modal -->
         <div id="settle-up-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
                     <h3 class="text-2xl font-bold">Time to Settle Up!</h3>
                     <button type="button" id="close-settle-up-btn-x" class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
+                <p id="settlement-currency" class="text-sm text-gray-500 mb-4"></p>
                 <p id="settlement-summary" class="text-gray-600 mb-6 flex-shrink-0"></p>
                 <div id="settlement-list" class="space-y-4 overflow-y-auto flex-grow">
                     <!-- Settlement instructions will be inserted here -->
@@ -565,6 +569,7 @@
         const settleUpBtn = document.getElementById('settle-up-btn');
         const settleUpModal = document.getElementById('settle-up-modal');
         const settlementSummary = document.getElementById('settlement-summary');
+        const settlementCurrency = document.getElementById('settlement-currency');
         const settlementList = document.getElementById('settlement-list');
         const closeSettleUpBtn = document.getElementById('close-settle-up-btn');
         const closeSettleUpBtnX = document.getElementById('close-settle-up-btn-x');
@@ -591,6 +596,11 @@
 
         // Deleted Items Toggle
         const showDeletedToggle = document.getElementById('show-deleted-toggle');
+
+        // Currency Symbol Helper
+        const currencySymbols = {
+            GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
+        };
 
         // --- UI Logic ---
         function showView(viewId) {
@@ -653,10 +663,8 @@
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
                 const userData = userDoc.data();
-                // Check for preferences and showDeleted specifically. Default to false if not found.
                 showDeletedItems = userData.preferences?.showDeleted ?? false;
             } else {
-                // Default for new users or users without a doc
                 showDeletedItems = false;
             }
             showDeletedToggle.checked = showDeletedItems;
@@ -699,7 +707,7 @@
             if (user && user.emailVerified) {
                 userProfilesCache.set(user.uid, { uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL });
                 renderProfile(user);
-                await loadUserPreferences(user.uid); // Load preferences on login
+                await loadUserPreferences(user.uid);
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
                 showView('dashboard-view');
@@ -1095,7 +1103,7 @@
             if (paymentWrapper.querySelector('.payment-header')) {
                  paymentWrapper.querySelector('.payment-header').addEventListener('click', (e) => {
                     const details = paymentWrapper.querySelector('.payment-details');
-                    const icon = paymentWrapper.querySelector('.chevron-icon');
+                    const icon = expenseWrapper.querySelector('.chevron-icon');
                     details.classList.toggle('hidden');
                     icon.classList.toggle('rotate-180');
                 });
@@ -1380,6 +1388,15 @@
                 }
             });
             document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
+            document.getElementById('select-all-btn').addEventListener('click', () => {
+                expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                updateAndValidateSplit(true);
+            });
+            document.getElementById('deselect-all-btn').addEventListener('click', () => {
+                expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateAndValidateSplit(true);
+            });
+
 
             handleCurrencyChange();
         }
@@ -1443,6 +1460,7 @@
 
         async function calculateAndShowSettlement() {
             if (!currentTrip) return;
+            settlementCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             const transactions = calculateSettlement();
             await renderSettlement(transactions);
             openModal(settleUpModal);
@@ -1469,6 +1487,7 @@
             userTransactions.forEach(tx => {
                 const fromUser = profiles[tx.from];
                 const toUser = profiles[tx.to];
+                const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
                 if (!fromUser || !toUser) return;
                 
                 const transactionEl = document.createElement('div');
@@ -1492,7 +1511,7 @@
                         <span class="font-semibold text-gray-800 break-words">${fromUser.displayName}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         <span class="font-semibold text-gray-800 break-words">${toUser.displayName}</span>
-                        <span class="font-bold text-lg text-purple-600 text-right">${tx.amount.toFixed(2)}</span>
+                        <span class="font-bold text-lg text-purple-600 text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-end items-center">${actionControl}</div>
                 `;
