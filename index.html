@@ -140,6 +140,16 @@
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
                 </div>
+                <div class="flex justify-end items-center mb-4">
+                    <label for="show-deleted-toggle" class="flex items-center cursor-pointer">
+                        <span class="mr-3 text-sm font-medium text-gray-700">Display Deleted Items</span>
+                        <div class="relative">
+                            <input type="checkbox" id="show-deleted-toggle" class="sr-only">
+                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
                 <div id="trips-list" class="space-y-4">
                      <p id="no-trips-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">You have no trips yet. Create one to get started!</p>
                 </div>
@@ -189,17 +199,6 @@
                     <div id="trip-members-list" class="flex flex-wrap gap-4">
                         <!-- Members will be dynamically inserted here -->
                     </div>
-                </div>
-                
-                <div class="flex justify-end items-center mb-4">
-                    <label for="show-deleted-toggle" class="flex items-center cursor-pointer">
-                        <span class="mr-3 text-sm font-medium text-gray-700">Display Deleted Items</span>
-                        <div class="relative">
-                            <input type="checkbox" id="show-deleted-toggle" class="sr-only" checked>
-                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                        </div>
-                    </label>
                 </div>
 
                 <div id="trip-items-list" class="space-y-1">
@@ -491,7 +490,7 @@
         const userProfilesCache = new Map();
         let cameraStream = null;
         let userLocation = null;
-        let showDeletedItems = true; // New state for the toggle
+        let showDeletedItems = false; // New state for the toggle, default off
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -1838,7 +1837,10 @@
 
         showDeletedToggle.addEventListener('change', () => {
             showDeletedItems = showDeletedToggle.checked;
-            renderTripItems();
+            // Re-render trip items if on the detail page
+            if (currentTrip) {
+                renderTripItems();
+            }
         });
 
         // --- Currency Exchange API ---
