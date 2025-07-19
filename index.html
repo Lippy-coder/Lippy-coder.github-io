@@ -79,10 +79,6 @@
         #show-deleted-toggle:checked ~ .block {
             background-color: #a5b4fc; /* Tailwind indigo-300 */
         }
-        .locked-input {
-            background-color: #e5e7eb; /* gray-200 */
-            cursor: not-allowed;
-        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -499,7 +495,6 @@
         let cameraStream = null;
         let userLocation = null;
         let showDeletedItems = false; // New state for the toggle, default off
-        let lockedShares = new Set(); // For soft-locking shares
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -652,6 +647,29 @@
             return profiles;
         }
 
+        async function loadUserPreferences(userId) {
+            const userDocRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                // Check for preferences and showDeleted specifically. Default to false if not found.
+                showDeletedItems = userData.preferences?.showDeleted ?? false;
+            } else {
+                // Default for new users or users without a doc
+                showDeletedItems = false;
+            }
+            showDeletedToggle.checked = showDeletedItems;
+        }
+
+        async function saveUserPreferences(userId, prefs) {
+            try {
+                const userDocRef = doc(db, "users", userId);
+                await updateDoc(userDocRef, { preferences: prefs });
+            } catch (error) {
+                console.error("Could not save user preferences:", error);
+            }
+        }
+
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
             profileArea.innerHTML = '';
@@ -676,10 +694,11 @@
             profileArea.appendChild(profilePicWrapper);
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 userProfilesCache.set(user.uid, { uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL });
                 renderProfile(user);
+                await loadUserPreferences(user.uid); // Load preferences on login
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
                 showView('dashboard-view');
@@ -1174,57 +1193,88 @@
             const isForeign = expenseCurrencySelect.value !== currentTrip.baseCurrency;
 
             if (isEqualSplit) {
-                lockedShares.clear();
-            } else if (eventSource) {
-                const uid = eventSource.dataset.uid;
-                if (eventSource.value) {
-                    lockedShares.add(uid);
-                } else {
-                    lockedShares.delete(uid);
-                }
-            }
-            
-            let lockedAmountBase = 0;
-            const unlockedMembers = [];
+                const checkedInputs = Array.from(memberInputs).filter(group => group.querySelector('input[type="checkbox"]').checked);
+                if (checkedInputs.length > 0 && currentBaseAmount > 0) {
+                    const numSharers = checkedInputs.length;
+                    const totalInCents = Math.round(currentBaseAmount * 100);
+                    const baseShareInCents = Math.floor(totalInCents / numSharers);
+                    let remainderInCents = totalInCents % numSharers;
 
-            memberInputs.forEach(group => {
-                const uid = group.dataset.uid;
-                const checkbox = group.querySelector('input[type="checkbox"]');
-                if (checkbox.checked) {
-                    if (lockedShares.has(uid)) {
+                    const shares = {};
+                    checkedInputs.forEach(group => {
+                        const uid = group.dataset.uid;
+                        shares[uid] = baseShareInCents;
+                    });
+                    
+                    let sharerUids = checkedInputs.map(group => group.dataset.uid);
+                    while (remainderInCents > 0) {
+                        const randomIndex = Math.floor(Math.random() * sharerUids.length);
+                        const randomUid = sharerUids[randomIndex];
+                        shares[randomUid]++;
+                        sharerUids.splice(randomIndex, 1);
+                        if (sharerUids.length === 0) {
+                            sharerUids = checkedInputs.map(group => group.dataset.uid);
+                        }
+                        remainderInCents--;
+                    }
+
+                    memberInputs.forEach(group => {
+                        const uid = group.dataset.uid;
                         const baseInput = group.querySelector('input[data-role="base"]');
-                        lockedAmountBase += parseFloat(baseInput.value) || 0;
-                    } else {
-                        unlockedMembers.push(group);
+                        const foreignInput = group.querySelector('input[data-role="foreign"]');
+                        if (shares[uid] !== undefined) {
+                            const baseValue = (shares[uid] / 100);
+                            baseInput.value = baseValue.toFixed(2);
+                            if (foreignInput) {
+                                foreignInput.value = (baseValue / currentExchangeRate).toFixed(2);
+                            }
+                        }
+                    });
+                }
+            } else if (eventSource) {
+                const group = eventSource.closest('.split-input-group');
+                const baseInput = group.querySelector('input[data-role="base"]');
+                const foreignInput = group.querySelector('input[data-role="foreign"]');
+
+                if (eventSource.dataset.role === 'foreign') {
+                    const foreignValue = parseFloat(eventSource.value) || 0;
+                    baseInput.value = (foreignValue * currentExchangeRate).toFixed(2);
+                } else {
+                    const baseValue = parseFloat(eventSource.value) || 0;
+                    if (foreignInput) {
+                        foreignInput.value = (baseValue / currentExchangeRate).toFixed(2);
                     }
                 }
-            });
-
-            const remainderToSplit = currentBaseAmount - lockedAmountBase;
-            if (unlockedMembers.length > 0) {
-                const sharePerUnlocked = remainderToSplit / unlockedMembers.length;
-                unlockedMembers.forEach(group => {
-                    const baseInput = group.querySelector('input[data-role="base"]');
-                    const foreignInput = group.querySelector('input[data-role="foreign"]');
-                    baseInput.value = sharePerUnlocked.toFixed(2);
-                    if (foreignInput) {
-                        foreignInput.value = (sharePerUnlocked / currentExchangeRate).toFixed(2);
-                    }
-                });
             }
-            
-            rebuildSplitInputs(); // Re-render to show locks and correct values
 
-            let finalTotalBase = 0;
+            let currentSplitTotalBase = 0;
+            let currentSplitTotalForeign = 0;
+            
             memberInputs.forEach(group => {
                 const checkbox = group.querySelector('input[type="checkbox"]');
-                if(checkbox.checked) {
-                    const baseInput = group.querySelector('input[data-role="base"]');
-                    finalTotalBase += parseFloat(baseInput.value) || 0;
+                const baseInput = group.querySelector('input[data-role="base"]');
+                const foreignInput = group.querySelector('input[data-role="foreign"]');
+                
+                if (checkbox.checked) {
+                    baseInput.disabled = false;
+                    currentSplitTotalBase += parseFloat(baseInput.value) || 0;
+                    if (foreignInput) {
+                        foreignInput.disabled = false;
+                        currentSplitTotalForeign += parseFloat(foreignInput.value) || 0;
+                    }
+                } else {
+                    baseInput.disabled = true;
+                    baseInput.value = '';
+                    if (foreignInput) {
+                        foreignInput.disabled = true;
+                        foreignInput.value = '';
+                    }
                 }
             });
 
-            if (Math.abs(currentBaseAmount - finalTotalBase) < 0.015 && currentBaseAmount > 0) {
+            const remainderBase = currentBaseAmount - currentSplitTotalBase;
+            
+            if (Math.abs(remainderBase) < 0.015 && currentBaseAmount > 0) {
                 splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-green-600 font-semibold';
                 splitTotalValidation.textContent = 'Total is fully allocated!';
                 submitBtn.disabled = false;
@@ -1235,7 +1285,13 @@
                 if (currentBaseAmount <= 0) {
                     splitTotalValidation.textContent = 'Please enter a valid amount.';
                 } else {
-                    splitTotalValidation.textContent = `Remainder to allocate: ${(currentBaseAmount - finalTotalBase).toFixed(2)}`;
+                    if (isForeign) {
+                        const originalAmount = parseFloat(expenseAmountInput.value) || 0;
+                        const remainderForeign = originalAmount - currentSplitTotalForeign;
+                        splitTotalValidation.textContent = `Remainder: ${remainderForeign.toFixed(2)} ${expenseCurrencySelect.value}`;
+                    } else {
+                        splitTotalValidation.textContent = `Remainder to allocate: ${remainderBase.toFixed(2)}`;
+                    }
                 }
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
@@ -1244,17 +1300,6 @@
         }
 
         function rebuildSplitInputs() {
-            const currentValues = {};
-            expenseSplitBetweenDiv.querySelectorAll('.split-input-group').forEach(group => {
-                const uid = group.dataset.uid;
-                const baseInput = group.querySelector('input[data-role="base"]');
-                const foreignInput = group.querySelector('input[data-role="foreign"]');
-                currentValues[uid] = {
-                    base: baseInput.value,
-                    foreign: foreignInput ? foreignInput.value : null
-                };
-            });
-
             expenseSplitBetweenDiv.innerHTML = '';
             const isForeign = expenseCurrencySelect.value !== currentTrip.baseCurrency;
 
@@ -1262,7 +1307,6 @@
                 const profile = userProfilesCache.get(uid);
                 if (!profile) return;
 
-                const isLocked = lockedShares.has(uid);
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'flex items-center justify-between split-input-group';
                 groupDiv.dataset.uid = uid;
@@ -1271,19 +1315,18 @@
                 if (isForeign) {
                     inputsHtml = `
                         <div class="flex items-center space-x-2">
-                            <input type="number" step="0.01" data-role="foreign" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm ${isLocked ? 'locked-input' : ''}" ${isLocked ? 'readonly' : ''} value="${currentValues[uid]?.foreign || ''}">
-                            <button type="button" data-uid="${uid}" class="unlock-btn text-xs text-gray-500 cursor-pointer">${expenseCurrencySelect.value} ${isLocked ? '🔒' : ''}</button>
+                            <input type="number" step="0.01" data-role="foreign" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
+                            <span class="text-xs text-gray-500">${expenseCurrencySelect.value}</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-gray-400">=</span>
-                            <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border-gray-200 bg-gray-100 rounded-md text-sm" readonly value="${currentValues[uid]?.base || ''}">
+                            <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border-gray-200 bg-gray-100 rounded-md text-sm" disabled>
                             <span class="text-xs text-gray-500">${currentTrip.baseCurrency}</span>
                         </div>
                     `;
                 } else {
                     inputsHtml = `
-                        <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm ${isLocked ? 'locked-input' : ''}" ${isLocked ? 'readonly' : ''} value="${currentValues[uid]?.base || ''}">
-                        <button type="button" data-uid="${uid}" class="unlock-btn text-xs text-gray-500 cursor-pointer ml-2">${currentTrip.baseCurrency} ${isLocked ? '🔒' : ''}</button>
+                        <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
                     `;
                 }
 
@@ -1300,7 +1343,6 @@
 
         async function populateExpenseModal() {
             if (!currentTrip) return;
-            lockedShares.clear(); // Reset locks
             const currencies = ["GBP", "USD", "EUR", "JPY", "CAD", "AUD", "CHF", "CNY", "SEK", "NZD", "CZK", "THB"];
             expenseCurrencySelect.innerHTML = currencies.map(c => `<option value="${c}">${c}</option>`).join('');
             expenseCurrencySelect.value = currentTrip.baseCurrency;
@@ -1334,14 +1376,6 @@
             expenseSplitBetweenDiv.addEventListener('input', (e) => {
                  if(e.target.type === 'number') {
                     updateAndValidateSplit(false, e.target);
-                }
-            });
-             expenseSplitBetweenDiv.addEventListener('click', (e) => {
-                const unlockBtn = e.target.closest('.unlock-btn');
-                if (unlockBtn) {
-                    const uid = unlockBtn.dataset.uid;
-                    lockedShares.delete(uid);
-                    updateAndValidateSplit(true);
                 }
             });
             document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
@@ -1829,9 +1863,11 @@
             }
         });
 
-        showDeletedToggle.addEventListener('change', () => {
+        showDeletedToggle.addEventListener('change', async () => {
             showDeletedItems = showDeletedToggle.checked;
-            // Re-render trip items if on the detail page
+            if (auth.currentUser) {
+                await saveUserPreferences(auth.currentUser.uid, { showDeleted: showDeletedItems });
+            }
             if (currentTrip) {
                 renderTripItems();
             }
