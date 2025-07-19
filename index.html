@@ -387,10 +387,11 @@
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col">
                 <div class="flex-shrink-0">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold">Optimised Payments</h3>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold">Summary Payments</h3>
                         <button type="button" id="close-visualisation-btn" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
                     </div>
+                    <p id="visualisation-currency" class="text-sm text-gray-500 mb-4"></p>
                 </div>
                 <!-- This container is now scrollable -->
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
@@ -449,7 +450,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.0.0
+              Version 5.0.1
             </p>
         </footer>
     </div>
@@ -579,6 +580,7 @@
         // Visualisation elements
         const visualiseSettlementBtn = document.getElementById('visualise-settlement-btn');
         const settlementVisualisationModal = document.getElementById('settlement-visualisation-modal');
+        const visualisationCurrency = document.getElementById('visualisation-currency');
         const closeVisualisationBtn = document.getElementById('close-visualisation-btn');
         const vizDebtorsList = document.getElementById('viz-debtors-list');
         const vizCreditorsList = document.getElementById('viz-creditors-list');
@@ -1165,8 +1167,6 @@
             const originalCurrency = expenseCurrencySelect.value;
             const baseCurrency = currentTrip.baseCurrency;
 
-            rebuildSplitInputs();
-
             if (originalAmount <= 0) {
                 currentBaseAmount = 0;
                 fxConversionDisplay.innerHTML = '';
@@ -1374,6 +1374,8 @@
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('expense-occurred-at').value = now.toISOString().slice(0,16);
             
+            rebuildSplitInputs(); // Call this immediately to show members
+
             expenseAmountInput.addEventListener('input', handleCurrencyChange);
             expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
             expenseSplitBetweenDiv.addEventListener('change', (e) => {
@@ -1506,7 +1508,7 @@
                         <span class="font-semibold text-gray-800 break-words">${fromUser.displayName}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         <span class="font-semibold text-gray-800 break-words">${toUser.displayName}</span>
-                        <span class="font-bold text-lg text-purple-600 text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
+                        <span class="font-bold text-base text-purple-600 text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-end items-center">${actionControl}</div>
                 `;
@@ -1905,6 +1907,7 @@
 
         // --- Mobile-First Visualisation Logic ---
         async function initializeVisualisation() {
+            visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             const balances = new Map();
             currentTrip.memberIds.forEach(uid => balances.set(uid, 0));
 
@@ -1941,6 +1944,7 @@
 
             const allMemberIds = [...new Set(currentTrip.memberIds)];
             const profiles = await fetchUserProfiles(allMemberIds);
+            const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
 
             const creditors = [];
             const debtors = [];
@@ -1957,8 +1961,8 @@
 
             const transactions = calculateSettlement();
 
-            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
-            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
+            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
+            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${currencySymbol}${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizPaymentsList.innerHTML = transactions.length > 0 ? transactions.map(tx => {
                 const from = profiles[tx.from].displayName;
                 const to = profiles[tx.to].displayName;
@@ -1966,7 +1970,7 @@
                     <span class="break-words text-left">${from}</span>
                     <svg class="w-4 h-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
                     <span class="break-words text-left">${to}</span>
-                    <span class="font-bold text-right">${tx.amount.toFixed(2)}</span>
+                    <span class="font-bold text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
                 </div>`;
             }).join('') : '<p>All settled!</p>';
         }
