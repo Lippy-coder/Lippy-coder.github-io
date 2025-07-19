@@ -686,13 +686,19 @@
         }
 
         async function loadUserPreferences(userId) {
-            const userDocRef = doc(db, "users", userId);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                showDeletedItems = userData.preferences?.showDeleted ?? false;
-            } else {
-                showDeletedItems = false;
+            try {
+                const userDocRef = doc(db, "users", userId);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    showDeletedItems = userData.preferences?.showDeleted ?? false;
+                } else {
+                    showDeletedItems = false;
+                }
+            } catch (error) {
+                console.warn("Could not load user preferences due to a Firestore permissions issue. Please update your Firestore rules to allow users to read their own data in the 'users' collection. Using default preferences.");
+                console.warn("Recommended rule for '/users/{userId}': allow read, update: if request.auth != null && request.auth.uid == userId;");
+                showDeletedItems = false; // Default to false on error
             }
             showDeletedToggle.checked = showDeletedItems;
         }
@@ -702,7 +708,8 @@
                 const userDocRef = doc(db, "users", userId);
                 await updateDoc(userDocRef, { preferences: prefs });
             } catch (error) {
-                console.error("Could not save user preferences:", error);
+                console.error("Could not save user preferences. Check Firestore rules.", error);
+                showMessage("Could not save your preference. Please check your Firestore security rules.");
             }
         }
 
@@ -1424,10 +1431,6 @@
                 }
             });
             document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
-            document.getElementById('select-all-btn').addEventListener('click', () => {
-                expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
-                updateAndValidateSplit(true);
-            });
             document.getElementById('deselect-all-btn').addEventListener('click', () => {
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 updateAndValidateSplit(true);
