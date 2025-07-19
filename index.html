@@ -1225,6 +1225,7 @@
 
             let currentSplitTotalBase = 0;
             let currentSplitTotalForeign = 0;
+            let unroundedSplitTotalBase = 0;
             
             memberInputs.forEach(group => {
                 const checkbox = group.querySelector('input[type="checkbox"]');
@@ -1236,7 +1237,11 @@
                     currentSplitTotalBase += parseFloat(baseInput.value) || 0;
                     if (foreignInput) {
                         foreignInput.disabled = false;
-                        currentSplitTotalForeign += parseFloat(foreignInput.value) || 0;
+                        const foreignValue = parseFloat(foreignInput.value) || 0;
+                        currentSplitTotalForeign += foreignValue;
+                        unroundedSplitTotalBase += foreignValue * currentExchangeRate;
+                    } else {
+                        unroundedSplitTotalBase += parseFloat(baseInput.value) || 0;
                     }
                 } else {
                     baseInput.disabled = true;
@@ -1248,7 +1253,7 @@
                 }
             });
 
-            const remainderBase = currentBaseAmount - currentSplitTotalBase;
+            const remainderBase = currentBaseAmount - (isForeign ? unroundedSplitTotalBase : currentSplitTotalBase);
             
             if (Math.abs(remainderBase) < 0.01 && currentBaseAmount > 0) {
                 splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-green-600 font-semibold';
@@ -1261,13 +1266,10 @@
                 if (currentBaseAmount <= 0) {
                     splitTotalValidation.textContent = 'Please enter a valid amount.';
                 } else {
-                    if (isForeign) {
-                        const originalAmount = parseFloat(expenseAmountInput.value) || 0;
-                        const remainderForeign = originalAmount - currentSplitTotalForeign;
-                        splitTotalValidation.textContent = `Remainder: ${remainderForeign.toFixed(2)} ${expenseCurrencySelect.value}`;
-                    } else {
-                        splitTotalValidation.textContent = `Remainder to allocate: ${remainderBase.toFixed(2)}`;
-                    }
+                    const originalAmount = parseFloat(expenseAmountInput.value) || 0;
+                    const remainderToShow = isForeign ? (originalAmount - currentSplitTotalForeign) : remainderBase;
+                    const currencyToShow = isForeign ? expenseCurrencySelect.value : currentTrip.baseCurrency;
+                    splitTotalValidation.textContent = `Remainder to allocate: ${remainderToShow.toFixed(2)} ${currencyToShow}`;
                 }
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
