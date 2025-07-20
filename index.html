@@ -110,6 +110,7 @@
 
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
 
+        <!-- Authentication View -->
         <div id="auth-view" class="view">
              <div class="text-center mb-8 mt-16">
                  <h1 class="text-4xl font-bold text-blue-600">Splitify</h1>
@@ -150,6 +151,7 @@
              </div>
         </div>
 
+        <!-- Dashboard View -->
         <div id="dashboard-view" class="view hidden-view py-8">
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <h1 class="text-3xl font-bold text-blue-600">Splitify</h1>
@@ -181,6 +183,7 @@
             </main>
         </div>
         
+        <!-- Trip Detail View -->
         <div id="trip-detail-view" class="view hidden-view py-8">
             <header class="mb-6">
                 <button id="back-to-dashboard-btn" class="text-blue-600 hover:underline mb-4">&larr; Back to My Trips</button>
@@ -195,8 +198,8 @@
                     <div class="flex items-center space-x-3">
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                             </svg>
                         </button>
                         <button id="settle-up-btn" title="Settle Up" class="h-12 w-12 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,6 +257,7 @@
             </div>
         </div>
 
+        <!-- Create Trip Modal -->
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Create a New Trip</h3>
@@ -281,6 +285,7 @@
             </div>
         </div>
 
+        <!-- Add Expense Modal -->
         <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto">
                 <h3 class="text-2xl font-bold mb-6">Add an Expense</h3>
@@ -307,13 +312,13 @@
                     <div class="mb-4">
                          <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
                          <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
-                            <option value="">-- Select a Category --</option>
-                            <option value="Food & Drink">Food & Drink</option>
-                            <option value="Transport">Transport</option>
-                            <option value="Accommodation">Accommodation</option>
-                            <option value="Activities">Activities</option>
-                            <option value="Shopping">Shopping</option>
-                            <option value="Other">Other</option>
+                             <option value="">-- Select a Category --</option>
+                             <option value="Food & Drink">Food & Drink</option>
+                             <option value="Transport">Transport</option>
+                             <option value="Accommodation">Accommodation</option>
+                             <option value="Activities">Activities</option>
+                             <option value="Shopping">Shopping</option>
+                             <option value="Other">Other</option>
                          </select>
                     </div>
                     <div class="mb-4">
@@ -342,6 +347,7 @@
             </div>
         </div>
 
+        <!-- Edit Profile Modal -->
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3>
@@ -371,6 +377,7 @@
             </div>
         </div>
 
+        <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3>
@@ -388,6 +395,7 @@
             </div>
         </div>
 
+        <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Invite a Friend</h3>
@@ -404,6 +412,7 @@
             </div>
         </div>
 
+        <!-- Archive Trip Modal -->
         <div id="archive-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Archive Trip</h3>
@@ -415,6 +424,7 @@
             </div>
         </div>
         
+        <!-- Delete Expense Modal -->
         <div id="delete-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Expense</h3>
@@ -426,6 +436,7 @@
             </div>
         </div>
 
+        <!-- Delete Payment Modal -->
         <div id="delete-payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Payment</h3>
@@ -437,6 +448,7 @@
             </div>
         </div>
         
+        <!-- Settle Up Modal -->
         <div id="settle-up-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
@@ -455,6 +467,7 @@
             </div>
         </div>
 
+        <!-- Settlement Visualisation Modal -->
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col">
                 <div class="flex-shrink-0">
@@ -491,6 +504,7 @@
             </div>
         </div>
         
+        <!-- AI Choice Modal -->
         <div id="ai-choice-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view z-30">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
                 <h3 class="text-2xl font-bold mb-6 text-center">Scan Receipt</h3>
@@ -510,6 +524,7 @@
             </div>
         </div>
 
+        <!-- AI Camera Scan Modal -->
         <div id="ai-scan-modal" class="modal-overlay fixed inset-0 bg-black flex items-center justify-center z-40 hidden-view">
             <div class="relative w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
                 <video id="camera-feed" playsinline class="rounded-lg"></video>
@@ -524,22 +539,24 @@
             </div>
         </div>
 
+        <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p class="text-white mt-4">Analyzing your expense...</p>
         </div>
 
-
+        <!-- Message Box -->
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
             <p id="message-text"></p>
         </div>
         
+        <!-- Hidden File Inputs -->
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.2.0
+              Version 5.3.1
             </p>
         </footer>
     </div>
@@ -550,7 +567,7 @@
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // --- Firebase Config Keys ---
+        // --- Firebase Config Keys (MOVE TO A SECURE ENVIRONMENT FOR PRODUCTION) ---
         const firebaseConfig = {
             apiKey: "AIzaSyAi2llnXf_VloWUL6mZgdJMa1W1EOTwLE4",
             authDomain: "splitify-2ec5e.firebaseapp.com",
@@ -561,9 +578,8 @@
             measurementId: "G-DTBQM17BV6"
         };
         
-        // --- ExchangeRate-API.com API Key ---
+        // --- API Keys & URLs (MOVE TO A SECURE BACKEND/CLOUD FUNCTION FOR PRODUCTION) ---
         const FX_API_KEY = '9dedf9a9f74ab256717d8f4f';
-        // --- AI Cloud Function URL ---
         const ANALYZE_IMAGE_URL = 'https://analyzeexpenseimage-1038415606946.europe-west2.run.app';
 
 
@@ -583,12 +599,10 @@
         let allTripExpenses = [];
         let tripsUnsubscribe = null;
         let expensesUnsubscribe = null;
-        let currentBaseAmount = 0;
-        let currentExchangeRate = 1;
         const userProfilesCache = new Map();
         let cameraStream = null;
         let userLocation = null;
-        let showDeletedItems = false; // New state for the toggle, default off
+        let showDeletedItems = false; 
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -1029,22 +1043,10 @@
                 const splitBetween = expense.splitBetween;
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
                 
-                const sharerIds = Object.keys(splitBetween);
-                if (sharerIds.length > 0) {
-                    const isOldFormat = typeof splitBetween[sharerIds[0]] !== 'number';
-
-                    if (isOldFormat) {
-                        const numberOfSharers = sharerIds.length;
-                        const equalShare = expense.amountDetails.baseAmount / numberOfSharers;
-                        sharerIds.forEach(memberId => {
-                            balances.set(memberId, (balances.get(memberId) || 0) - equalShare);
-                        });
-                    } else {
-                        for (const memberId in splitBetween) {
-                            const share = splitBetween[memberId];
-                            balances.set(memberId, (balances.get(memberId) || 0) - share);
-                        }
-                    }
+                for (const memberId in splitBetween) {
+                    // The value is now always the base currency share
+                    const share = splitBetween[memberId];
+                    balances.set(memberId, (balances.get(memberId) || 0) - share);
                 }
             });
 
@@ -1093,19 +1095,13 @@
             const date = expense.occurredAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+            // **MODIFIED:** This now only reads the base currency share.
             const splitWithLines = Object.keys(expense.splitBetween)
                 .map(uid => {
                     const memberProfile = userProfilesCache.get(uid);
                     const memberName = memberProfile ? memberProfile.displayName : 'Unknown';
-                    const splitValue = expense.splitBetween[uid];
-                    let shareText;
-
-                    if (typeof splitValue === 'number') {
-                        shareText = splitValue.toFixed(2);
-                    } else { 
-                        const numberOfSharers = Object.keys(expense.splitBetween).length;
-                        shareText = (expense.amountDetails.baseAmount / numberOfSharers).toFixed(2);
-                    }
+                    const baseShare = expense.splitBetween[uid];
+                    const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A';
                     return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
                 }).join('');
             
@@ -1306,127 +1302,50 @@
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
 
+        // **MODIFIED:** This function now also triggers a rebuild of the split inputs when currency changes
         async function handleCurrencyChange() {
-            const originalAmount = parseFloat(expenseAmountInput.value) || 0;
             const originalCurrency = expenseCurrencySelect.value;
             const baseCurrency = currentTrip.baseCurrency;
 
-            if (originalAmount <= 0) {
-                currentBaseAmount = 0;
-                fxConversionDisplay.innerHTML = '';
-                updateAndValidateSplit(true);
-                return;
-            }
+            rebuildSplitInputs(); // Rebuild inputs to show correct currency symbol
 
             if (originalCurrency === baseCurrency) {
-                currentBaseAmount = originalAmount;
-                currentExchangeRate = 1;
                 fxConversionDisplay.innerHTML = '';
-                updateAndValidateSplit(true);
             } else {
-                fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Converting...</span>`;
+                fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Fetching rate...</span>`;
                 try {
                     const rateData = await getExchangeRate(originalCurrency, baseCurrency);
-                    currentExchangeRate = rateData.conversion_rate;
-                    currentBaseAmount = originalAmount * currentExchangeRate;
-                    fxConversionDisplay.innerHTML = `&equals; <span class="font-semibold mx-1">${currentBaseAmount.toFixed(2)} ${baseCurrency}</span> (Rate: ${currentExchangeRate.toFixed(4)})`;
-                    updateAndValidateSplit(true);
+                    fxConversionDisplay.innerHTML = `1 ${originalCurrency} &equals; <span class="font-semibold mx-1">${rateData.conversion_rate.toFixed(4)} ${baseCurrency}</span>`;
                 } catch (error) {
                     fxConversionDisplay.innerHTML = `<span class="text-red-600">Could not get rate.</span>`;
-                    currentBaseAmount = 0;
-                    updateAndValidateSplit(true);
                 }
             }
+            // **FIX:** After rebuilding the inputs, we must redistribute the existing amount.
+            autoDistributeAmount(); 
         }
-
-        function updateAndValidateSplit(isEqualSplit = false, eventSource = null) {
+        
+        // **MODIFIED:** This function now validates in the original currency.
+        function updateAndValidateSplit() {
+            const totalOriginalAmount = parseFloat(expenseAmountInput.value) || 0;
             const memberInputs = expenseSplitBetweenDiv.querySelectorAll('.split-input-group');
             const submitBtn = document.getElementById('submit-expense-btn');
-            const isForeign = expenseCurrencySelect.value !== currentTrip.baseCurrency;
-
-            if (isEqualSplit) {
-                const checkedInputs = Array.from(memberInputs).filter(group => group.querySelector('input[type="checkbox"]').checked);
-                if (checkedInputs.length > 0 && currentBaseAmount > 0) {
-                    const numSharers = checkedInputs.length;
-                    const totalInCents = Math.round(currentBaseAmount * 100);
-                    const baseShareInCents = Math.floor(totalInCents / numSharers);
-                    let remainderInCents = totalInCents % numSharers;
-
-                    const shares = {};
-                    checkedInputs.forEach(group => {
-                        const uid = group.dataset.uid;
-                        shares[uid] = baseShareInCents;
-                    });
-                    
-                    let sharerUids = checkedInputs.map(group => group.dataset.uid);
-                    while (remainderInCents > 0) {
-                        const randomIndex = Math.floor(Math.random() * sharerUids.length);
-                        const randomUid = sharerUids[randomIndex];
-                        shares[randomUid]++;
-                        sharerUids.splice(randomIndex, 1);
-                        if (sharerUids.length === 0) {
-                            sharerUids = checkedInputs.map(group => group.dataset.uid);
-                        }
-                        remainderInCents--;
-                    }
-
-                    memberInputs.forEach(group => {
-                        const uid = group.dataset.uid;
-                        const baseInput = group.querySelector('input[data-role="base"]');
-                        const foreignInput = group.querySelector('input[data-role="foreign"]');
-                        if (shares[uid] !== undefined) {
-                            const baseValue = (shares[uid] / 100);
-                            baseInput.value = baseValue.toFixed(2);
-                            if (foreignInput) {
-                                foreignInput.value = (baseValue / currentExchangeRate).toFixed(2);
-                            }
-                        }
-                    });
-                }
-            } else if (eventSource) {
-                const group = eventSource.closest('.split-input-group');
-                const baseInput = group.querySelector('input[data-role="base"]');
-                const foreignInput = group.querySelector('input[data-role="foreign"]');
-
-                if (eventSource.dataset.role === 'foreign') {
-                    const foreignValue = parseFloat(eventSource.value) || 0;
-                    baseInput.value = (foreignValue * currentExchangeRate).toFixed(2);
-                } else {
-                    const baseValue = parseFloat(eventSource.value) || 0;
-                    if (foreignInput) {
-                        foreignInput.value = (baseValue / currentExchangeRate).toFixed(2);
-                    }
-                }
-            }
-
-            let currentSplitTotalBase = 0;
-            let currentSplitTotalForeign = 0;
+            const originalCurrency = expenseCurrencySelect.value;
             
+            let currentSplitTotal = 0;
             memberInputs.forEach(group => {
                 const checkbox = group.querySelector('input[type="checkbox"]');
-                const baseInput = group.querySelector('input[data-role="base"]');
-                const foreignInput = group.querySelector('input[data-role="foreign"]');
-                
-                if (checkbox.checked) {
-                    baseInput.disabled = false;
-                    currentSplitTotalBase += parseFloat(baseInput.value) || 0;
-                    if (foreignInput) {
-                        foreignInput.disabled = false;
-                        currentSplitTotalForeign += parseFloat(foreignInput.value) || 0;
-                    }
+                const input = group.querySelector('input[type="number"]');
+                input.disabled = !checkbox.checked;
+                if (!checkbox.checked) {
+                    input.value = '';
                 } else {
-                    baseInput.disabled = true;
-                    baseInput.value = '';
-                    if (foreignInput) {
-                        foreignInput.disabled = true;
-                        foreignInput.value = '';
-                    }
+                    currentSplitTotal += parseFloat(input.value) || 0;
                 }
             });
-
-            const remainderBase = currentBaseAmount - currentSplitTotalBase;
             
-            if (Math.abs(remainderBase) < 0.015 && currentBaseAmount > 0) {
+            // Using a small tolerance for floating point comparisons
+            const remainder = totalOriginalAmount - currentSplitTotal;
+            if (Math.abs(remainder) < 0.015 && totalOriginalAmount > 0) {
                 splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-green-600 font-semibold';
                 splitTotalValidation.textContent = 'Total is fully allocated!';
                 submitBtn.disabled = false;
@@ -1434,16 +1353,10 @@
                 submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             } else {
                 splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-red-600 font-semibold';
-                if (currentBaseAmount <= 0) {
+                if (totalOriginalAmount <= 0) {
                     splitTotalValidation.textContent = 'Please enter a valid amount.';
                 } else {
-                    if (isForeign) {
-                        const originalAmount = parseFloat(expenseAmountInput.value) || 0;
-                        const remainderForeign = originalAmount - currentSplitTotalForeign;
-                        splitTotalValidation.textContent = `Remainder: ${remainderForeign.toFixed(2)} ${expenseCurrencySelect.value}`;
-                    } else {
-                        splitTotalValidation.textContent = `Remainder to allocate: ${remainderBase.toFixed(2)}`;
-                    }
+                    splitTotalValidation.textContent = `Remainder to allocate: ${remainder.toFixed(2)} ${originalCurrency}`;
                 }
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
@@ -1451,9 +1364,10 @@
             }
         }
 
+        // **MODIFIED:** This function now builds inputs for the original currency.
         function rebuildSplitInputs() {
             expenseSplitBetweenDiv.innerHTML = '';
-            const isForeign = expenseCurrencySelect.value !== currentTrip.baseCurrency;
+            const originalCurrency = expenseCurrencySelect.value;
 
             currentTrip.memberIds.forEach(uid => {
                 const profile = userProfilesCache.get(uid);
@@ -1462,35 +1376,59 @@
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'flex items-center justify-between split-input-group';
                 groupDiv.dataset.uid = uid;
-
-                let inputsHtml;
-                if (isForeign) {
-                    inputsHtml = `
-                        <div class="flex items-center space-x-2">
-                            <input type="number" step="0.01" data-role="foreign" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
-                            <span class="text-xs text-gray-500">${expenseCurrencySelect.value}</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-gray-400">=</span>
-                            <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border-gray-200 bg-gray-100 rounded-md text-sm" disabled>
-                            <span class="text-xs text-gray-500">${currentTrip.baseCurrency}</span>
-                        </div>
-                    `;
-                } else {
-                    inputsHtml = `
-                        <input type="number" step="0.01" data-role="base" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
-                    `;
-                }
+                
+                const inputHtml = `
+                    <div class="flex items-center space-x-2">
+                        <input type="number" step="0.01" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
+                        <span class="text-xs text-gray-500 w-8">${originalCurrency}</span>
+                    </div>`;
 
                 groupDiv.innerHTML = `
                     <div class="flex items-center">
                         <input id="split-${uid}" type="checkbox" value="${uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 w-28 truncate">${profile.displayName}</label>
+                        <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 w-40 truncate">${profile.displayName}</label>
                     </div>
-                    <div class="flex items-center">${inputsHtml}</div>
+                    ${inputHtml}
                 `;
                 expenseSplitBetweenDiv.appendChild(groupDiv);
             });
+        }
+        
+        // **MODIFIED:** This function now handles clearing inputs for deselected users and recalculating the split.
+        function autoDistributeAmount() {
+            const totalOriginalAmount = parseFloat(expenseAmountInput.value) || 0;
+            
+            // Clear all number inputs before recalculating
+            expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="number"]').forEach(input => input.value = '');
+
+            if (totalOriginalAmount <= 0) {
+                updateAndValidateSplit();
+                return;
+            }
+
+            const checkedInputs = Array.from(expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked'));
+            if (checkedInputs.length === 0) {
+                updateAndValidateSplit();
+                return;
+            };
+            
+            const numSharers = checkedInputs.length;
+            const totalInCents = Math.round(totalOriginalAmount * 100);
+            const baseShareInCents = Math.floor(totalInCents / numSharers);
+            let remainderInCents = totalInCents % numSharers;
+
+            checkedInputs.forEach((checkbox) => {
+                const group = checkbox.closest('.split-input-group');
+                const input = group.querySelector('input[type="number"]');
+                let share = baseShareInCents;
+                if (remainderInCents > 0) {
+                    share++;
+                    remainderInCents--;
+                }
+                input.value = (share / 100).toFixed(2);
+            });
+            
+            updateAndValidateSplit();
         }
 
         async function populateExpenseModal() {
@@ -1501,8 +1439,6 @@
             expensePaidBySelect.innerHTML = '';
             splitTotalValidation.textContent = '';
             fxConversionDisplay.innerHTML = '';
-            currentBaseAmount = 0;
-            currentExchangeRate = 1;
 
             const profiles = await fetchUserProfiles(currentTrip.memberIds);
             Object.values(profiles).forEach(profile => {
@@ -1518,28 +1454,24 @@
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('expense-occurred-at').value = now.toISOString().slice(0,16);
             
-            rebuildSplitInputs(); // Call this immediately to show members
+            // Initial setup
+            rebuildSplitInputs(); 
+            updateAndValidateSplit();
 
-            expenseAmountInput.addEventListener('input', handleCurrencyChange);
+            // Event Listeners
+            expenseAmountInput.addEventListener('input', autoDistributeAmount);
             expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
             expenseSplitBetweenDiv.addEventListener('change', (e) => {
-                if(e.target.type === 'checkbox') {
-                    updateAndValidateSplit(true);
-                }
+                if(e.target.type === 'checkbox') autoDistributeAmount();
             });
             expenseSplitBetweenDiv.addEventListener('input', (e) => {
-                 if(e.target.type === 'number') {
-                    updateAndValidateSplit(false, e.target);
-                }
+                if(e.target.type === 'number') updateAndValidateSplit();
             });
             
             document.getElementById('deselect-all-btn').addEventListener('click', () => {
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                updateAndValidateSplit(true);
+                autoDistributeAmount();
             });
-
-
-            handleCurrencyChange();
         }
 
         // --- Settlement Logic ---
@@ -1553,22 +1485,9 @@
                 const splitBetween = expense.splitBetween;
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
                 
-                const sharerIds = Object.keys(splitBetween);
-                if (sharerIds.length > 0) {
-                    const isOldFormat = typeof splitBetween[sharerIds[0]] !== 'number';
-
-                    if (isOldFormat) {
-                        const numberOfSharers = sharerIds.length;
-                        const equalShare = expense.amountDetails.baseAmount / numberOfSharers;
-                        sharerIds.forEach(memberId => {
-                            balances.set(memberId, (balances.get(memberId) || 0) - equalShare);
-                        });
-                    } else {
-                        for (const memberId in splitBetween) {
-                            const share = splitBetween[memberId];
-                            balances.set(memberId, (balances.get(memberId) || 0) - share);
-                        }
-                    }
+                for (const memberId in splitBetween) {
+                    const share = splitBetween[memberId];
+                    balances.set(memberId, (balances.get(memberId) || 0) - share);
                 }
             });
 
@@ -1657,8 +1576,8 @@
                         <button class="paid-manually-toggle-btn text-sm text-gray-600 hover:underline w-full text-center mt-2">Paid manually?</button>
                         <div class="manual-payment-area">
                             <div class="flex items-center space-x-2 justify-end">
-                               <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
-                               <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Confirm</button>
+                                <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
+                                <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Confirm</button>
                             </div>
                         </div>
                     `;
@@ -1826,6 +1745,7 @@
             } catch (error) { showMessage(error.message); }
         };
 
+        // **MODIFIED:** This function handles the new splitting and conversion logic.
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1833,45 +1753,62 @@
             submitBtnText.classList.add('hidden');
             spinner.classList.remove('hidden');
             submitExpenseBtn.disabled = true;
+
             try {
+                // 1. Get user inputs
                 const description = document.getElementById('expense-description').value;
                 const originalAmount = parseFloat(document.getElementById('expense-amount').value);
                 const originalCurrency = document.getElementById('expense-currency').value;
-                const occurredAtValue = document.getElementById('expense-occurred-at').value;
-                const occurredAt = Timestamp.fromDate(new Date(occurredAtValue));
+                const baseCurrency = currentTrip.baseCurrency;
+                const occurredAt = Timestamp.fromDate(new Date(document.getElementById('expense-occurred-at').value));
                 const category = document.getElementById('expense-category').value;
                 const paidBy = document.getElementById('expense-paid-by').value;
-                
-                if (isNaN(originalAmount) || originalAmount <= 0) throw new Error("Please enter a valid expense amount.");
 
-                const splitBetweenCheckboxes = expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked');
-                if (splitBetweenCheckboxes.length === 0) throw new Error("Expense must be split with at least one member.");
-
-                let splitTotal = 0;
-                const splitBetween = {};
-                expenseSplitBetweenDiv.querySelectorAll('.split-input-group').forEach(group => {
-                    if (group.querySelector('input[type="checkbox"]').checked) {
-                        const uid = group.dataset.uid;
-                        const amountInput = group.querySelector('input[data-role="base"]');
-                        const amount = parseFloat(amountInput.value);
-                        if (isNaN(amount) || amount < 0) throw new Error(`Invalid amount for a member.`);
-                        splitBetween[uid] = amount;
-                        splitTotal += amount;
-                    }
+                // 2. Collect original currency splits from form
+                const originalSplits = new Map();
+                let originalSplitSum = 0;
+                expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
+                    const uid = cb.closest('.split-input-group').dataset.uid;
+                    const share = parseFloat(cb.closest('.split-input-group').querySelector('input[type="number"]').value) || 0;
+                    originalSplits.set(uid, share);
+                    originalSplitSum += share;
                 });
 
-                if (Math.abs(currentBaseAmount - splitTotal) > 0.015) throw new Error(`The split amounts total ${splitTotal.toFixed(2)}, which doesn't match the expense total of ${currentBaseAmount.toFixed(2)}.`);
+                if (originalSplits.size === 0) throw new Error("Expense must be split with at least one member.");
+                if (Math.abs(originalAmount - originalSplitSum) > 0.015) throw new Error("The split amounts do not add up to the total expense.");
 
+                // 3. Fetch exchange rate and calculate base amounts
+                let exchangeRate = 1;
+                if (originalCurrency !== baseCurrency) {
+                    const rateData = await getExchangeRate(originalCurrency, baseCurrency);
+                    exchangeRate = rateData.conversion_rate;
+                }
+                const totalBaseAmount = originalAmount * exchangeRate;
+
+                // 4. Convert each share and handle rounding
+                const finalBaseSplits = {};
+                let calculatedBaseSum = 0;
+                originalSplits.forEach((originalShare, uid) => {
+                    const baseShare = parseFloat((originalShare * exchangeRate).toFixed(2));
+                    finalBaseSplits[uid] = baseShare;
+                    calculatedBaseSum += baseShare;
+                });
+                
+                // 5. Distribute rounding remainder randomly
+                const remainder = parseFloat((totalBaseAmount - calculatedBaseSum).toFixed(2));
+                if (Math.abs(remainder) > 0) {
+                    const sharerUids = Array.from(originalSplits.keys());
+                    const randomUid = sharerUids[Math.floor(Math.random() * sharerUids.length)];
+                    finalBaseSplits[randomUid] = parseFloat((finalBaseSplits[randomUid] + remainder).toFixed(2));
+                }
+                
+                // 6. Construct and save the final expense object
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
                     amountDetails: { 
-                        originalAmount, 
-                        originalCurrency, 
-                        baseAmount: currentBaseAmount, 
-                        baseCurrency: currentTrip.baseCurrency, 
-                        exchangeRate: currentExchangeRate 
+                        originalAmount, originalCurrency, baseAmount: totalBaseAmount, baseCurrency, exchangeRate 
                     },
-                    splitBetween,
+                    splitBetween: finalBaseSplits,
                     isDeleted: false
                 };
 
@@ -2163,22 +2100,9 @@
                 const splitBetween = expense.splitBetween;
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
                 
-                const sharerIds = Object.keys(splitBetween);
-                if (sharerIds.length > 0) {
-                    const isOldFormat = typeof splitBetween[sharerIds[0]] !== 'number';
-
-                    if (isOldFormat) {
-                        const numberOfSharers = sharerIds.length;
-                        const equalShare = expense.amountDetails.baseAmount / numberOfSharers;
-                        sharerIds.forEach(memberId => {
-                            balances.set(memberId, (balances.get(memberId) || 0) - equalShare);
-                        });
-                    } else {
-                        for (const memberId in splitBetween) {
-                            const share = splitBetween[memberId];
-                            balances.set(memberId, (balances.get(memberId) || 0) - share);
-                        }
-                    }
+                for (const memberId in splitBetween) {
+                    const share = splitBetween[memberId];
+                    balances.set(memberId, (balances.get(memberId) || 0) - share);
                 }
             });
             
@@ -2269,8 +2193,8 @@
         async function analyzeImageWithAI(base64Image) {
             try {
                  if (!auth.currentUser) {
-                    throw new Error("You must be logged in to use this feature.");
-                }
+                     throw new Error("You must be logged in to use this feature.");
+                 }
                 const token = await auth.currentUser.getIdToken();
 
                 const response = await fetch(ANALYZE_IMAGE_URL, {
@@ -2315,12 +2239,13 @@
                 }
                 if (data.category) {
                      if ([...categorySelect.options].some(opt => opt.value === data.category)) {
-                        categorySelect.value = data.category;
+                         categorySelect.value = data.category;
                      }
                 }
                 
                 // Trigger currency change to calculate base amount and update UI
                 await handleCurrencyChange();
+                autoDistributeAmount();
 
             } catch (error) {
                 console.error('AI Scan failed:', error);
