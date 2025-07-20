@@ -333,6 +333,35 @@
             </div>
         </div>
 
+        <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
+                <h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3>
+                <form id="edit-profile-form">
+                    <div class="mb-4">
+                        <label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="mb-4">
+                        <label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label>
+                        <select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+                            <option value="">None</option>
+                            <option value="Monzo">Monzo</option>
+                            <option value="Revolut">Revolut</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label>
+                        <input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith">
+                        <p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                        <button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3>
@@ -609,6 +638,10 @@
         const cancelArchiveTripBtn = document.getElementById('cancel-archive-trip-btn');
         const confirmArchiveTripBtn = document.getElementById('confirm-archive-trip-btn');
 
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const editProfileForm = document.getElementById('edit-profile-form');
+        const cancelEditProfileBtn = document.getElementById('cancel-edit-profile-btn');
+        
         const editExpenseModal = document.getElementById('edit-expense-modal');
         const editExpenseForm = document.getElementById('edit-expense-form');
         const editExpenseIdInput = document.getElementById('edit-expense-id');
@@ -782,22 +815,29 @@
             profilePicWrapper.innerHTML = `
                 ${avatar}
                 <div class="profile-pic-overlay">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </div>
             `;
-            profilePicWrapper.addEventListener('click', () => profilePicInput.click());
+            profilePicWrapper.addEventListener('click', () => {
+                const user = auth.currentUser;
+                const userProfile = userProfilesCache.get(user.uid);
+                document.getElementById('profile-name').value = user.displayName;
+                document.getElementById('payment-bank').value = userProfile?.paymentInfo?.bank || '';
+                document.getElementById('payment-username').value = userProfile?.paymentInfo?.username || '';
+                openModal(editProfileModal);
+            });
             profileArea.appendChild(profilePicWrapper);
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
-                userProfilesCache.set(user.uid, { uid: user.uid, displayName: user.displayName, email: user.email, photoURL: user.photoURL });
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                userProfilesCache.set(user.uid, { uid: user.uid, ...userDoc.data() });
                 renderProfile(user);
                 try {
                     await loadUserPreferences(user.uid);
                 } catch (error) {
                     console.error("Failed to load user preferences on login:", error);
-                    // The function itself handles the warning and sets a default
                 }
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
@@ -1255,6 +1295,7 @@
         closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
 
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
+        cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
 
         async function handleCurrencyChange() {
             const originalAmount = parseFloat(expenseAmountInput.value) || 0;
@@ -1585,15 +1626,21 @@
                 transactionEl.className = 'p-3 rounded-lg bg-gray-100';
                 
                 let actionControl;
+                let payLinkBtn = '';
                 if (auth.currentUser.uid === tx.from) {
+                    const payeeProfile = userProfilesCache.get(tx.to);
+                    if (payeeProfile?.paymentInfo?.bank && payeeProfile?.paymentInfo?.username) {
+                        payLinkBtn = `<button data-to-uid="${tx.to}" data-amount="${tx.amount.toFixed(2)}" class="pay-link-btn bg-yellow-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-yellow-600">Pay with Link</button>`;
+                    }
                     actionControl = `
                         <div class="flex items-center space-x-2">
+                           ${payLinkBtn}
                            <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
-                           <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Pay</button>
+                           <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Paid Manually</button>
                         </div>`;
                 } else if (auth.currentUser.uid === tx.to) {
                     actionControl = `
-                        <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-blue-600">Confirm Payment</button>
+                        <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-blue-600">Confirm Payment Received</button>
                     `;
                 }
 
@@ -1611,6 +1658,26 @@
         }
 
         settlementList.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('pay-link-btn')) {
+                const button = e.target;
+                const payeeId = button.dataset.toUid;
+                const amount = button.dataset.amount;
+                const payeeProfile = userProfilesCache.get(payeeId);
+                
+                if (payeeProfile?.paymentInfo?.bank && payeeProfile?.paymentInfo?.username) {
+                    let url;
+                    const username = payeeProfile.paymentInfo.username;
+                    if (payeeProfile.paymentInfo.bank === 'Monzo') {
+                        url = `https://monzo.me/${username}/${amount}`;
+                    } else if (payeeProfile.paymentInfo.bank === 'Revolut') {
+                        url = `https://revolut.me/${username}/${amount}`;
+                    }
+                    if(url) window.open(url, '_blank');
+                } else {
+                    showMessage("Payee has not set up a payment link.");
+                }
+            }
+
             if (e.target.classList.contains('pay-btn')) {
                 const button = e.target;
                 const remainingAmount = parseFloat(button.dataset.remaining);
@@ -1715,7 +1782,8 @@
                     uid: user.uid,
                     displayName: displayName,
                     email: user.email,
-                    photoURL: null
+                    photoURL: null,
+                    paymentInfo: { bank: '', username: '' }
                 });
 
                 await sendEmailVerification(user);
@@ -1935,6 +2003,48 @@
             if (deletePaymentBtn) {
                 paymentToDeleteId = parseInt(deletePaymentBtn.dataset.paymentId, 10);
                 openModal(deletePaymentModal);
+            }
+        });
+
+        editProfileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            const newName = document.getElementById('profile-name').value;
+            const paymentBank = document.getElementById('payment-bank').value;
+            const paymentUsername = document.getElementById('payment-username').value.replace('@', '');
+
+            if (!newName) {
+                showMessage("Name cannot be empty.");
+                return;
+            }
+
+            try {
+                // Update Auth profile
+                if (user.displayName !== newName) {
+                    await updateProfile(user, { displayName: newName });
+                }
+
+                // Update Firestore document
+                const userDocRef = doc(db, "users", user.uid);
+                const updatedData = {
+                    displayName: newName,
+                    paymentInfo: {
+                        bank: paymentBank,
+                        username: paymentUsername
+                    }
+                };
+                await updateDoc(userDocRef, updatedData);
+
+                // Update local cache
+                userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), ...updatedData });
+                
+                renderProfile(user);
+                showMessage("Profile updated successfully!", false);
+                closeModal(editProfileModal);
+
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                showMessage("Could not update profile.");
             }
         });
 
