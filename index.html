@@ -446,7 +446,7 @@
             </div>
         </div>
 
-        <div id="loading-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex-col items-center justify-center z-50 hidden-view">
+        <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex-col items-center justify-center z-50 hidden-view">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p class="text-white mt-4">Analyzing your expense...</p>
         </div>
@@ -461,7 +461,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.1.0
+              Version 5.2.0
             </p>
         </footer>
     </div>
@@ -2098,7 +2098,6 @@
         }
 
         async function analyzeImageWithAI(base64Image) {
-            loadingOverlay.classList.remove('hidden-view');
             try {
                  if (!auth.currentUser) {
                     throw new Error("You must be logged in to use this feature.");
@@ -2157,37 +2156,60 @@
             } catch (error) {
                 console.error('AI Scan failed:', error);
                 showMessage(`AI analysis failed: ${error.message}. Please enter the expense manually.`);
+            }
+        }
+
+        async function handleAiCapture() {
+            loadingOverlay.classList.remove('hidden-view');
+            try {
+                const context = canvasElement.getContext('2d');
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+                context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                const imageDataUrl = canvasElement.toDataURL('image/jpeg', 0.8);
+                const base64Image = imageDataUrl.split(',')[1];
+                
+                closeCameraView();
+                await analyzeImageWithAI(base64Image);
+            } catch (error) {
+                 console.error("Error capturing photo:", error);
+                 showMessage("Could not capture photo.");
             } finally {
                 loadingOverlay.classList.add('hidden-view');
             }
         }
 
-        async function handleAiCapture() {
-            const context = canvasElement.getContext('2d');
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-            const imageDataUrl = canvasElement.toDataURL('image/jpeg', 0.8);
-            const base64Image = imageDataUrl.split(',')[1];
-            
-            closeCameraView();
-            await analyzeImageWithAI(base64Image);
-        }
-
-        function handleReceiptFileUpload(event) {
+        async function handleReceiptFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imageDataUrl = e.target.result;
-                const base64Image = imageDataUrl.split(',')[1];
-                await analyzeImageWithAI(base64Image);
-            };
-            reader.readAsDataURL(file);
             
-            // Reset the input value to allow uploading the same file again
-            event.target.value = '';
+            loadingOverlay.classList.remove('hidden-view');
+
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1024,
+              useWebWorker: true,
+            }
+
+            try {
+                const compressedFile = await imageCompression(file, options);
+                
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const imageDataUrl = e.target.result;
+                    const base64Image = imageDataUrl.split(',')[1];
+                    await analyzeImageWithAI(base64Image);
+                };
+                reader.readAsDataURL(compressedFile);
+
+            } catch (error) {
+                 console.error("Error compressing or reading file:", error);
+                 showMessage("Could not process the selected image.");
+            } finally {
+                loadingOverlay.classList.add('hidden-view');
+                // Reset the input value to allow uploading the same file again
+                event.target.value = '';
+            }
         }
 
         // --- AI SCAN EVENT LISTENERS ---
