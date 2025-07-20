@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Splitify - Bill Splitting Made Easy</title>
     
-    <!-- Favicon and Touch Icons -->
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.firebasestorage.app/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
     <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.firebasestorage.app/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
 
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Image Compression Library -->
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
     
     <style>
@@ -83,10 +79,8 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Main Container -->
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
 
-        <!-- Authentication View -->
         <div id="auth-view" class="view">
              <div class="text-center mb-8 mt-16">
                 <h1 class="text-4xl font-bold text-blue-600">Splitify</h1>
@@ -127,14 +121,12 @@
             </div>
         </div>
 
-        <!-- Dashboard View (My Trips) -->
         <div id="dashboard-view" class="view hidden-view py-8">
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <h1 class="text-3xl font-bold text-blue-600">Splitify</h1>
                 <div class="flex items-center">
                     <div id="profile-area" class="flex items-center">
-                        <!-- Profile picture will be inserted here -->
-                    </div>
+                        </div>
                     <span id="welcome-message" class="text-gray-600 mx-4 text-center"></span>
                     <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 text-sm">Logout</button>
                 </div>
@@ -160,7 +152,6 @@
             </main>
         </div>
         
-        <!-- Trip Detail View -->
         <div id="trip-detail-view" class="view hidden-view py-8">
             <header class="mb-6">
                 <button id="back-to-dashboard-btn" class="text-blue-600 hover:underline mb-4">&larr; Back to My Trips</button>
@@ -173,20 +164,17 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <!-- AI Scan Button -->
                         <button id="ai-scan-btn" title="AI Scan Receipt" class="h-12 w-12 flex items-center justify-center bg-teal-500 text-white rounded-full hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </button>
-                        <!-- Visualise Button -->
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <!-- Settle Up Button -->
                         <button id="settle-up-btn" title="Settle Up" class="h-12 w-12 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -202,8 +190,7 @@
                         <button id="invite-member-btn" class="text-sm text-green-600 hover:underline font-semibold">Invite Friend</button>
                     </div>
                     <div id="trip-members-list" class="flex flex-wrap gap-4">
-                        <!-- Members will be dynamically inserted here -->
-                    </div>
+                        </div>
                 </div>
 
                 <div id="trip-items-list" class="space-y-1">
@@ -211,7 +198,6 @@
                 </div>
             </main>
 
-            <!-- Floating Add Expense Button -->
             <button id="add-expense-btn-fab" title="Add Expense" class="fixed bottom-8 right-8 h-14 w-14 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-30">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -219,7 +205,6 @@
             </button>
         </div>
 
-        <!-- Create Trip Modal -->
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Create a New Trip</h3>
@@ -247,7 +232,6 @@
             </div>
         </div>
 
-        <!-- Add Expense Modal -->
         <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto">
                 <h3 class="text-2xl font-bold mb-6">Add an Expense</h3>
@@ -295,8 +279,7 @@
                             </div>
                         </div>
                         <div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50">
-                            <!-- Member inputs will be inserted here -->
-                        </div>
+                            </div>
                         <div id="split-total-validation" class="text-xs text-right mt-1 h-4"></div>
                     </div>
                      <div class="flex justify-end space-x-4">
@@ -310,7 +293,6 @@
             </div>
         </div>
 
-        <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3>
@@ -328,7 +310,6 @@
             </div>
         </div>
 
-        <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Invite a Friend</h3>
@@ -345,7 +326,6 @@
             </div>
         </div>
 
-        <!-- Archive Trip Confirmation Modal -->
         <div id="archive-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Archive Trip</h3>
@@ -357,7 +337,6 @@
             </div>
         </div>
         
-        <!-- Delete Expense Confirmation Modal -->
         <div id="delete-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Expense</h3>
@@ -369,7 +348,6 @@
             </div>
         </div>
 
-        <!-- Delete Payment Confirmation Modal -->
         <div id="delete-payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Payment</h3>
@@ -381,7 +359,6 @@
             </div>
         </div>
         
-        <!-- Settle Up Modal -->
         <div id="settle-up-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
@@ -393,15 +370,13 @@
                 <p id="settlement-currency" class="text-sm text-gray-500 mb-4"></p>
                 <p id="settlement-summary" class="text-gray-600 mb-6 flex-shrink-0"></p>
                 <div id="settlement-list" class="space-y-4 overflow-y-auto flex-grow">
-                    <!-- Settlement instructions will be inserted here -->
-                </div>
+                    </div>
                 <div class="flex justify-end mt-8 flex-shrink-0">
                      <button type="button" id="close-settle-up-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Close</button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile-First Settlement Visualisation Modal -->
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col">
                 <div class="flex-shrink-0">
@@ -411,7 +386,6 @@
                     </div>
                     <p id="visualisation-currency" class="text-sm text-gray-500 mb-4"></p>
                 </div>
-                <!-- This container is now scrollable -->
                 <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                     <div id="viz-debtors" class="p-3 bg-red-50 rounded-lg">
                         <h4 class="font-bold text-red-800">Who Owes</h4>
@@ -438,18 +412,31 @@
                 </div>
             </div>
         </div>
+        
+        <div id="ai-choice-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view z-30">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
+                <h3 class="text-2xl font-bold mb-6 text-center">Scan Receipt</h3>
+                <div class="space-y-4">
+                    <button id="take-photo-btn" class="w-full flex items-center justify-center text-lg bg-teal-500 text-white py-3 rounded-md font-semibold hover:bg-teal-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Take Photo
+                    </button>
+                    <button id="upload-from-gallery-btn" class="w-full flex items-center justify-center text-lg bg-indigo-500 text-white py-3 rounded-md font-semibold hover:bg-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        Upload from Gallery
+                    </button>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="cancel-ai-choice-btn" class="text-gray-500 hover:text-gray-800 font-semibold">Cancel</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- AI SCAN CAMERA VIEW MODAL -->
         <div id="ai-scan-modal" class="modal-overlay fixed inset-0 bg-black flex items-center justify-center z-40 hidden-view">
             <div class="relative w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
                 <video id="camera-feed" playsinline class="rounded-lg"></video>
                 <canvas id="camera-canvas" class="hidden"></canvas>
                 
-                <div id="ai-scan-loading-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex-col items-center justify-center z-50" style="display: none;">
-                    <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
-                    <p class="text-white mt-4">Analyzing your expense...</p>
-                </div>
-
                 <div class="absolute bottom-8 left-0 right-0 flex justify-center items-center space-x-8">
                     <button id="ai-cancel-btn" class="w-16 h-16 bg-white bg-opacity-30 text-white rounded-full flex items-center justify-center text-xl">
                         &times;
@@ -459,21 +446,26 @@
             </div>
         </div>
 
-        <!-- Custom Message/Alert Box -->
+        <div id="loading-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex-col items-center justify-center z-50 hidden-view">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+            <p class="text-white mt-4">Analyzing your expense...</p>
+        </div>
+
+
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
             <p id="message-text"></p>
         </div>
-
+        
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
+        <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.0.2
+              Version 5.1.0
             </p>
         </footer>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -522,6 +514,7 @@
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
+        const allModals = document.querySelectorAll('.modal-overlay');
         const authView = document.getElementById('auth-view');
         const dashboardView = document.getElementById('dashboard-view');
         const tripDetailView = document.getElementById('trip-detail-view');
@@ -614,12 +607,17 @@
 
         // AI Scan Elements
         const aiScanBtn = document.getElementById('ai-scan-btn');
+        const aiChoiceModal = document.getElementById('ai-choice-modal');
+        const takePhotoBtn = document.getElementById('take-photo-btn');
+        const uploadFromGalleryBtn = document.getElementById('upload-from-gallery-btn');
+        const cancelAiChoiceBtn = document.getElementById('cancel-ai-choice-btn');
         const aiScanModal = document.getElementById('ai-scan-modal');
         const aiCancelBtn = document.getElementById('ai-cancel-btn');
         const aiCaptureBtn = document.getElementById('ai-capture-btn');
         const videoElement = document.getElementById('camera-feed');
         const canvasElement = document.getElementById('camera-canvas');
-        const aiLoadingOverlay = document.getElementById('ai-scan-loading-overlay');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const receiptUploadInput = document.getElementById('receipt-upload-input');
 
         // Deleted Items Toggle
         const showDeletedToggle = document.getElementById('show-deleted-toggle');
@@ -632,6 +630,7 @@
         // --- UI Logic ---
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
+            allModals.forEach(modal => modal.classList.add('hidden-view')); // Close all modals on view change
             document.getElementById(viewId).classList.remove('hidden-view');
         }
 
@@ -2054,9 +2053,8 @@
         }
         
         // --- AI SCAN FEATURE IMPLEMENTATION ---
-        async function openCameraView() {
-            openModal(aiScanModal);
 
+        function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = {
@@ -2066,11 +2064,15 @@
                     console.log('Location acquired:', userLocation);
                 },
                 (error) => {
-                    console.warn("Could not get user location. This might be due to browser permissions or running in a secure environment. Proceeding without location data.");
+                    console.warn("Could not get user location. Proceeding without location data.");
                     userLocation = null; 
                 }
             );
+        }
 
+        async function openCameraView() {
+            closeModal(aiChoiceModal);
+            openModal(aiScanModal);
             try {
                 if (cameraStream) {
                     cameraStream.getTracks().forEach(track => track.stop());
@@ -2093,27 +2095,16 @@
             }
             videoElement.srcObject = null;
             closeModal(aiScanModal);
-            aiLoadingOverlay.style.display = 'none';
         }
 
-        async function handleAiCapture() {
-            aiLoadingOverlay.style.display = 'flex';
-
-            const context = canvasElement.getContext('2d');
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
-            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-            const imageDataUrl = canvasElement.toDataURL('image/jpeg', 0.8);
-            const base64Image = imageDataUrl.split(',')[1];
-
-            if (!auth.currentUser) {
-                showMessage("You must be logged in to use this feature.");
-                closeCameraView();
-                return;
-            }
-            const token = await auth.currentUser.getIdToken();
-
+        async function analyzeImageWithAI(base64Image) {
+            loadingOverlay.classList.remove('hidden-view');
             try {
+                 if (!auth.currentUser) {
+                    throw new Error("You must be logged in to use this feature.");
+                }
+                const token = await auth.currentUser.getIdToken();
+
                 const response = await fetch(ANALYZE_IMAGE_URL, {
                     method: 'POST',
                     headers: {
@@ -2133,8 +2124,6 @@
 
                 const data = await response.json();
                 console.log('AI Response:', data);
-                
-                closeCameraView();
                 
                 // Open and pre-fill the expense modal
                 addExpenseForm.reset();
@@ -2164,15 +2153,56 @@
                 
                 // Trigger currency change to calculate base amount and update UI
                 await handleCurrencyChange();
-                
+
             } catch (error) {
                 console.error('AI Scan failed:', error);
                 showMessage(`AI analysis failed: ${error.message}. Please enter the expense manually.`);
-                closeCameraView();
+            } finally {
+                loadingOverlay.classList.add('hidden-view');
             }
         }
 
-        aiScanBtn.addEventListener('click', openCameraView);
+        async function handleAiCapture() {
+            const context = canvasElement.getContext('2d');
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            const imageDataUrl = canvasElement.toDataURL('image/jpeg', 0.8);
+            const base64Image = imageDataUrl.split(',')[1];
+            
+            closeCameraView();
+            await analyzeImageWithAI(base64Image);
+        }
+
+        function handleReceiptFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const imageDataUrl = e.target.result;
+                const base64Image = imageDataUrl.split(',')[1];
+                await analyzeImageWithAI(base64Image);
+            };
+            reader.readAsDataURL(file);
+            
+            // Reset the input value to allow uploading the same file again
+            event.target.value = '';
+        }
+
+        // --- AI SCAN EVENT LISTENERS ---
+        aiScanBtn.addEventListener('click', () => {
+            getUserLocation();
+            openModal(aiChoiceModal);
+        });
+        cancelAiChoiceBtn.addEventListener('click', () => closeModal(aiChoiceModal));
+        takePhotoBtn.addEventListener('click', openCameraView);
+        uploadFromGalleryBtn.addEventListener('click', () => {
+            closeModal(aiChoiceModal);
+            receiptUploadInput.click();
+        });
+        receiptUploadInput.addEventListener('change', handleReceiptFileUpload);
+        
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
@@ -2199,5 +2229,3 @@
     </script>
 </body>
 </html>
-
-
