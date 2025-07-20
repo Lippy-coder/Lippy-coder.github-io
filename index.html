@@ -1695,7 +1695,7 @@
                 let paymentAmount = remainingAmount; 
 
                 if (auth.currentUser.uid === button.dataset.from) {
-                    const input = button.previousElementSibling;
+                    const input = button.parentElement.querySelector('input');
                     const inputValue = parseFloat(input.value);
                     if (!isNaN(inputValue) && inputValue > 0) {
                         paymentAmount = inputValue;
