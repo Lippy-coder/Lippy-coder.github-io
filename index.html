@@ -446,7 +446,7 @@
             </div>
         </div>
 
-        <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex-col items-center justify-center z-50 hidden-view">
+        <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p class="text-white mt-4">Analyzing your expense...</p>
         </div>
@@ -2182,30 +2182,34 @@
         async function handleReceiptFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             loadingOverlay.classList.remove('hidden-view');
 
             const options = {
               maxSizeMB: 1,
               maxWidthOrHeight: 1024,
               useWebWorker: true,
-            }
+            };
 
             try {
                 const compressedFile = await imageCompression(file, options);
                 
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const imageDataUrl = e.target.result;
-                    const base64Image = imageDataUrl.split(',')[1];
-                    await analyzeImageWithAI(base64Image);
-                };
-                reader.readAsDataURL(compressedFile);
+                // Promisify the FileReader to work correctly with async/await
+                const base64Image = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+                    reader.onerror = (error) => reject(error);
+                    reader.readAsDataURL(compressedFile);
+                });
+
+                // Now, wait for the AI analysis to complete
+                await analyzeImageWithAI(base64Image);
 
             } catch (error) {
-                 console.error("Error compressing or reading file:", error);
+                 console.error("Error processing uploaded file:", error);
                  showMessage("Could not process the selected image.");
             } finally {
+                // This will now correctly run after the analysis is finished
                 loadingOverlay.classList.add('hidden-view');
                 // Reset the input value to allow uploading the same file again
                 event.target.value = '';
