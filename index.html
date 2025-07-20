@@ -95,6 +95,15 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .manual-payment-area {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+        }
+        .manual-payment-area.open {
+            max-height: 100px; /* Adjust as needed */
+            margin-top: 0.75rem; /* 12px */
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -1623,59 +1632,61 @@
                 if (!fromUser || !toUser) return;
                 
                 const transactionEl = document.createElement('div');
-                transactionEl.className = 'p-3 rounded-lg bg-gray-100';
+                transactionEl.className = 'p-4 rounded-lg bg-gray-100';
                 
                 let actionControl;
-                let payLinkBtn = '';
                 if (auth.currentUser.uid === tx.from) {
                     const payeeProfile = userProfilesCache.get(tx.to);
+                    let payLinkBtn = '';
                     if (payeeProfile?.paymentInfo?.bank && payeeProfile?.paymentInfo?.username) {
-                        payLinkBtn = `<button data-to-uid="${tx.to}" data-amount="${tx.amount.toFixed(2)}" class="pay-link-btn bg-yellow-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-yellow-600">Pay with Link</button>`;
+                        let url;
+                        const username = payeeProfile.paymentInfo.username;
+                        const amount = tx.amount.toFixed(2);
+                        if (payeeProfile.paymentInfo.bank === 'Monzo') {
+                            url = `https://monzo.me/${username}/${amount}`;
+                        } else if (payeeProfile.paymentInfo.bank === 'Revolut') {
+                            url = `https://revolut.me/${username}/${amount}`;
+                        }
+                        if (url) {
+                            payLinkBtn = `<a href="${url}" target="_blank" class="pay-link-btn w-full text-center bg-yellow-500 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-yellow-600 block mb-2">Pay with Link</a>`;
+                        }
                     }
+                    
                     actionControl = `
-                        <div class="flex items-center space-x-2">
-                           ${payLinkBtn}
-                           <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
-                           <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Paid Manually</button>
-                        </div>`;
+                        ${payLinkBtn}
+                        <button class="paid-manually-toggle-btn text-sm text-gray-600 hover:underline w-full text-center mt-2">Paid manually?</button>
+                        <div class="manual-payment-area">
+                            <div class="flex items-center space-x-2 justify-end">
+                               <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
+                               <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Confirm</button>
+                            </div>
+                        </div>
+                    `;
                 } else if (auth.currentUser.uid === tx.to) {
                     actionControl = `
-                        <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-blue-600">Confirm Payment Received</button>
+                        <div class="flex justify-end">
+                            <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-600">Confirm Payment Received</button>
+                        </div>
                     `;
                 }
 
                 transactionEl.innerHTML = `
-                    <div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center mb-2">
+                    <div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center">
                         <span class="font-semibold text-gray-800 break-words text-sm">${fromUser.displayName}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         <span class="font-semibold text-gray-800 break-words text-sm">${toUser.displayName}</span>
                         <span class="font-bold text-base text-purple-600 text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-end items-center">${actionControl}</div>
+                    <div class="mt-3">${actionControl}</div>
                 `;
                 settlementList.appendChild(transactionEl);
             });
         }
 
         settlementList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('pay-link-btn')) {
-                const button = e.target;
-                const payeeId = button.dataset.toUid;
-                const amount = button.dataset.amount;
-                const payeeProfile = userProfilesCache.get(payeeId);
-                
-                if (payeeProfile?.paymentInfo?.bank && payeeProfile?.paymentInfo?.username) {
-                    let url;
-                    const username = payeeProfile.paymentInfo.username;
-                    if (payeeProfile.paymentInfo.bank === 'Monzo') {
-                        url = `https://monzo.me/${username}/${amount}`;
-                    } else if (payeeProfile.paymentInfo.bank === 'Revolut') {
-                        url = `https://revolut.me/${username}/${amount}`;
-                    }
-                    if(url) window.open(url, '_blank');
-                } else {
-                    showMessage("Payee has not set up a payment link.");
-                }
+            if (e.target.classList.contains('paid-manually-toggle-btn')) {
+                const manualArea = e.target.nextElementSibling;
+                manualArea.classList.toggle('open');
             }
 
             if (e.target.classList.contains('pay-btn')) {
