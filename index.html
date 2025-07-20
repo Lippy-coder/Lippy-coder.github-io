@@ -468,7 +468,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.0.3
+              Version 5.0.2
             </p>
         </footer>
     </div>
@@ -1435,7 +1435,7 @@
                     updateAndValidateSplit(false, e.target);
                 }
             });
-            document.getElementById('distribute-equally-btn').addEventListener('click', () => updateAndValidateSplit(true));
+            
             document.getElementById('deselect-all-btn').addEventListener('click', () => {
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 updateAndValidateSplit(true);
@@ -2199,3 +2199,5 @@
     </script>
 </body>
 </html>
+
+
