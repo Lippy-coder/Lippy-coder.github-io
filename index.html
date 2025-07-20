@@ -69,11 +69,31 @@
         }
         /* Toggle Switch Styles */
         #show-deleted-toggle:checked ~ .dot {
-          transform: translateX(100%);
-          background-color: #4f46e5; /* Tailwind indigo-600 */
+         transform: translateX(100%);
+         background-color: #4f46e5; /* Tailwind indigo-600 */
         }
         #show-deleted-toggle:checked ~ .block {
             background-color: #a5b4fc; /* Tailwind indigo-300 */
+        }
+
+        /* FAB Menu Styles */
+        #fab-container.open #fab-icon-plus {
+            transform: rotate(45deg);
+        }
+        #fab-container.open #fab-manual-add {
+            transform: translateY(-80px);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #fab-container.open #fab-camera-scan {
+            transform: translate(-57px, -57px);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #fab-container.open #fab-gallery-upload {
+            transform: translateX(-80px);
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -83,42 +103,42 @@
 
         <div id="auth-view" class="view">
              <div class="text-center mb-8 mt-16">
-                <h1 class="text-4xl font-bold text-blue-600">Splitify</h1>
-                <p class="text-gray-500 mt-4">Sign in or create an account to start splitting bills.</p>
-            </div>
-            <div class="bg-white p-8 rounded-xl shadow-md max-w-md mx-auto">
-                <div id="auth-message-area" class="hidden mb-4 p-3 rounded-md bg-yellow-100 text-yellow-800 text-sm"></div>
-                <div class="flex border-b mb-6">
-                    <button type="button" id="login-tab-btn" class="flex-1 py-2 font-semibold text-blue-600 border-b-2 border-blue-600">Login</button>
-                    <button type="button" id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Register</button>
-                </div>
-                <form id="login-form">
-                    <div class="mb-4">
-                        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="login-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com">
-                    </div>
-                    <div class="mb-6">
-                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" id="login-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="••••••••">
-                    </div>
-                    <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Login</button>
-                </form>
-                <form id="register-form" class="hidden">
-                    <div class="mb-4">
-                        <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="register-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe">
-                    </div>
-                    <div class="mb-4">
-                        <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="register-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com">
-                    </div>
-                    <div class="mb-6">
-                        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" id="register-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Minimum 6 characters">
-                    </div>
-                    <button type="submit" id="register-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Create Account</button>
-                </form>
-            </div>
+                 <h1 class="text-4xl font-bold text-blue-600">Splitify</h1>
+                 <p class="text-gray-500 mt-4">Sign in or create an account to start splitting bills.</p>
+             </div>
+             <div class="bg-white p-8 rounded-xl shadow-md max-w-md mx-auto">
+                 <div id="auth-message-area" class="hidden mb-4 p-3 rounded-md bg-yellow-100 text-yellow-800 text-sm"></div>
+                 <div class="flex border-b mb-6">
+                     <button type="button" id="login-tab-btn" class="flex-1 py-2 font-semibold text-blue-600 border-b-2 border-blue-600">Login</button>
+                     <button type="button" id="register-tab-btn" class="flex-1 py-2 font-semibold text-gray-500">Register</button>
+                 </div>
+                 <form id="login-form">
+                     <div class="mb-4">
+                         <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                         <input type="email" id="login-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com">
+                     </div>
+                     <div class="mb-6">
+                         <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                         <input type="password" id="login-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="••••••••">
+                     </div>
+                     <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Login</button>
+                 </form>
+                 <form id="register-form" class="hidden">
+                     <div class="mb-4">
+                         <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                         <input type="text" id="register-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe">
+                     </div>
+                     <div class="mb-4">
+                         <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                         <input type="email" id="register-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com">
+                     </div>
+                     <div class="mb-6">
+                         <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                         <input type="password" id="register-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Minimum 6 characters">
+                     </div>
+                     <button type="submit" id="register-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Create Account</button>
+                 </form>
+             </div>
         </div>
 
         <div id="dashboard-view" class="view hidden-view py-8">
@@ -198,11 +218,37 @@
                 </div>
             </main>
 
-            <button id="add-expense-btn-fab" title="Add Expense" class="fixed bottom-8 right-8 h-14 w-14 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-            </button>
+            <!-- FAB Menu Container -->
+            <div id="fab-container" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-30">
+                <!-- Sub-FAB for Manual Input -->
+                <button id="fab-manual-add" title="Add Manually" class="absolute bottom-1 right-1 h-12 w-12 flex items-center justify-center bg-white text-blue-600 rounded-full shadow-md hover:bg-gray-100 transition-all duration-300 ease-in-out opacity-0 pointer-events-none transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </button>
+                <!-- Sub-FAB for Camera Scan -->
+                <button id="fab-camera-scan" title="Scan with Camera" class="absolute bottom-1 right-1 h-12 w-12 flex items-center justify-center bg-white text-teal-500 rounded-full shadow-md hover:bg-gray-100 transition-all duration-300 ease-in-out opacity-0 pointer-events-none transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+                <!-- Sub-FAB for Gallery Upload -->
+                <button id="fab-gallery-upload" title="Upload from Gallery" class="absolute bottom-1 right-1 h-12 w-12 flex items-center justify-center bg-white text-indigo-500 rounded-full shadow-md hover:bg-gray-100 transition-all duration-300 ease-in-out opacity-0 pointer-events-none transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </button>
+
+                <!-- Main FAB Toggle Button -->
+                <button id="fab-toggle" title="Add Item" class="relative h-16 w-16 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-10">
+                    <div id="fab-icon-plus" class="transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
         </div>
 
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden-view">
@@ -547,7 +593,6 @@
         const tripItemsList = document.getElementById('trip-items-list');
         const noItemsMessage = document.getElementById('no-items-message');
         
-        const addExpenseBtnFab = document.getElementById('add-expense-btn-fab');
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
         const cancelAddExpenseBtn = document.getElementById('cancel-add-expense-btn');
@@ -622,6 +667,13 @@
         // Deleted Items Toggle
         const showDeletedToggle = document.getElementById('show-deleted-toggle');
 
+        // FAB Menu Elements
+        const fabContainer = document.getElementById('fab-container');
+        const fabToggle = document.getElementById('fab-toggle');
+        const fabManualAdd = document.getElementById('fab-manual-add');
+        const fabCameraScan = document.getElementById('fab-camera-scan');
+        const fabGalleryUpload = document.getElementById('fab-gallery-upload');
+
         // Currency Symbol Helper
         const currencySymbols = {
             GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
@@ -648,6 +700,14 @@
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
+        }
+        
+        function toggleFabMenu(forceClose = false) {
+            if (forceClose || !fabContainer.classList.contains('open')) {
+                fabContainer.classList.remove('open');
+            } else {
+                fabContainer.classList.toggle('open');
+            }
         }
 
         // --- View Navigation & Trip Selection ---
@@ -1072,7 +1132,7 @@
                         <div class="flex items-center">
                             ${amountDisplay}
                             <svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </div>
                     </div>
@@ -1171,11 +1231,6 @@
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
         cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
         
-        addExpenseBtnFab.addEventListener('click', () => {
-            addExpenseForm.reset();
-            populateExpenseModal();
-            openModal(addExpenseModal);
-        });
         cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
         
         inviteMemberBtn.addEventListener('click', () => openModal(inviteMemberModal));
@@ -2216,21 +2271,48 @@
             }
         }
 
-        // --- AI SCAN EVENT LISTENERS ---
+        // --- AI & FAB EVENT LISTENERS ---
+        // Header button opens choice modal
         aiScanBtn.addEventListener('click', () => {
             getUserLocation();
             openModal(aiChoiceModal);
         });
         cancelAiChoiceBtn.addEventListener('click', () => closeModal(aiChoiceModal));
+        // Choice modal buttons trigger specific actions
         takePhotoBtn.addEventListener('click', openCameraView);
         uploadFromGalleryBtn.addEventListener('click', () => {
             closeModal(aiChoiceModal);
             receiptUploadInput.click();
         });
+
         receiptUploadInput.addEventListener('change', handleReceiptFileUpload);
         
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
+
+        // New FAB Menu Listeners
+        fabToggle.addEventListener('click', () => {
+            fabContainer.classList.toggle('open');
+        });
+
+        fabManualAdd.addEventListener('click', () => {
+            fabContainer.classList.remove('open');
+            addExpenseForm.reset();
+            populateExpenseModal();
+            openModal(addExpenseModal);
+        });
+
+        fabCameraScan.addEventListener('click', () => {
+            fabContainer.classList.remove('open');
+            getUserLocation();
+            openCameraView();
+        });
+
+        fabGalleryUpload.addEventListener('click', () => {
+            fabContainer.classList.remove('open');
+            getUserLocation();
+            receiptUploadInput.click();
+        });
 
 
         // Auth tabs
