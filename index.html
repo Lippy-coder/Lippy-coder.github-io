@@ -1961,6 +1961,12 @@
             }
             if (e.target.closest('#edit-profile-btn')) {
                 e.preventDefault();
+                // **FIX:** Load user data into the modal before opening it.
+                const user = auth.currentUser;
+                const userProfile = userProfilesCache.get(user.uid);
+                document.getElementById('profile-name').value = user.displayName;
+                document.getElementById('payment-bank').value = userProfile?.paymentInfo?.bank || '';
+                document.getElementById('payment-username').value = userProfile?.paymentInfo?.username || '';
                 openModal(editProfileModal);
                 dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
