@@ -104,6 +104,10 @@
             max-height: 100px; /* Adjust as needed */
             margin-top: 0.75rem; /* 12px */
         }
+        /* Profile Dropdown */
+        #profile-dropdown {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -156,10 +160,10 @@
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <h1 class="text-3xl font-bold text-blue-600">Splitify</h1>
                 <div class="flex items-center">
-                    <div id="profile-area" class="flex items-center">
-                        </div>
-                    <span id="welcome-message" class="text-gray-600 mx-4 text-center"></span>
-                    <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 text-sm">Logout</button>
+                    <span id="welcome-message" class="text-gray-600 mr-4 text-center"></span>
+                    <!-- Profile Area is now a relative container for the dropdown -->
+                    <div id="profile-area" class="relative">
+                    </div>
                 </div>
             </header>
             <main>
@@ -556,7 +560,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.3.1
+              Version 5.3.2
             </p>
         </footer>
     </div>
@@ -616,7 +620,6 @@
         const registerForm = document.getElementById('register-form');
         const loginTabBtn = document.getElementById('login-tab-btn');
         const registerTabBtn = document.getElementById('register-tab-btn');
-        const logoutBtn = document.getElementById('logout-btn');
         const welcomeMessage = document.getElementById('welcome-message');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
@@ -821,12 +824,21 @@
             }
         }
 
+        // **MODIFIED:** This function now renders the profile picture and the new dropdown menu.
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
-            profileArea.innerHTML = '';
-            const profilePicWrapper = document.createElement('div');
-            profilePicWrapper.className = 'profile-pic-wrapper';
+            profileArea.innerHTML = ''; // Clear previous content
 
+            // Main container for picture and dropdown
+            const profileContainer = document.createElement('div');
+            profileContainer.className = 'relative';
+
+            // Profile picture element
+            const profilePicBtn = document.createElement('button');
+            profilePicBtn.id = 'profile-pic-btn';
+            profilePicBtn.type = 'button';
+            profilePicBtn.className = 'profile-pic-wrapper block';
+            
             let avatar;
             if (user.photoURL) {
                 avatar = `<img src="${user.photoURL}" alt="Profile Picture" class="w-10 h-10 rounded-full object-cover">`;
@@ -834,22 +846,21 @@
                 const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
+            profilePicBtn.innerHTML = avatar;
 
-            profilePicWrapper.innerHTML = `
-                ${avatar}
-                <div class="profile-pic-overlay">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                </div>
+            // Dropdown menu element
+            const dropdown = document.createElement('div');
+            dropdown.id = 'profile-dropdown';
+            dropdown.className = 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95';
+            dropdown.innerHTML = `
+                <a href="#" id="change-pic-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Picture</a>
+                <a href="#" id="edit-profile-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile & Payments</a>
+                <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
-            profilePicWrapper.addEventListener('click', () => {
-                const user = auth.currentUser;
-                const userProfile = userProfilesCache.get(user.uid);
-                document.getElementById('profile-name').value = user.displayName;
-                document.getElementById('payment-bank').value = userProfile?.paymentInfo?.bank || '';
-                document.getElementById('payment-username').value = userProfile?.paymentInfo?.username || '';
-                openModal(editProfileModal);
-            });
-            profileArea.appendChild(profilePicWrapper);
+
+            profileContainer.appendChild(profilePicBtn);
+            profileContainer.appendChild(dropdown);
+            profileArea.appendChild(profileContainer);
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -1910,7 +1921,7 @@
             }
         };
 
-        // Attach all event listeners
+        // --- Event Listener Setup ---
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
 
@@ -1926,8 +1937,47 @@
         inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMember(); });
         submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
 
-        logoutBtn.addEventListener('click', () => signOut(auth));
         profilePicInput.addEventListener('change', handleProfilePicUpload);
+
+        // **MODIFIED:** Using event delegation for profile actions
+        profileArea.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profile-dropdown');
+            
+            // Toggle dropdown
+            if (e.target.closest('#profile-pic-btn')) {
+                if (dropdown.classList.contains('hidden')) {
+                    dropdown.classList.remove('hidden', 'opacity-0', 'scale-95');
+                } else {
+                    dropdown.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => dropdown.classList.add('hidden'), 200);
+                }
+            }
+
+            // Handle dropdown actions
+            if (e.target.closest('#change-pic-btn')) {
+                e.preventDefault();
+                profilePicInput.click();
+                dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+            }
+            if (e.target.closest('#edit-profile-btn')) {
+                e.preventDefault();
+                openModal(editProfileModal);
+                dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+            }
+            if (e.target.closest('#logout-btn')) {
+                e.preventDefault();
+                signOut(auth);
+            }
+        });
+
+        // Close dropdown if clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profile-dropdown');
+            if (dropdown && !e.target.closest('#profile-area')) {
+                 dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+            }
+        });
+
 
         tripItemsList.addEventListener('click', (e) => {
             const deleteExpenseBtn = e.target.closest('.delete-expense-btn');
