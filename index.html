@@ -561,7 +561,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.8.0
+              Version 5.9.0
             </p>
         </footer>
     </div>
@@ -608,6 +608,7 @@
         let cameraStream = null;
         let userLocation = null;
         let showDeletedItems = false;
+        let showArchivedTrips = false; // NEW: State for showing archived trips
         let isTripSupremoEnabled = false;
 
         // --- DOM Element References ---
@@ -816,15 +817,18 @@
                     const prefs = userData.preferences || {};
                     showDeletedItems = prefs.showDeleted ?? false;
                     isTripSupremoEnabled = prefs.supremoEnabled ?? false;
+                    showArchivedTrips = prefs.showArchived ?? false; // NEW
                 } else {
                     showDeletedItems = false;
                     isTripSupremoEnabled = false;
+                    showArchivedTrips = false; // NEW
                 }
             } catch (error) {
                 console.warn("Could not load user preferences due to a Firestore permissions issue. Please update your Firestore rules to allow users to read their own data in the 'users' collection. Using default preferences.");
                 console.warn("Recommended rule for '/users/{userId}': allow read, update: if request.auth != null && request.auth.uid == userId;");
                 showDeletedItems = false; 
                 isTripSupremoEnabled = false;
+                showArchivedTrips = false; // NEW
             }
             // The checked state of toggles will be set when they are rendered.
         }
@@ -867,11 +871,19 @@
                 <a href="#" id="change-pic-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Picture</a>
                 <a href="#" id="edit-profile-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile & Payments</a>
                 <div class="border-t border-gray-100 my-1"></div>
-                <div class="px-4 py-2">
+                <div class="px-4 py-2 space-y-2">
                     <label for="show-deleted-toggle" class="flex items-center justify-between cursor-pointer">
                         <span class="text-sm text-gray-700">Display Deleted Items</span>
                         <div class="relative">
                             <input type="checkbox" id="show-deleted-toggle" class="sr-only toggle-switch">
+                            <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                        </div>
+                    </label>
+                    <label for="show-archived-toggle" class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm text-gray-700">Display archived trips</span>
+                        <div class="relative">
+                            <input type="checkbox" id="show-archived-toggle" class="sr-only toggle-switch">
                             <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
                             <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
                         </div>
@@ -885,7 +897,7 @@
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
 
-            // Set initial state and add listener for the new toggle
+            // Set initial state and add listeners for the new toggles
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
             showDeletedToggle.addEventListener('change', async () => {
@@ -893,13 +905,32 @@
                 if (auth.currentUser) {
                     const prefs = { 
                         showDeleted: showDeletedItems,
-                        supremoEnabled: isTripSupremoEnabled 
+                        supremoEnabled: isTripSupremoEnabled,
+                        showArchived: showArchivedTrips
                     };
                     await saveUserPreferences(auth.currentUser.uid, prefs);
                 }
                 if (currentTrip) {
                     renderTripItems();
                 }
+            });
+
+            // NEW: Listener for archived trips toggle
+            const showArchivedToggle = document.getElementById('show-archived-toggle');
+            showArchivedToggle.checked = showArchivedTrips;
+            showArchivedToggle.addEventListener('change', async () => {
+                showArchivedTrips = showArchivedToggle.checked;
+                if (auth.currentUser) {
+                    const prefs = {
+                        showDeleted: showDeletedItems,
+                        supremoEnabled: isTripSupremoEnabled,
+                        showArchived: showArchivedTrips
+                    };
+                    await saveUserPreferences(auth.currentUser.uid, prefs);
+                }
+                // Re-fetch and render trips to apply the filter
+                if (tripsUnsubscribe) tripsUnsubscribe();
+                listenForTrips(auth.currentUser.uid);
             });
         }
 
@@ -926,13 +957,17 @@
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberIds", "array-contains", userId));
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
-                const trips = [];
+                let trips = [];
                 snapshot.forEach((doc) => {
                     trips.push({ id: doc.id, ...doc.data() });
                 });
                 
-                const activeTrips = trips.filter(trip => !trip.isArchived);
-                await renderTrips(activeTrips);
+                // NEW: Filter based on showArchivedTrips state
+                if (!showArchivedTrips) {
+                    trips = trips.filter(trip => !trip.isArchived);
+                }
+                
+                await renderTrips(trips);
 
             }, (error) => {
                 console.error("Error listening for trips:", error);
@@ -957,17 +992,40 @@
             trips.forEach(trip => {
                 const tripElement = document.createElement('div');
                 const isSettled = trip.isSettled || false;
-                tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${isSettled ? 'bg-green-100' : 'bg-white'}`;
-                
-                const archiveBtn = (auth.currentUser && auth.currentUser.uid === trip.ownerId && !isSettled) ? 
-                    `<button data-trip-id="${trip.id}" data-trip-name="${trip.name}" class="archive-trip-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-orange-100 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                            <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
-                        </svg>
-                    </button>` : '';
+                const isArchived = trip.isArchived || false; // NEW
 
-                const settledBadge = isSettled ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
+                // NEW: Dynamic styling for archived trips
+                let bgClass = 'bg-white';
+                if (isArchived) {
+                    bgClass = 'bg-gray-200';
+                } else if (isSettled) {
+                    bgClass = 'bg-green-100';
+                }
+
+                tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
+                
+                // NEW: Unarchive button logic
+                let actionButtonHTML = '';
+                if (auth.currentUser && auth.currentUser.uid === trip.ownerId) {
+                    if (isArchived) {
+                        actionButtonHTML = `<button data-trip-id="${trip.id}" class="unarchive-trip-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-green-100 hover:text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5zm5 6a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>`;
+                    } else if (!isSettled) {
+                        actionButtonHTML = `<button data-trip-id="${trip.id}" data-trip-name="${trip.name}" class="archive-trip-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-orange-100 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                                <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>`;
+                    }
+                }
+
+                const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
+                const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
+
 
                 const memberAvatars = trip.memberIds.slice(0, 4).map(uid => {
                     const profile = memberProfiles[uid];
@@ -981,22 +1039,23 @@
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <h3 class="text-xl font-bold ${isSettled ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
-                            <p class="text-sm ${isSettled ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
+                            <h3 class="text-xl font-bold ${isArchived ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
+                            <p class="text-sm ${isArchived ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
                         </div>
                         <div class="flex items-center space-x-4 pl-4">
                             ${settledBadge}
+                            ${archivedBadge}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
                                 ${trip.memberIds.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.memberIds.length - 4}</div>` : ''}
                             </div>
                         </div>
                     </div>
-                    ${archiveBtn}
+                    ${actionButtonHTML}
                 `;
                 
                 tripElement.addEventListener('click', (e) => {
-                    if (!e.target.closest('.archive-trip-btn')) {
+                    if (!e.target.closest('.archive-trip-btn') && !e.target.closest('.unarchive-trip-btn')) {
                        selectTrip(trip);
                     }
                 });
@@ -1010,6 +1069,24 @@
                         openModal(archiveTripModal);
                     });
                 }
+                
+                // NEW: Unarchive listener
+                const unarchBtn = tripElement.querySelector('.unarchive-trip-btn');
+                if (unarchBtn) {
+                    unarchBtn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const tripId = unarchBtn.dataset.tripId;
+                        try {
+                            const tripRef = doc(db, 'trips', tripId);
+                            await updateDoc(tripRef, { isArchived: false });
+                            showMessage('Trip restored!', false);
+                        } catch (error) {
+                            console.error("Error unarchiving trip:", error);
+                            showMessage("Could not restore trip.");
+                        }
+                    });
+                }
+
                 tripsList.appendChild(tripElement);
             });
         }
@@ -1964,7 +2041,8 @@
             if (auth.currentUser) {
                 const prefs = { 
                     showDeleted: showDeletedItems, 
-                    supremoEnabled: isTripSupremoEnabled 
+                    supremoEnabled: isTripSupremoEnabled,
+                    showArchived: showArchivedTrips
                 };
                 await saveUserPreferences(auth.currentUser.uid, prefs);
                 showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
