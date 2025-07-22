@@ -104,14 +104,9 @@
             max-height: 100px; /* Adjust as needed */
             margin-top: 0.75rem; /* 12px */
         }
-        /* Profile Dropdown */
-        #profile-dropdown {
+        /* Profile & Supremo Dropdown */
+        .dropdown-menu {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        /* Trip Supremo Button Style */
-        #trip-supremo-btn.active {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #4338ca; /* indigo-800 */
         }
     </style>
 </head>
@@ -166,9 +161,7 @@
                 <h1 class="text-3xl font-bold text-blue-600">Splitify</h1>
                 <div class="flex items-center">
                     <span id="welcome-message" class="text-gray-600 mr-4 text-center"></span>
-                    <!-- Profile Area is now a relative container for the dropdown -->
-                    <div id="profile-area" class="relative">
-                    </div>
+                    <div id="profile-area" class="relative"></div>
                 </div>
             </header>
             <main>
@@ -206,17 +199,31 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </button>
-                        <button id="trip-supremo-btn" title="Toggle Trip Supremo" class="hidden h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 2a1 1 0 01.757.343l2.5 3.333A1 1 0 0112.5 7H7.5a1 1 0 01-.757-1.324l2.5-3.333A1 1 0 0110 2zM3.667 9.5a1 1 0 01-1-1v-1a1 1 0 011-1h12.666a1 1 0 011 1v1a1 1 0 01-1 1H3.667zM2 12a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z" />
-                            </svg>
-                        </button>
-                        <button id="archive-trip-icon-btn" title="Archive Trip" class="hidden h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all transform hover:scale-110">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                                <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+                        
+                        <!-- Supremo Menu Container -->
+                        <div id="supremo-menu-container" class="relative hidden">
+                            <button id="supremo-menu-btn" title="Trip Supremo Controls" class="h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5.02.997.997 0 001 6v5.5a.5.5 0 00.223.42l7.5 4.5a.5.5 0 00.554 0l7.5-4.5A.5.5 0 0019 11.5V6a.997.997 0 00-1.166-.976A11.954 11.954 0 0110 1.944zM8.5 8.5a1.5 1.5 0 113 0v1.5a1 1 0 102 0V9a4 4 0 10-8 0v1a1 1 0 102 0V8.5z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div id="supremo-dropdown" class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95">
+                                <div class="px-4 py-2 space-y-2">
+                                    <label for="supremo-toggle" class="flex items-center justify-between cursor-pointer">
+                                        <span class="text-sm font-semibold text-gray-700">Enable Editing</span>
+                                        <div class="relative">
+                                            <input type="checkbox" id="supremo-toggle" class="sr-only toggle-switch">
+                                            <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="#" id="supremo-archive-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Archive Trip</a>
+                                <a href="#" id="supremo-email-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Email Members</a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </header>
@@ -614,7 +621,7 @@
         let cameraStream = null;
         let userLocation = null;
         let showDeletedItems = false;
-        let showArchivedTrips = false; // NEW: State for showing archived trips
+        let showArchivedTrips = false;
         let isTripSupremoEnabled = false;
 
         // --- DOM Element References ---
@@ -650,8 +657,9 @@
         const tripMembersList = document.getElementById('trip-members-list');
         const tripItemsList = document.getElementById('trip-items-list');
         const noItemsMessage = document.getElementById('no-items-message');
-        const tripSupremoBtn = document.getElementById('trip-supremo-btn');
-        const archiveTripIconBtn = document.getElementById('archive-trip-icon-btn');
+        const supremoMenuContainer = document.getElementById('supremo-menu-container');
+        const supremoMenuBtn = document.getElementById('supremo-menu-btn');
+        const supremoDropdown = document.getElementById('supremo-dropdown');
         
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
@@ -778,12 +786,11 @@
             // Handle Owner Action Buttons Visibility
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
-                tripSupremoBtn.classList.remove('hidden');
-                tripSupremoBtn.classList.toggle('active', isTripSupremoEnabled);
-                archiveTripIconBtn.classList.toggle('hidden', !isTripSupremoEnabled);
+                supremoMenuContainer.classList.remove('hidden');
+                const supremoToggle = document.getElementById('supremo-toggle');
+                supremoToggle.checked = isTripSupremoEnabled;
             } else {
-                tripSupremoBtn.classList.add('hidden');
-                archiveTripIconBtn.classList.add('hidden');
+                supremoMenuContainer.classList.add('hidden');
             }
             
             await renderTripMembers(trip.memberIds);
@@ -839,7 +846,6 @@
                 isTripSupremoEnabled = false;
                 showArchivedTrips = false;
             }
-            // The checked state of toggles will be set when they are rendered.
         }
 
         async function saveUserPreferences(userId, prefs) {
@@ -875,7 +881,7 @@
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
-            dropdown.className = 'absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95';
+            dropdown.className = 'dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95';
             dropdown.innerHTML = `
                 <a href="#" id="change-pic-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Picture</a>
                 <a href="#" id="edit-profile-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile & Payments</a>
@@ -906,7 +912,6 @@
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
 
-            // Set initial state and add listeners for the new toggles
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
             showDeletedToggle.addEventListener('change', async () => {
@@ -936,7 +941,6 @@
                     };
                     await saveUserPreferences(auth.currentUser.uid, prefs);
                 }
-                // Re-fetch and render trips to apply the filter
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(auth.currentUser.uid);
             });
@@ -1747,6 +1751,7 @@
                 showMessage('Trip archived successfully!', false);
                 closeModal(archiveTripModal);
                 tripToArchive = null;
+                backToDashboardBtn.click();
             } catch (error) {
                 console.error("Error archiving trip:", error);
                 showMessage("Failed to archive trip.");
@@ -1992,46 +1997,53 @@
 
         profilePicInput.addEventListener('change', handleProfilePicUpload);
 
-        tripSupremoBtn.addEventListener('click', async () => {
-            isTripSupremoEnabled = !isTripSupremoEnabled;
-            tripSupremoBtn.classList.toggle('active', isTripSupremoEnabled);
-            archiveTripIconBtn.classList.toggle('hidden', !isTripSupremoEnabled);
+        supremoMenuBtn.addEventListener('click', () => {
+            supremoDropdown.classList.toggle('hidden');
+            supremoDropdown.classList.toggle('opacity-0');
+            supremoDropdown.classList.toggle('scale-95');
+        });
 
-            if (auth.currentUser) {
-                const prefs = { 
-                    showDeleted: showDeletedItems, 
-                    supremoEnabled: isTripSupremoEnabled,
-                    showArchived: showArchivedTrips
-                };
-                await saveUserPreferences(auth.currentUser.uid, prefs);
-                showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
-            }
-            if (currentTrip) {
-                renderTripItems();
+        document.addEventListener('click', (e) => {
+            if (!supremoMenuContainer.contains(e.target)) {
+                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
         });
 
-        archiveTripIconBtn.addEventListener('click', async () => {
-            if (!currentTrip || auth.currentUser.uid !== currentTrip.ownerId) return;
-
-            if (currentTrip.isArchived) {
-                // Unarchive logic
-                try {
-                    const tripRef = doc(db, 'trips', currentTrip.id);
-                    await updateDoc(tripRef, { isArchived: false });
-                    showMessage('Trip restored!', false);
-                    backToDashboardBtn.click(); // Go back to dashboard to see it in the active list
-                } catch (error) {
-                    console.error("Error unarchiving trip:", error);
-                    showMessage("Could not restore trip.");
-                }
-            } else {
-                // Archive logic
+        supremoDropdown.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent clicks inside from closing the menu
+            if (e.target.closest('#supremo-toggle') || e.target.closest('label[for="supremo-toggle"]')) {
+                // The change event handles the logic
+            } else if (e.target.closest('#supremo-archive-btn')) {
+                e.preventDefault();
                 tripToArchive = { id: currentTrip.id, name: currentTrip.name };
                 archiveTripNameSpan.textContent = tripToArchive.name;
                 openModal(archiveTripModal);
+                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+            } else if (e.target.closest('#supremo-email-btn')) {
+                e.preventDefault();
+                showMessage("Email function coming soon!", false);
+                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
         });
+        
+        supremoDropdown.addEventListener('change', async (e) => {
+            if (e.target.id === 'supremo-toggle') {
+                isTripSupremoEnabled = e.target.checked;
+                if (auth.currentUser) {
+                    const prefs = { 
+                        showDeleted: showDeletedItems, 
+                        supremoEnabled: isTripSupremoEnabled,
+                        showArchived: showArchivedTrips
+                    };
+                    await saveUserPreferences(auth.currentUser.uid, prefs);
+                    showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
+                }
+                if (currentTrip) {
+                    renderTripItems();
+                }
+            }
+        });
+
 
         profileArea.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
