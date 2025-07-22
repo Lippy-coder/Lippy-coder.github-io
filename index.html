@@ -108,6 +108,11 @@
         #profile-dropdown {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
+        /* Trip Supremo Button Style */
+        #trip-supremo-btn.active {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #4338ca; /* indigo-800 */
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -199,6 +204,11 @@
                         <button id="settle-up-btn" title="Settle Up" class="h-12 w-12 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </button>
+                        <button id="trip-supremo-btn" title="Toggle Trip Supremo" class="hidden h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 2a1 1 0 01.757.343l2.5 3.333A1 1 0 0112.5 7H7.5a1 1 0 01-.757-1.324l2.5-3.333A1 1 0 0110 2zM3.667 9.5a1 1 0 01-1-1v-1a1 1 0 011-1h12.666a1 1 0 011 1v1a1 1 0 01-1 1H3.667zM2 12a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z" />
                             </svg>
                         </button>
                     </div>
@@ -551,7 +561,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.6.0
+              Version 5.8.0
             </p>
         </footer>
     </div>
@@ -633,6 +643,7 @@
         const tripMembersList = document.getElementById('trip-members-list');
         const tripItemsList = document.getElementById('trip-items-list');
         const noItemsMessage = document.getElementById('no-items-message');
+        const tripSupremoBtn = document.getElementById('trip-supremo-btn');
         
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
@@ -755,6 +766,16 @@
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
+
+            // Handle Trip Supremo Button Visibility and State
+            const user = auth.currentUser;
+            if (user && user.uid === currentTrip.ownerId) {
+                tripSupremoBtn.classList.remove('hidden');
+                tripSupremoBtn.classList.toggle('active', isTripSupremoEnabled);
+            } else {
+                tripSupremoBtn.classList.add('hidden');
+            }
+            
             await renderTripMembers(trip.memberIds);
             if (expensesUnsubscribe) expensesUnsubscribe();
             listenForExpenses(trip.id);
@@ -957,22 +978,6 @@
                     return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
                 }).join('');
 
-                let supremoToggleHTML = '';
-                if (auth.currentUser && auth.currentUser.uid === trip.ownerId) {
-                    supremoToggleHTML = `
-                        <div class="mt-3 pt-3 border-t border-gray-200">
-                             <label for="trip-supremo-toggle-${trip.id}" class="flex items-center cursor-pointer">
-                                <span class="mr-3 text-sm font-semibold text-gray-700">Trip Supremo</span>
-                                <div class="relative ml-auto">
-                                    <input type="checkbox" id="trip-supremo-toggle-${trip.id}" class="sr-only toggle-switch trip-supremo-toggle" ${isTripSupremoEnabled ? 'checked' : ''}>
-                                    <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
-                                </div>
-                            </label>
-                        </div>
-                    `;
-                }
-
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
@@ -987,12 +992,11 @@
                             </div>
                         </div>
                     </div>
-                    ${supremoToggleHTML}
                     ${archiveBtn}
                 `;
                 
                 tripElement.addEventListener('click', (e) => {
-                    if (!e.target.closest('.archive-trip-btn') && !e.target.closest('.trip-supremo-toggle') && !e.target.closest('label')) {
+                    if (!e.target.closest('.archive-trip-btn')) {
                        selectTrip(trip);
                     }
                 });
@@ -1006,26 +1010,6 @@
                         openModal(archiveTripModal);
                     });
                 }
-
-                const supremoToggle = tripElement.querySelector('.trip-supremo-toggle');
-                if (supremoToggle) {
-                    supremoToggle.addEventListener('change', async () => {
-                        isTripSupremoEnabled = supremoToggle.checked;
-                        if (auth.currentUser) {
-                             const prefs = { 
-                                showDeleted: showDeletedItems, 
-                                supremoEnabled: isTripSupremoEnabled 
-                            };
-                            await saveUserPreferences(auth.currentUser.uid, prefs);
-                            showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
-                        }
-                        // Sync all visible supremo toggles
-                        document.querySelectorAll('.trip-supremo-toggle').forEach(toggle => {
-                            toggle.checked = isTripSupremoEnabled;
-                        });
-                    });
-                }
-
                 tripsList.appendChild(tripElement);
             });
         }
@@ -1973,6 +1957,22 @@
         submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
 
         profilePicInput.addEventListener('change', handleProfilePicUpload);
+
+        tripSupremoBtn.addEventListener('click', async () => {
+            isTripSupremoEnabled = !isTripSupremoEnabled;
+            tripSupremoBtn.classList.toggle('active', isTripSupremoEnabled);
+            if (auth.currentUser) {
+                const prefs = { 
+                    showDeleted: showDeletedItems, 
+                    supremoEnabled: isTripSupremoEnabled 
+                };
+                await saveUserPreferences(auth.currentUser.uid, prefs);
+                showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
+            }
+            if (currentTrip) {
+                renderTripItems();
+            }
+        });
 
         profileArea.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
