@@ -68,11 +68,11 @@
             border-radius: 0.5rem;
         }
         /* Toggle Switch Styles */
-        #show-deleted-toggle:checked ~ .dot {
-         transform: translateX(100%);
-         background-color: #4f46e5; /* Tailwind indigo-600 */
+        .toggle-switch:checked ~ .dot {
+           transform: translateX(100%);
+           background-color: #4f46e5; /* Tailwind indigo-600 */
         }
-        #show-deleted-toggle:checked ~ .block {
+        .toggle-switch:checked ~ .block {
             background-color: #a5b4fc; /* Tailwind indigo-300 */
         }
 
@@ -107,14 +107,6 @@
         /* Profile Dropdown */
         #profile-dropdown {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        /* NEW: Manager Mode Toggle Style */
-        #manager-mode-toggle.active {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #4338ca; /* indigo-800 */
-        }
-        #manager-mode-toggle.active svg {
-            color: #4f46e5; /* indigo-600 */
         }
     </style>
 </head>
@@ -179,16 +171,7 @@
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
                 </div>
-                <div class="flex justify-end items-center mb-4">
-                    <label for="show-deleted-toggle" class="flex items-center cursor-pointer">
-                        <span class="mr-3 text-sm font-medium text-gray-700">Display Deleted Items</span>
-                        <div class="relative">
-                            <input type="checkbox" id="show-deleted-toggle" class="sr-only">
-                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                        </div>
-                    </label>
-                </div>
+
                 <div id="trips-list" class="space-y-4">
                      <p id="no-trips-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">You have no trips yet. Create one to get started!</p>
                 </div>
@@ -208,13 +191,6 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <!-- NEW: Manager Mode Toggle Button -->
-                        <button id="manager-mode-toggle" title="Toggle Manager Mode" class="hidden h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -235,7 +211,7 @@
                         <button id="invite-member-btn" class="text-sm text-green-600 hover:underline font-semibold">Invite Friend</button>
                     </div>
                     <div id="trip-members-list" class="flex flex-wrap gap-4">
-                        </div>
+                    </div>
                 </div>
 
                 <div id="trip-items-list" class="space-y-1">
@@ -331,13 +307,13 @@
                     <div class="mb-4">
                          <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
                          <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
-                             <option value="">-- Select a Category --</option>
-                             <option value="Food & Drink">Food & Drink</option>
-                             <option value="Transport">Transport</option>
-                             <option value="Accommodation">Accommodation</option>
-                             <option value="Activities">Activities</option>
-                             <option value="Shopping">Shopping</option>
-                             <option value="Other">Other</option>
+                              <option value="">-- Select a Category --</option>
+                              <option value="Food & Drink">Food & Drink</option>
+                              <option value="Transport">Transport</option>
+                              <option value="Accommodation">Accommodation</option>
+                              <option value="Activities">Activities</option>
+                              <option value="Shopping">Shopping</option>
+                              <option value="Other">Other</option>
                          </select>
                     </div>
                     <div class="mb-4">
@@ -352,7 +328,7 @@
                             </div>
                         </div>
                         <div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50">
-                            </div>
+                        </div>
                         <div id="split-total-validation" class="text-xs text-right mt-1 h-4"></div>
                     </div>
                      <div class="flex justify-end space-x-4">
@@ -479,7 +455,7 @@
                 <p id="settlement-currency" class="text-sm text-gray-500 mb-4"></p>
                 <p id="settlement-summary" class="text-gray-600 mb-6 flex-shrink-0"></p>
                 <div id="settlement-list" class="space-y-4 overflow-y-auto flex-grow">
-                    </div>
+                </div>
                 <div class="flex justify-end mt-8 flex-shrink-0">
                      <button type="button" id="close-settle-up-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Close</button>
                 </div>
@@ -511,9 +487,9 @@
                         <div id="viz-payments-list" class="mt-2 space-y-2 text-sm"></div>
                     </div>
                     <div class="flex justify-center items-center py-2">
-                         <svg class="w-6 h-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-                        </svg>
+                          <svg class="w-6 h-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+                          </svg>
                     </div>
                      <div id="viz-creditors" class="p-3 bg-green-50 rounded-lg">
                         <h4 class="font-bold text-green-800">Who Gets Paid</h4>
@@ -575,7 +551,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.4.0
+              Version 5.6.0
             </p>
         </footer>
     </div>
@@ -622,7 +598,7 @@
         let cameraStream = null;
         let userLocation = null;
         let showDeletedItems = false;
-        let isManagerModeEnabled = false; // NEW: Manager mode state
+        let isTripSupremoEnabled = false;
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -732,12 +708,6 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const receiptUploadInput = document.getElementById('receipt-upload-input');
 
-        // Deleted Items Toggle
-        const showDeletedToggle = document.getElementById('show-deleted-toggle');
-        
-        // NEW: Manager Mode Toggle
-        const managerModeToggle = document.getElementById('manager-mode-toggle');
-
         // FAB Menu Elements
         const fabContainer = document.getElementById('fab-container');
         const fabToggle = document.getElementById('fab-toggle');
@@ -789,26 +759,12 @@
             if (expensesUnsubscribe) expensesUnsubscribe();
             listenForExpenses(trip.id);
             
-            // NEW: Manager Mode UI setup
-            const user = auth.currentUser;
-            if (user && user.uid === currentTrip.ownerId) {
-                managerModeToggle.classList.remove('hidden');
-                // Load saved state for this trip from localStorage
-                const savedState = localStorage.getItem(`manager_mode_${currentTrip.id}`);
-                isManagerModeEnabled = savedState === 'true';
-                managerModeToggle.classList.toggle('active', isManagerModeEnabled);
-            } else {
-                managerModeToggle.classList.add('hidden');
-                isManagerModeEnabled = false; // Ensure it's disabled if not owner
-            }
-
             showView('trip-detail-view');
         }
 
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
-            isManagerModeEnabled = false; // Reset manager mode on leaving trip view
             showView('dashboard-view');
         });
 
@@ -836,16 +792,20 @@
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    showDeletedItems = userData.preferences?.showDeleted ?? false;
+                    const prefs = userData.preferences || {};
+                    showDeletedItems = prefs.showDeleted ?? false;
+                    isTripSupremoEnabled = prefs.supremoEnabled ?? false;
                 } else {
                     showDeletedItems = false;
+                    isTripSupremoEnabled = false;
                 }
             } catch (error) {
                 console.warn("Could not load user preferences due to a Firestore permissions issue. Please update your Firestore rules to allow users to read their own data in the 'users' collection. Using default preferences.");
                 console.warn("Recommended rule for '/users/{userId}': allow read, update: if request.auth != null && request.auth.uid == userId;");
-                showDeletedItems = false; // Default to false on error
+                showDeletedItems = false; 
+                isTripSupremoEnabled = false;
             }
-            showDeletedToggle.checked = showDeletedItems;
+            // The checked state of toggles will be set when they are rendered.
         }
 
         async function saveUserPreferences(userId, prefs) {
@@ -862,11 +822,9 @@
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
             profileArea.innerHTML = ''; // Clear previous content
 
-            // Main container for picture and dropdown
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
 
-            // Profile picture element
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
             profilePicBtn.type = 'button';
@@ -881,31 +839,55 @@
             }
             profilePicBtn.innerHTML = avatar;
 
-            // Dropdown menu element
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
-            dropdown.className = 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95';
+            dropdown.className = 'absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95';
             dropdown.innerHTML = `
                 <a href="#" id="change-pic-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Picture</a>
                 <a href="#" id="edit-profile-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile & Payments</a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <div class="px-4 py-2">
+                    <label for="show-deleted-toggle" class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm text-gray-700">Display Deleted Items</span>
+                        <div class="relative">
+                            <input type="checkbox" id="show-deleted-toggle" class="sr-only toggle-switch">
+                            <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="border-t border-gray-100 my-1"></div>
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
+
+            // Set initial state and add listener for the new toggle
+            const showDeletedToggle = document.getElementById('show-deleted-toggle');
+            showDeletedToggle.checked = showDeletedItems;
+            showDeletedToggle.addEventListener('change', async () => {
+                showDeletedItems = showDeletedToggle.checked;
+                if (auth.currentUser) {
+                    const prefs = { 
+                        showDeleted: showDeletedItems,
+                        supremoEnabled: isTripSupremoEnabled 
+                    };
+                    await saveUserPreferences(auth.currentUser.uid, prefs);
+                }
+                if (currentTrip) {
+                    renderTripItems();
+                }
+            });
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 userProfilesCache.set(user.uid, { uid: user.uid, ...userDoc.data() });
+                await loadUserPreferences(user.uid);
                 renderProfile(user);
-                try {
-                    await loadUserPreferences(user.uid);
-                } catch (error) {
-                    console.error("Failed to load user preferences on login:", error);
-                }
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(user.uid);
                 showView('dashboard-view');
@@ -975,13 +957,29 @@
                     return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
                 }).join('');
 
+                let supremoToggleHTML = '';
+                if (auth.currentUser && auth.currentUser.uid === trip.ownerId) {
+                    supremoToggleHTML = `
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                             <label for="trip-supremo-toggle-${trip.id}" class="flex items-center cursor-pointer">
+                                <span class="mr-3 text-sm font-semibold text-gray-700">Trip Supremo</span>
+                                <div class="relative ml-auto">
+                                    <input type="checkbox" id="trip-supremo-toggle-${trip.id}" class="sr-only toggle-switch trip-supremo-toggle" ${isTripSupremoEnabled ? 'checked' : ''}>
+                                    <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                                </div>
+                            </label>
+                        </div>
+                    `;
+                }
+
                 tripElement.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
                             <h3 class="text-xl font-bold ${isSettled ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
                             <p class="text-sm ${isSettled ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
                         </div>
-                        <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-4 pl-4">
                             ${settledBadge}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
@@ -989,11 +987,12 @@
                             </div>
                         </div>
                     </div>
+                    ${supremoToggleHTML}
                     ${archiveBtn}
                 `;
                 
                 tripElement.addEventListener('click', (e) => {
-                    if (!e.target.closest('.archive-trip-btn')) {
+                    if (!e.target.closest('.archive-trip-btn') && !e.target.closest('.trip-supremo-toggle') && !e.target.closest('label')) {
                        selectTrip(trip);
                     }
                 });
@@ -1007,6 +1006,26 @@
                         openModal(archiveTripModal);
                     });
                 }
+
+                const supremoToggle = tripElement.querySelector('.trip-supremo-toggle');
+                if (supremoToggle) {
+                    supremoToggle.addEventListener('change', async () => {
+                        isTripSupremoEnabled = supremoToggle.checked;
+                        if (auth.currentUser) {
+                             const prefs = { 
+                                showDeleted: showDeletedItems, 
+                                supremoEnabled: isTripSupremoEnabled 
+                            };
+                            await saveUserPreferences(auth.currentUser.uid, prefs);
+                            showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
+                        }
+                        // Sync all visible supremo toggles
+                        document.querySelectorAll('.trip-supremo-toggle').forEach(toggle => {
+                            toggle.checked = isTripSupremoEnabled;
+                        });
+                    });
+                }
+
                 tripsList.appendChild(tripElement);
             });
         }
@@ -1059,7 +1078,6 @@
             
             let allItems = [...expenses, ...payments];
 
-            // Filter out deleted items if the toggle is off
             if (!showDeletedItems) {
                 allItems = allItems.filter(item => !item.data.isDeleted);
             }
@@ -1088,7 +1106,6 @@
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
                 
                 for (const memberId in splitBetween) {
-                    // The value is now always the base currency share
                     const share = splitBetween[memberId];
                     balances.set(memberId, (balances.get(memberId) || 0) - share);
                 }
@@ -1148,15 +1165,14 @@
                     return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
                 }).join('');
             
-            // MODIFIED: Check for manager mode to show action buttons
             const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
-            const canModify = paidByMe || (isTripOwner && isManagerModeEnabled);
+            const canModify = paidByMe || (isTripOwner && isTripSupremoEnabled);
 
             const actionButtons = (canModify && !isDeleted) ? 
                 `<div class="absolute top-2 right-2 flex flex-col space-y-1">
                     <button data-expense-id="${expense.id}" data-expense-description="${expense.description}" class="edit-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-yellow-100 hover:text-yellow-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </button>
                     <button data-expense-id="${expense.id}" class="delete-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600">
@@ -1197,7 +1213,7 @@
                     <div class="p-3 flex justify-between items-center cursor-pointer expense-header">
                         <p class="italic text-gray-500">Deleted Item</p>
                         <svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
                     </div>
                     <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
@@ -1246,10 +1262,9 @@
             const date = payment.paidAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' });
             
-            // MODIFIED: Check for manager mode to allow deletion
             const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
             const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to;
-            const canDelete = amPayerOrPayee || (isTripOwner && isManagerModeEnabled);
+            const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled);
 
             const paymentWrapper = document.createElement('div');
             paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative';
@@ -1572,9 +1587,8 @@
             settlementList.innerHTML = '';
             const currentUserId = auth.currentUser.uid;
             
-            // MODIFIED: In manager mode, show all transactions, not just the user's.
             const isTripOwner = currentUserId === currentTrip.ownerId;
-            const transactionsToShow = (isTripOwner && isManagerModeEnabled) ? transactions : transactions.filter(tx => tx.from === currentUserId || tx.to === currentUserId);
+            const transactionsToShow = (isTripOwner && isTripSupremoEnabled) ? transactions : transactions.filter(tx => tx.from === currentUserId || tx.to === currentUserId);
 
             if (transactionsToShow.length === 0) {
                 settlementSummary.textContent = "You are all settled up!";
@@ -1598,8 +1612,7 @@
                 transactionEl.className = 'p-4 rounded-lg bg-gray-100';
                 
                 let actionControl = '';
-                // MODIFIED: Allow manager to action any payment
-                const canAction = (currentUserId === tx.from || currentUserId === tx.to) || (isTripOwner && isManagerModeEnabled);
+                const canAction = (currentUserId === tx.from || currentUserId === tx.to) || (isTripOwner && isTripSupremoEnabled);
 
                 if (canAction) {
                     const payeeProfile = userProfilesCache.get(tx.to);
@@ -1654,9 +1667,8 @@
                 const remainingAmount = parseFloat(button.dataset.remaining);
                 let paymentAmount = remainingAmount; 
 
-                // MODIFIED: Allow manager to confirm any payment
                 const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
-                if (auth.currentUser.uid === button.dataset.from || (isTripOwner && isManagerModeEnabled)) {
+                if (auth.currentUser.uid === button.dataset.from || (isTripOwner && isTripSupremoEnabled)) {
                     const input = button.parentElement.querySelector('input');
                     const inputValue = parseFloat(input.value);
                     if (!isNaN(inputValue) && inputValue > 0) {
@@ -2134,34 +2146,6 @@
             }
         });
 
-        showDeletedToggle.addEventListener('change', async () => {
-            showDeletedItems = showDeletedToggle.checked;
-            if (auth.currentUser) {
-                await saveUserPreferences(auth.currentUser.uid, { showDeleted: showDeletedItems });
-            }
-            if (currentTrip) {
-                renderTripItems();
-            }
-        });
-        
-        // NEW: Manager Mode Toggle Event Listener
-        managerModeToggle.addEventListener('click', () => {
-            if (!currentTrip) return;
-            isManagerModeEnabled = !isManagerModeEnabled;
-            localStorage.setItem(`manager_mode_${currentTrip.id}`, isManagerModeEnabled);
-            managerModeToggle.classList.toggle('active', isManagerModeEnabled);
-            
-            showMessage(`Manager Mode ${isManagerModeEnabled ? 'Enabled' : 'Disabled'}`, false);
-
-            // Re-render items to show/hide action buttons
-            renderTripItems();
-            
-            // If settlement modal is open, re-render it as well
-            if (settleUpModal.classList.contains('hidden-view') === false) {
-                calculateAndShowSettlement();
-            }
-        });
-
         // --- Currency Exchange API ---
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
@@ -2326,7 +2310,7 @@
                 }
                 if (data.category) {
                      if ([...categorySelect.options].some(opt => opt.value === data.category)) {
-                         categorySelect.value = data.category;
+                          categorySelect.value = data.category;
                      }
                 }
                 
