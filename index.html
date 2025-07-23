@@ -113,6 +113,15 @@
             background-color: #e0e7ff; /* indigo-100 */
             color: #4338ca; /* indigo-800 */
         }
+        
+        /* Action Sheet Styles */
+        .action-sheet-panel {
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(100%);
+        }
+        #action-sheet-modal:not(.hidden-view) .action-sheet-panel {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -212,22 +221,6 @@
                                     <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5.02.997.997 0 001 6v5.5a.5.5 0 00.223.42l7.5 4.5a.5.5 0 00.554 0l7.5-4.5A.5.5 0 0019 11.5V6a.997.997 0 00-1.166-.976A11.954 11.954 0 0110 1.944zM8.5 8.5a1.5 1.5 0 113 0v1.5a1 1 0 102 0V9a4 4 0 10-8 0v1a1 1 0 102 0V8.5z" clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <!-- FIX: Used negative right positioning to align the menu to the screen edge, counteracting parent padding. -->
-                            <div id="supremo-dropdown" class="dropdown-menu absolute right-[-1rem] sm:right-[-1.5rem] mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 hidden origin-top-right transform opacity-0 scale-95">
-                                <div class="px-4 py-2 space-y-2">
-                                    <label for="supremo-toggle" class="flex items-center justify-between cursor-pointer">
-                                        <span class="text-sm font-semibold text-gray-700">Enable Editing</span>
-                                        <div class="relative">
-                                            <input type="checkbox" id="supremo-toggle" class="sr-only toggle-switch">
-                                            <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
-                                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="border-t border-gray-100 my-1"></div>
-                                <a href="#" id="supremo-archive-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Archive Trip</a>
-                                <a href="#" id="supremo-email-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Email Members</a>
-                            </div>
                         </div>
 
                     </div>
@@ -563,6 +556,28 @@
             </div>
         </div>
 
+        <!-- Action Sheet Modal -->
+        <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end hidden-view z-40">
+            <div class="action-sheet-panel w-full bg-gray-100 rounded-t-2xl p-4">
+                <div class="bg-white rounded-xl">
+                    <div class="p-4 flex items-center">
+                        <label for="supremo-toggle-action-sheet" class="flex-1 text-lg text-gray-800">Enable Editing</label>
+                        <div class="relative">
+                            <input type="checkbox" id="supremo-toggle-action-sheet" class="sr-only toggle-switch">
+                            <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200"></div>
+                    <button id="action-sheet-archive-btn" class="w-full text-left p-4 text-lg text-gray-800">Archive Trip</button>
+                    <div class="border-t border-gray-200"></div>
+                    <button id="action-sheet-email-btn" class="w-full text-left p-4 text-lg text-gray-800">Email Members</button>
+                </div>
+                <button id="action-sheet-cancel-btn" class="w-full mt-3 bg-white rounded-xl p-4 text-lg text-blue-600 font-semibold">Cancel</button>
+            </div>
+        </div>
+
+
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
@@ -580,7 +595,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.9.2
+              Version 5.9.3
             </p>
         </footer>
     </div>
@@ -665,7 +680,6 @@
         const noItemsMessage = document.getElementById('no-items-message');
         const supremoMenuContainer = document.getElementById('supremo-menu-container');
         const supremoMenuBtn = document.getElementById('supremo-menu-btn');
-        const supremoDropdown = document.getElementById('supremo-dropdown');
         
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
@@ -748,6 +762,14 @@
         const fabCameraScan = document.getElementById('fab-camera-scan');
         const fabGalleryUpload = document.getElementById('fab-gallery-upload');
 
+        // Action Sheet Elements
+        const actionSheetModal = document.getElementById('action-sheet-modal');
+        const actionSheetCancelBtn = document.getElementById('action-sheet-cancel-btn');
+        const actionSheetArchiveBtn = document.getElementById('action-sheet-archive-btn');
+        const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
+        const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
+
+
         // Currency Symbol Helper
         const currencySymbols = {
             GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
@@ -793,8 +815,6 @@
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
                 supremoMenuContainer.classList.remove('hidden');
-                const supremoToggle = document.getElementById('supremo-toggle');
-                supremoToggle.checked = isTripSupremoEnabled;
             } else {
                 supremoMenuContainer.classList.add('hidden');
             }
@@ -2004,49 +2024,42 @@
         profilePicInput.addEventListener('change', handleProfilePicUpload);
 
         supremoMenuBtn.addEventListener('click', () => {
-            supremoDropdown.classList.toggle('hidden');
-            supremoDropdown.classList.toggle('opacity-0');
-            supremoDropdown.classList.toggle('scale-95');
+            supremoToggleActionSheet.checked = isTripSupremoEnabled;
+            openModal(actionSheetModal);
         });
 
-        document.addEventListener('click', (e) => {
-            if (!supremoMenuContainer.contains(e.target)) {
-                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+        actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
+        actionSheetModal.addEventListener('click', (e) => {
+            if (e.target === actionSheetModal) {
+                closeModal(actionSheetModal);
             }
         });
 
-        supremoDropdown.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Prevent clicks inside from closing the menu
-            if (e.target.closest('#supremo-toggle') || e.target.closest('label[for="supremo-toggle"]')) {
-                // The change event handles the logic
-            } else if (e.target.closest('#supremo-archive-btn')) {
-                e.preventDefault();
-                tripToArchive = { id: currentTrip.id, name: currentTrip.name };
-                archiveTripNameSpan.textContent = tripToArchive.name;
-                openModal(archiveTripModal);
-                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
-            } else if (e.target.closest('#supremo-email-btn')) {
-                e.preventDefault();
-                showMessage("Email function coming soon!", false);
-                supremoDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
-            }
+        actionSheetArchiveBtn.addEventListener('click', () => {
+            closeModal(actionSheetModal);
+            tripToArchive = { id: currentTrip.id, name: currentTrip.name };
+            archiveTripNameSpan.textContent = tripToArchive.name;
+            openModal(archiveTripModal);
         });
-        
-        supremoDropdown.addEventListener('change', async (e) => {
-            if (e.target.id === 'supremo-toggle') {
-                isTripSupremoEnabled = e.target.checked;
-                if (auth.currentUser) {
-                    const prefs = { 
-                        showDeleted: showDeletedItems, 
-                        supremoEnabled: isTripSupremoEnabled,
-                        showArchived: showArchivedTrips
-                    };
-                    await saveUserPreferences(auth.currentUser.uid, prefs);
-                    showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
-                }
-                if (currentTrip) {
-                    renderTripItems();
-                }
+
+        actionSheetEmailBtn.addEventListener('click', () => {
+            closeModal(actionSheetModal);
+            showMessage("Email function coming soon!", false);
+        });
+
+        supremoToggleActionSheet.addEventListener('change', async (e) => {
+            isTripSupremoEnabled = e.target.checked;
+            if (auth.currentUser) {
+                const prefs = { 
+                    showDeleted: showDeletedItems, 
+                    supremoEnabled: isTripSupremoEnabled,
+                    showArchived: showArchivedTrips
+                };
+                await saveUserPreferences(auth.currentUser.uid, prefs);
+                showMessage(`Trip Supremo ${isTripSupremoEnabled ? 'Enabled' : 'Disabled'}`, false);
+            }
+            if (currentTrip) {
+                renderTripItems();
             }
         });
 
