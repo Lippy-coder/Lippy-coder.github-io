@@ -122,6 +122,16 @@
         #action-sheet-modal:not(.hidden-view) .action-sheet-panel {
             transform: translateY(0);
         }
+
+        /* Itemization Styles */
+        .item-assignment-avatar {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .item-assignment-avatar.assigned {
+            border-color: #4f46e5; /* indigo-600 */
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -328,21 +338,51 @@
                     </div>
                     <div class="mb-4">
                          <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
-                         <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
-                               <option value="">-- Select a Category --</option>
-                               <option value="Food & Drink">Food & Drink</option>
-                               <option value="Transport">Transport</option>
-                               <option value="Accommodation">Accommodation</option>
-                               <option value="Activities">Activities</option>
-                               <option value="Shopping">Shopping</option>
-                               <option value="Other">Other</option>
-                         </select>
+                         <div class="flex items-center space-x-2">
+                            <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+                                 <option value="">-- Select a Category --</option>
+                                 <option value="Food & Drink">Food & Drink</option>
+                                 <option value="Transport">Transport</option>
+                                 <option value="Accommodation">Accommodation</option>
+                                 <option value="Activities">Activities</option>
+                                 <option value="Shopping">Shopping</option>
+                                 <option value="Other">Other</option>
+                            </select>
+                            <button type="button" id="ai-category-suggest-btn" title="Suggest Category with AI" class="p-2 bg-indigo-100 text-indigo-600 rounded-md hover:bg-indigo-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586zM12 6a1 1 0 100-2 1 1 0 000 2zM12 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" />
+                                </svg>
+                            </button>
+                         </div>
+                         <div id="ai-category-spinner" class="mt-2 hidden"></div>
                     </div>
                     <div class="mb-4">
                         <label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label>
                         <select id="expense-paid-by" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select>
                     </div>
-                    <div class="mb-6">
+                    
+                    <!-- NEW: Container for the split mode toggle button -->
+                    <div id="split-mode-toggle-container" class="my-4 hidden">
+                        <button type="button" id="toggle-split-mode-btn" class="w-full text-center bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-200">
+                            Switch to Split by Item
+                        </button>
+                    </div>
+
+                    <!-- Itemized Split Section -->
+                    <div id="itemized-split-section" class="hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Assign Items to Members</label>
+                        </div>
+                        <div id="itemized-list" class="space-y-3 p-3 border rounded-md bg-gray-50 max-h-48 overflow-y-auto">
+                            <!-- Itemized list will be rendered here by JS -->
+                        </div>
+                        <div id="itemized-summary" class="mt-2 text-sm">
+                            <!-- Itemization summary will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Equal Split Section -->
+                    <div id="equal-split-section" class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-gray-700">Split Between</label>
                             <div class="space-x-4">
@@ -521,26 +561,6 @@
             </div>
         </div>
         
-        <!-- AI Choice Modal -->
-        <div id="ai-choice-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view z-30">
-            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-sm p-8">
-                <h3 class="text-2xl font-bold mb-6 text-center">Scan Receipt</h3>
-                <div class="space-y-4">
-                    <button id="take-photo-btn" class="w-full flex items-center justify-center text-lg bg-teal-500 text-white py-3 rounded-md font-semibold hover:bg-teal-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        Take Photo
-                    </button>
-                    <button id="upload-from-gallery-btn" class="w-full flex items-center justify-center text-lg bg-indigo-500 text-white py-3 rounded-md font-semibold hover:bg-indigo-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        Upload from Gallery
-                    </button>
-                </div>
-                <div class="mt-8 text-center">
-                    <button id="cancel-ai-choice-btn" class="text-gray-500 hover:text-gray-800 font-semibold">Cancel</button>
-                </div>
-            </div>
-        </div>
-
         <!-- AI Camera Scan Modal -->
         <div id="ai-scan-modal" class="modal-overlay fixed inset-0 bg-black flex items-center justify-center z-40 hidden-view">
             <div class="relative w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
@@ -580,8 +600,8 @@
 
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
-            <p class="text-white mt-4">Analyzing your expense...</p>
+            <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+            <p id="loading-text" class="text-white mt-4">Analyzing your expense...</p>
         </div>
 
         <!-- Message Box -->
@@ -595,7 +615,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 5.9.3
+              Version 6.5.0 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -606,7 +626,7 @@
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // --- Firebase Config Keys (MOVE TO A SECURE ENVIRONMENT FOR PRODUCTION) ---
+        // --- Firebase Config Keys (Provided by your environment) ---
         const firebaseConfig = {
             apiKey: "AIzaSyAi2llnXf_VloWUL6mZgdJMa1W1EOTwLE4",
             authDomain: "splitify-2ec5e.firebaseapp.com",
@@ -617,10 +637,9 @@
             measurementId: "G-DTBQM17BV6"
         };
         
-        // --- API Keys & URLs (MOVE TO A SECURE BACKEND/CLOUD FUNCTION FOR PRODUCTION) ---
+        // --- API Keys & URLs ---
+        const CLOUD_FUNCTION_URL = 'https://us-central1-splitify-2ec5e.cloudfunctions.net/callgemini';
         const FX_API_KEY = '9dedf9a9f74ab256717d8f4f';
-        const ANALYZE_IMAGE_URL = 'https://analyzeexpenseimage-1038415606946.europe-west2.run.app';
-
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -644,6 +663,8 @@
         let showDeletedItems = false;
         let showArchivedTrips = false;
         let isTripSupremoEnabled = false;
+        let currentItemization = null; // To hold AI-extracted line items
+        let remainderAssignments = new Set(); // To hold UIDs for the remainder
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -691,6 +712,16 @@
         const expenseSplitBetweenDiv = document.getElementById('expense-split-between');
         const splitTotalValidation = document.getElementById('split-total-validation');
         const submitExpenseBtn = document.getElementById('submit-expense-btn');
+
+        // Itemization and Split Mode DOM refs
+        const itemizedSplitSection = document.getElementById('itemized-split-section');
+        const itemizedListDiv = document.getElementById('itemized-list');
+        const itemizedSummaryDiv = document.getElementById('itemized-summary');
+        const equalSplitSection = document.getElementById('equal-split-section');
+        const splitModeToggleContainer = document.getElementById('split-mode-toggle-container');
+        const toggleSplitModeBtn = document.getElementById('toggle-split-mode-btn');
+        const aiCategorySuggestBtn = document.getElementById('ai-category-suggest-btn');
+        const aiCategorySpinner = document.getElementById('ai-category-spinner');
 
         const inviteMemberBtn = document.getElementById('invite-member-btn');
         const inviteMemberModal = document.getElementById('invite-member-modal');
@@ -743,16 +774,13 @@
         const vizPaymentsList = document.getElementById('viz-payments-list');
 
         // AI Scan Elements
-        const aiChoiceModal = document.getElementById('ai-choice-modal');
-        const takePhotoBtn = document.getElementById('take-photo-btn');
-        const uploadFromGalleryBtn = document.getElementById('upload-from-gallery-btn');
-        const cancelAiChoiceBtn = document.getElementById('cancel-ai-choice-btn');
         const aiScanModal = document.getElementById('ai-scan-modal');
         const aiCancelBtn = document.getElementById('ai-cancel-btn');
         const aiCaptureBtn = document.getElementById('ai-capture-btn');
         const videoElement = document.getElementById('camera-feed');
         const canvasElement = document.getElementById('camera-canvas');
         const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
         const receiptUploadInput = document.getElementById('receipt-upload-input');
 
         // FAB Menu Elements
@@ -1540,6 +1568,14 @@
 
         async function populateExpenseModal() {
             if (!currentTrip) return;
+            // Reset modal to default state
+            addExpenseForm.reset();
+            currentItemization = null;
+            remainderAssignments.clear();
+            itemizedSplitSection.classList.add('hidden');
+            equalSplitSection.classList.remove('hidden');
+            splitModeToggleContainer.classList.add('hidden'); // Hide the toggle button
+
             const currencies = ["GBP", "USD", "EUR", "JPY", "CAD", "AUD", "CHF", "CNY", "SEK", "NZD", "CZK", "THB"];
             expenseCurrencySelect.innerHTML = currencies.map(c => `<option value="${c}">${c}</option>`).join('');
             expenseCurrencySelect.value = currentTrip.baseCurrency;
@@ -1563,6 +1599,10 @@
             
             rebuildSplitInputs(); 
             updateAndValidateSplit();
+
+            // Add debounced listener for automatic category suggestion
+            const expenseDescriptionInput = document.getElementById('expense-description');
+            expenseDescriptionInput.addEventListener('input', debouncedCategorySuggestion);
 
             expenseAmountInput.addEventListener('input', autoDistributeAmount);
             expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
@@ -1866,17 +1906,55 @@
                 const category = document.getElementById('expense-category').value;
                 const paidBy = document.getElementById('expense-paid-by').value;
 
-                const originalSplits = new Map();
-                let originalSplitSum = 0;
-                expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
-                    const uid = cb.closest('.split-input-group').dataset.uid;
-                    const share = parseFloat(cb.closest('.split-input-group').querySelector('input[type="number"]').value) || 0;
-                    originalSplits.set(uid, share);
-                    originalSplitSum += share;
-                });
+                let finalBaseSplits = {};
+                
+                // Check if itemization data exists AND the itemization UI is visible
+                if (currentItemization && !itemizedSplitSection.classList.contains('hidden')) {
+                    // Logic for itemized split
+                    const memberShares = calculateItemizedShares();
+                    let totalCalculatedAmount = 0;
+                    for(const uid in memberShares) {
+                        totalCalculatedAmount += memberShares[uid];
+                    }
+                    if (Math.abs(totalCalculatedAmount - (currentItemization.total * currentItemization.exchangeRate)) > 0.02) {
+                         throw new Error("The assigned item totals do not match the receipt total. Please check assignments.");
+                    }
+                    finalBaseSplits = memberShares;
+                } else {
+                    // Logic for equal/manual split
+                    const originalSplits = new Map();
+                    let originalSplitSum = 0;
+                    expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
+                        const uid = cb.closest('.split-input-group').dataset.uid;
+                        const share = parseFloat(cb.closest('.split-input-group').querySelector('input[type="number"]').value) || 0;
+                        originalSplits.set(uid, share);
+                        originalSplitSum += share;
+                    });
 
-                if (originalSplits.size === 0) throw new Error("Expense must be split with at least one member.");
-                if (Math.abs(originalAmount - originalSplitSum) > 0.015) throw new Error("The split amounts do not add up to the total expense.");
+                    if (originalSplits.size === 0) throw new Error("Expense must be split with at least one member.");
+                    if (Math.abs(originalAmount - originalSplitSum) > 0.015) throw new Error("The split amounts do not add up to the total expense.");
+                    
+                    let exchangeRate = 1;
+                    if (originalCurrency !== baseCurrency) {
+                        const rateData = await getExchangeRate(originalCurrency, baseCurrency);
+                        exchangeRate = rateData.conversion_rate;
+                    }
+                    
+                    let calculatedBaseSum = 0;
+                    originalSplits.forEach((originalShare, uid) => {
+                        const baseShare = parseFloat((originalShare * exchangeRate).toFixed(2));
+                        finalBaseSplits[uid] = baseShare;
+                        calculatedBaseSum += baseShare;
+                    });
+
+                    const totalBaseAmount = originalAmount * exchangeRate;
+                    const remainder = parseFloat((totalBaseAmount - calculatedBaseSum).toFixed(2));
+                    if (Math.abs(remainder) > 0) {
+                        const sharerUids = Array.from(originalSplits.keys());
+                        const randomUid = sharerUids[Math.floor(Math.random() * sharerUids.length)];
+                        finalBaseSplits[randomUid] = parseFloat((finalBaseSplits[randomUid] + remainder).toFixed(2));
+                    }
+                }
 
                 let exchangeRate = 1;
                 if (originalCurrency !== baseCurrency) {
@@ -1884,21 +1962,6 @@
                     exchangeRate = rateData.conversion_rate;
                 }
                 const totalBaseAmount = originalAmount * exchangeRate;
-
-                const finalBaseSplits = {};
-                let calculatedBaseSum = 0;
-                originalSplits.forEach((originalShare, uid) => {
-                    const baseShare = parseFloat((originalShare * exchangeRate).toFixed(2));
-                    finalBaseSplits[uid] = baseShare;
-                    calculatedBaseSum += baseShare;
-                });
-                
-                const remainder = parseFloat((totalBaseAmount - calculatedBaseSum).toFixed(2));
-                if (Math.abs(remainder) > 0) {
-                    const sharerUids = Array.from(originalSplits.keys());
-                    const randomUid = sharerUids[Math.floor(Math.random() * sharerUids.length)];
-                    finalBaseSplits[randomUid] = parseFloat((finalBaseSplits[randomUid] + remainder).toFixed(2));
-                }
                 
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
@@ -1928,6 +1991,7 @@
                 submitExpenseBtn.disabled = false;
             }
         };
+
 
         const handleInviteMember = async () => {
             const emailToInvite = document.getElementById('invite-email').value;
@@ -2310,6 +2374,25 @@
         
         // --- AI SCAN FEATURE IMPLEMENTATION ---
 
+        // Debounce utility to prevent excessive API calls
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        function getLanguageForCurrency(currencyCode) {
+            const languageMap = {
+                'JPY': 'Japanese',
+                'CNY': 'Chinese',
+                // Add other non-English defaults here if needed
+            };
+            return languageMap[currencyCode] || 'English'; // Default to English
+        }
+
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -2327,7 +2410,6 @@
         }
 
         async function openCameraView() {
-            closeModal(aiChoiceModal);
             openModal(aiScanModal);
             try {
                 if (cameraStream) {
@@ -2353,33 +2435,43 @@
             closeModal(aiScanModal);
         }
 
-        async function analyzeImageWithAI(base64Image) {
-            try {
-                 if (!auth.currentUser) {
-                     throw new Error("You must be logged in to use this feature.");
-                 }
-                const token = await auth.currentUser.getIdToken();
+        // --- Gemini AI Analysis Function ---
+        async function analyzeImageWithGemini(base64Image) {
+            loadingText.textContent = "Analyzing receipt with Gemini...";
+            loadingOverlay.classList.remove('hidden-view');
+            
+            const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
+            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency (as a 3-letter ISO code), and all individual line items with their descriptions and prices. Translate the description for each line item into ${targetLanguage}. IMPORTANT: If a line item indicates a quantity greater than one (e.g., '3 x Water @ $2.00 each'), expand it into multiple separate items in the JSON array (e.g., three distinct 'Water' items each with a price of 2.00). If you find tax or tip, list them as separate line items. Provide the output in a valid JSON format. Do not include any text outside of the JSON object.`;
 
-                const response = await fetch(ANALYZE_IMAGE_URL, {
+            const payload = {
+                prompt: prompt,
+                image: base64Image
+            };
+
+            try {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        location: userLocation
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Cloud Function Error: ${response.status}. ${errorText}`);
                 }
 
-                const data = await response.json();
-                console.log('AI Response:', data);
+                const result = await response.json();
                 
+                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+                    throw new Error("Invalid response structure from Cloud Function.");
+                }
+
+                const jsonText = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(jsonText);
+
+                console.log('Gemini Response:', data);
+
+                // Open the expense modal and populate it with the extracted data
                 addExpenseForm.reset();
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
@@ -2387,10 +2479,9 @@
                 const descInput = document.getElementById('expense-description');
                 const amountInput = document.getElementById('expense-amount');
                 const currencySelect = document.getElementById('expense-currency');
-                const categorySelect = document.getElementById('expense-category');
-
-                if (data.description) descInput.value = data.description;
-                if (data.amount) amountInput.value = data.amount;
+                
+                if (data.merchantName) descInput.value = data.merchantName;
+                if (data.total) amountInput.value = data.total;
                 if (data.currency) {
                     if (![...currencySelect.options].some(opt => opt.value === data.currency)) {
                         const newOption = new Option(data.currency, data.currency, true, true);
@@ -2398,23 +2489,38 @@
                     }
                     currencySelect.value = data.currency;
                 }
-                if (data.category) {
-                     if ([...categorySelect.options].some(opt => opt.value === data.category)) {
-                           categorySelect.value = data.category;
-                     }
+                
+                let exchangeRate = 1;
+                if (data.currency && data.currency !== currentTrip.baseCurrency) {
+                    const rateData = await getExchangeRate(data.currency, currentTrip.baseCurrency);
+                    exchangeRate = rateData.conversion_rate;
                 }
                 
+                // If line items exist, store them and show the toggle button
+                if (data.lineItems && data.lineItems.length > 0) {
+                    currentItemization = { ...data, exchangeRate };
+                    splitModeToggleContainer.classList.remove('hidden');
+                    toggleSplitModeBtn.textContent = 'Switch to Split by Item';
+                }
+                
+                // Always default to the amount view first
                 await handleCurrencyChange();
                 autoDistributeAmount();
+                triggerAiCategorySuggestion(); // Automatically suggest category after scan
 
             } catch (error) {
-                console.error('AI Scan failed:', error);
-                showMessage(`AI analysis failed: ${error.message}. Please enter the expense manually.`);
+                console.error('Gemini Scan failed:', error);
+                showMessage(`Gemini analysis failed: ${error.message}. Please enter the expense manually.`);
+                addExpenseForm.reset();
+                await populateExpenseModal();
+                openModal(addExpenseModal);
+            } finally {
+                loadingOverlay.classList.add('hidden-view');
             }
         }
 
+
         async function handleAiCapture() {
-            loadingOverlay.classList.remove('hidden-view');
             try {
                 const context = canvasElement.getContext('2d');
                 canvasElement.width = videoElement.videoWidth;
@@ -2424,12 +2530,11 @@
                 const base64Image = imageDataUrl.split(',')[1];
                 
                 closeCameraView();
-                await analyzeImageWithAI(base64Image);
+                await analyzeImageWithGemini(base64Image);
             } catch (error) {
                  console.error("Error capturing photo:", error);
                  showMessage("Could not capture photo.");
-            } finally {
-                loadingOverlay.classList.add('hidden-view');
+                 loadingOverlay.classList.add('hidden-view');
             }
         }
 
@@ -2437,15 +2542,15 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            loadingOverlay.classList.remove('hidden-view');
-
             const options = {
-              maxSizeMB: 1,
-              maxWidthOrHeight: 1024,
+              maxSizeMB: 2,
+              maxWidthOrHeight: 1920,
               useWebWorker: true,
             };
 
             try {
+                loadingText.textContent = "Compressing image...";
+                loadingOverlay.classList.remove('hidden-view');
                 const compressedFile = await imageCompression(file, options);
                 
                 const base64Image = await new Promise((resolve, reject) => {
@@ -2455,16 +2560,61 @@
                     reader.readAsDataURL(compressedFile);
                 });
 
-                await analyzeImageWithAI(base64Image);
+                await analyzeImageWithGemini(base64Image);
 
             } catch (error) {
                  console.error("Error processing uploaded file:", error);
                  showMessage("Could not process the selected image.");
+                 loadingOverlay.classList.add('hidden-view');
             } finally {
-                loadingOverlay.classList.add('hidden-view');
                 event.target.value = '';
             }
         }
+        
+        // Refactored function for AI category suggestion
+        async function triggerAiCategorySuggestion() {
+            const merchantName = document.getElementById('expense-description').value;
+            if (!merchantName || merchantName.length < 3) {
+                return;
+            }
+            
+            aiCategorySpinner.innerHTML = `<div class="mini-spinner"></div><span class="ml-2 text-sm text-indigo-600">Getting suggestion...</span>`;
+            aiCategorySpinner.classList.remove('hidden');
+            
+            const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
+            const prompt = `Given the expense description "${merchantName}"${locationInfo}, suggest the most fitting category from this list: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Respond with only the category name.`;
+
+            const payload = { prompt: prompt };
+
+            try {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error("API Error");
+
+                const result = await response.json();
+                const suggestedCategory = result.candidates[0].content.parts[0].text.trim();
+                
+                const categorySelect = document.getElementById('expense-category');
+                if ([...categorySelect.options].some(opt => opt.value === suggestedCategory)) {
+                    categorySelect.value = suggestedCategory;
+                } else {
+                     console.warn(`AI suggested "${suggestedCategory}", but it's not in the list.`);
+                }
+
+            } catch (error) {
+                console.error("Error getting category suggestion:", error);
+                showMessage("Could not get AI category suggestion.", true);
+            } finally {
+                aiCategorySpinner.classList.add('hidden');
+            }
+        }
+        
+        // Create a debounced version of the suggestion function
+        const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000); // 1-second delay
+
 
         // --- AI & FAB EVENT LISTENERS ---
         fabToggle.addEventListener('click', () => {
@@ -2494,6 +2644,211 @@
         
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
+
+        aiCategorySuggestBtn.addEventListener('click', triggerAiCategorySuggestion);
+
+        // --- NEW: Event Listener for the Split Mode Toggle Button ---
+        toggleSplitModeBtn.addEventListener('click', () => {
+            const isItemMode = !itemizedSplitSection.classList.contains('hidden');
+            if (isItemMode) {
+                // Switch back to amount mode
+                itemizedSplitSection.classList.add('hidden');
+                equalSplitSection.classList.remove('hidden');
+                toggleSplitModeBtn.textContent = 'Switch to Split by Item';
+                autoDistributeAmount(); // Recalculate equal split
+            } else {
+                // Switch to item mode
+                itemizedSplitSection.classList.remove('hidden');
+                equalSplitSection.classList.add('hidden');
+                toggleSplitModeBtn.textContent = 'Switch to Split by Amount';
+                renderItemizationUI(currentItemization); // Build the item UI
+            }
+        });
+
+        // --- Itemization UI Logic ---
+        function renderItemizationUI(itemizationData) {
+            itemizedListDiv.innerHTML = '';
+
+            itemizationData.lineItems.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'item-row p-2 bg-white rounded-md flex justify-between items-center';
+                itemEl.dataset.index = index;
+                
+                const memberAvatarsHTML = currentTrip.memberIds.map(uid => {
+                    const profile = userProfilesCache.get(uid);
+                    if (!profile) return '';
+                    let avatar;
+                     if (profile.photoURL) {
+                        avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar">`;
+                    } else {
+                        const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
+                        avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">${initial}</div>`;
+                    }
+                    return `<div data-uid="${uid}" title="${profile.displayName}">${avatar}</div>`;
+                }).join('');
+
+                itemEl.innerHTML = `
+                    <div class="flex-grow pr-4">
+                        <p class="font-medium text-gray-800">${item.description}</p>
+                        <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
+                    </div>
+                    <div class="flex space-x-1">
+                        ${memberAvatarsHTML}
+                    </div>
+                `;
+                itemizedListDiv.appendChild(itemEl);
+            });
+            updateItemizationSummary(); // This will now also handle rendering the remainder card
+        }
+
+        itemizedListDiv.addEventListener('click', (e) => {
+            const avatarContainer = e.target.closest('[data-uid]');
+            if (!avatarContainer) return;
+            
+            const avatar = avatarContainer.querySelector('.item-assignment-avatar');
+            if (!avatar) return;
+
+            const row = avatar.closest('.item-row, #remainder-row');
+            if (row && row.id === 'remainder-row') {
+                // Handle remainder selection
+                const uid = avatarContainer.dataset.uid;
+                if (remainderAssignments.has(uid)) {
+                    remainderAssignments.delete(uid);
+                } else {
+                    remainderAssignments.add(uid);
+                }
+            }
+            
+            avatar.classList.toggle('assigned');
+            updateItemizationSummary();
+        });
+        
+        function calculateItemizedShares() {
+            const memberShares = {};
+            currentTrip.memberIds.forEach(uid => memberShares[uid] = 0);
+
+            // Calculate shares from regular items that have been assigned
+            document.querySelectorAll('.item-row').forEach(row => {
+                const itemIndex = parseInt(row.dataset.index, 10);
+                const item = currentItemization.lineItems[itemIndex];
+                const itemPriceInBase = item.price * currentItemization.exchangeRate;
+
+                const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
+                if (assignedAvatars.length > 0) {
+                    const sharePerPerson = itemPriceInBase / assignedAvatars.length;
+                    assignedAvatars.forEach(avatarWrapper => {
+                        const uid = avatarWrapper.closest('[data-uid]').dataset.uid;
+                        memberShares[uid] += sharePerPerson;
+                    });
+                }
+            });
+
+            // Calculate shares from the remainder card
+            const remainderRow = document.getElementById('remainder-row');
+            if (remainderRow) {
+                const remainderAmount = parseFloat(remainderRow.dataset.remainderAmount);
+                const remainderInBaseCurrency = remainderAmount * currentItemization.exchangeRate;
+
+                if (remainderAssignments.size > 0) {
+                    const sharePerPerson = remainderInBaseCurrency / remainderAssignments.size;
+                    remainderAssignments.forEach(uid => {
+                        memberShares[uid] += sharePerPerson;
+                    });
+                }
+            }
+
+            // Round to 2 decimal places
+            for (const uid in memberShares) {
+                memberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
+            }
+            return memberShares;
+        }
+
+        function updateItemizationSummary() {
+            const existingRemainderRow = document.getElementById('remainder-row');
+            if (existingRemainderRow) existingRemainderRow.remove();
+
+            let unassignedItemsTotal = 0;
+            currentItemization.lineItems.forEach((item, index) => {
+                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
+                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
+                    unassignedItemsTotal += item.price;
+                }
+            });
+
+            const itemizedSum = currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
+            const tipAndTaxRemainder = currentItemization.total - itemizedSum;
+            const totalRemainder = unassignedItemsTotal + tipAndTaxRemainder;
+
+            if (totalRemainder > 0.01) {
+                const remainderEl = document.createElement('div');
+                remainderEl.id = 'remainder-row';
+                remainderEl.className = 'p-2 bg-indigo-50 rounded-md flex justify-between items-center';
+                remainderEl.dataset.remainderAmount = totalRemainder.toFixed(2);
+                
+                const memberAvatarsHTML = currentTrip.memberIds.map(uid => {
+                    const profile = userProfilesCache.get(uid);
+                    if (!profile) return '';
+                    const isAssigned = remainderAssignments.has(uid) ? 'assigned' : '';
+                    let avatar;
+                     if (profile.photoURL) {
+                        avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`;
+                    } else {
+                        const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
+                        avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${initial}</div>`;
+                    }
+                    return `<div data-uid="${uid}" title="${profile.displayName}">${avatar}</div>`;
+                }).join('');
+
+                remainderEl.innerHTML = `
+                    <div class="flex-grow pr-4">
+                        <p class="font-medium text-indigo-800">Allocate Remainder</p>
+                        <p class="text-sm text-indigo-600">${totalRemainder.toFixed(2)} ${currentItemization.currency}</p>
+                    </div>
+                    <div class="flex space-x-1">
+                        ${memberAvatarsHTML}
+                    </div>
+                `;
+                itemizedListDiv.appendChild(remainderEl);
+            }
+
+            const memberShares = calculateItemizedShares();
+            itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
+            let summaryHTML = '';
+            let totalAssignedInBase = 0;
+            
+            for (const uid in memberShares) {
+                if (memberShares[uid] > 0) {
+                    const profile = userProfilesCache.get(uid);
+                    const shareInOriginalCurrency = memberShares[uid] / currentItemization.exchangeRate;
+                    summaryHTML += `
+                        <div class="flex justify-between text-sm text-gray-700">
+                            <span>${profile.displayName}</span>
+                            <span class="font-medium">${shareInOriginalCurrency.toFixed(2)} ${currentItemization.currency}</span>
+                        </div>
+                    `;
+                    totalAssignedInBase += memberShares[uid];
+                }
+            }
+            itemizedSummaryDiv.innerHTML += summaryHTML;
+
+            const totalInBase = currentItemization.total * currentItemization.exchangeRate;
+            const difference = totalInBase - totalAssignedInBase;
+            
+            const validationEl = document.createElement('div');
+            validationEl.className = 'text-xs text-right mt-1 h-4 font-semibold';
+            if (Math.abs(difference) < 0.02) {
+                validationEl.textContent = `Total matches receipt!`;
+                validationEl.className += ' text-green-600';
+                submitExpenseBtn.disabled = false;
+            } else {
+                const differenceInOriginalCurrency = difference / currentItemization.exchangeRate;
+                validationEl.textContent = `Unassigned: ${differenceInOriginalCurrency.toFixed(2)} ${currentItemization.currency}`;
+                validationEl.className += ' text-red-600';
+                submitExpenseBtn.disabled = true;
+            }
+            itemizedSummaryDiv.appendChild(validationEl);
+        }
 
 
         // Auth tabs
