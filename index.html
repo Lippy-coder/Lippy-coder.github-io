@@ -23,7 +23,7 @@
         }
         .view { transition: opacity 0.3s ease-in-out; }
         .hidden-view { display: none !important; opacity: 0; }
-        .modal-overlay { transition: opacity 0.3s ease-in-out; }
+        .modal-overlay { transition: opacity 0.3s ease-in-out; z-index: 40; }
         .spinner, .mini-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
@@ -386,7 +386,7 @@
                         </div>
                         <div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50">
                         </div>
-                        <div id="split-total-validation" class="text-xs text-right mt-1 h-4"></div>
+                        <div id="split-total-validation" class="text-xs text-right mt-1 min-h-[1rem]"></div>
                     </div>
                      <div class="flex justify-end space-x-4">
                         <button type="button" id="cancel-add-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
@@ -572,7 +572,7 @@
         </div>
 
         <!-- Action Sheet Modal -->
-        <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end hidden-view z-40">
+        <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end z-50 hidden-view">
             <div class="action-sheet-panel w-full bg-gray-100 rounded-t-2xl p-4">
                 <div class="bg-white rounded-xl">
                     <div class="p-4 flex items-center">
@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.1 (Gemini Enhanced)
+              Version 6.6.6 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -799,24 +799,13 @@
 
         // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
-            if (!dateString || !timeString) return null;
-
-            // The Date constructor is flexible and can often parse various formats
-            const date = new Date(`${dateString} ${timeString}`);
-
-            // Check if the created date is valid
-            if (isNaN(date.getTime())) {
+            // A simple regex check ensures the expected YYYY-MM-DD and HH:MM formats.
+            if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
+                console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
                 return null;
             }
-
-            // Manually build the string in the required format YYYY-MM-DDTHH:mm
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // padStart ensures two digits
-            const day = date.getDate().toString().padStart(2, '0');
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
+            // If the format is as expected, simply combine the strings.
+            return `${dateString}T${timeString}`;
         }
 
         // --- UI Logic ---
@@ -1500,13 +1489,13 @@
             
             const remainder = totalOriginalAmount - currentSplitTotal;
             if (Math.abs(remainder) < 0.015 && totalOriginalAmount > 0) {
-                splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-green-600 font-semibold';
+                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-green-600 font-semibold';
                 splitTotalValidation.textContent = 'Total is fully allocated!';
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
                 submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             } else {
-                splitTotalValidation.className = 'text-xs text-right mt-1 h-4 text-red-600 font-semibold';
+                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-red-600 font-semibold';
                 if (totalOriginalAmount <= 0) {
                     splitTotalValidation.textContent = 'Please enter a valid amount.';
                 } else {
@@ -1531,15 +1520,15 @@
                 groupDiv.dataset.uid = uid;
                 
                 const inputHtml = `
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 flex-shrink-0">
                         <input type="number" step="0.01" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
                         <span class="text-xs text-gray-500 w-8">${originalCurrency}</span>
                     </div>`;
 
                 groupDiv.innerHTML = `
-                    <div class="flex items-center">
+                    <div class="flex items-center flex-grow min-w-0">
                         <input id="split-${uid}" type="checkbox" value="${uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 w-40 truncate">${profile.displayName}</label>
+                        <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 truncate">${profile.displayName}</label>
                     </div>
                     ${inputHtml}
                 `;
@@ -2457,7 +2446,7 @@
             loadingOverlay.classList.remove('hidden-view');
             
             const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
-            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency (as a 3-letter ISO code), transactionDate (in YYYY-MM-DD format), transactionTime (in HH:MM 24-hour format), and all individual line items with their descriptions and prices. Translate the description for each line item into ${targetLanguage}. IMPORTANT: If a line item indicates a quantity greater than one (e.g., '3 x Water @ $2.00 each'), expand it into multiple separate items in the JSON array (e.g., three distinct 'Water' items each with a price of 2.00). If you find tax or tip, list them as separate line items. Provide the output in a valid JSON format. Do not include any text outside of the JSON object.`;
+            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency, transactionDate (YYYY-MM-DD), transactionTime (HH:MM 24-hour), and all individual line items. IMPORTANT: For the 'currency' field, return the 3-letter ISO code ONLY if it is explicitly printed on the receipt. If no currency code or symbol (like $, £, €) is visible, return null for the currency field. For line items, if a quantity is indicated (e.g., '3 x Water'), expand it into multiple separate items in the JSON. Translate line item descriptions into ${targetLanguage}. List tax or tip as separate line items. Provide the output as a single, valid JSON object and nothing else.`;
 
             const payload = {
                 prompt: prompt,
@@ -2500,19 +2489,17 @@
                 if (data.merchantName) descInput.value = data.merchantName;
                 if (data.total) amountInput.value = data.total;
                 
-                // Set currency, defaulting to base currency if not found
+                // Set currency for the main form, defaulting to base currency if not found or if AI returns null
                 if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
                 } else {
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // --- START: MODIFIED DATE/TIME HANDLING ---
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
-                // --- END: MODIFIED DATE/TIME HANDLING ---
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2521,9 +2508,10 @@
                     exchangeRate = rateData.conversion_rate;
                 }
                 
-                // If line items exist, store them and show the toggle button
+                // If line items exist, ensure they have a valid currency before storing
                 if (data.lineItems && data.lineItems.length > 0) {
-                    currentItemization = { ...data, exchangeRate };
+                    const itemizationCurrency = data.currency || currentTrip.baseCurrency;
+                    currentItemization = { ...data, currency: itemizationCurrency, exchangeRate };
                     splitModeToggleContainer.classList.remove('hidden');
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
@@ -2607,7 +2595,7 @@
             aiCategorySpinner.classList.remove('hidden');
             
             const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
-            const prompt = `Given the expense description "${merchantName}"${locationInfo}, suggest the most fitting category from this list: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Respond with only the category name.`;
+            const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
             const payload = { prompt: prompt };
 
@@ -2859,7 +2847,7 @@
             const difference = totalInBase - totalAssignedInBase;
             
             const validationEl = document.createElement('div');
-            validationEl.className = 'text-xs text-right mt-1 h-4 font-semibold';
+            validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
             if (Math.abs(difference) < 0.02) {
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
@@ -2896,4 +2884,3 @@
     </script>
 </body>
 </html>
-
