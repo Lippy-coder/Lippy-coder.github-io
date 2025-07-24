@@ -1,0 +1,108 @@
+/* Custom Styles for Splitify App */
+
+/* General body styling from font import */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Style for the custom file input button */
+.file-input-button {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4a90e2;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Hide the actual file input */
+input[type="file"] {
+    display: none;
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+/* Animation for modals */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideIn {
+    from { transform: translate(-50%, -60%); opacity: 0; }
+    to { transform: translate(-50%, -50%); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translate(-50%, -50%); opacity: 1; }
+    to { transform: translate(-50%, -60%); opacity: 0; }
+}
+
+#modal-backdrop.show, #create-trip-modal.show, #add-expense-modal.show, #itemize-expense-modal.show, #add-member-modal.show, #profile-modal.show {
+    display: block;
+    animation: fadeIn 0.3s forwards;
+}
+
+#create-trip-modal.show, #add-expense-modal.show, #itemize-expense-modal.show, #add-member-modal.show, #profile-modal.show {
+    animation: slideIn 0.3s forwards, fadeIn 0.3s forwards;
+}
+
+#modal-backdrop.hide, #create-trip-modal.hide, #add-expense-modal.hide, #itemize-expense-modal.hide, #add-member-modal.hide, #profile-modal.hide {
+    animation: fadeOut 0.3s forwards;
+}
+
+#create-trip-modal.hide, #add-expense-modal.hide, #itemize-expense-modal.hide, #add-member-modal.hide, #profile-modal.hide {
+    animation: slideOut 0.3s forwards, fadeOut 0.3s forwards;
+}
+
+/* Styling for message box slide-in/out animation */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(120%);
+    }
+}
+
+#message-box.show {
+    display: block;
+    animation: slideInRight 0.5s forwards;
+}
+
+#message-box.hide {
+    animation: slideOutRight 0.5s forwards;
+}
