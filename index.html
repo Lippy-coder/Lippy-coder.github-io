@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.3 (Gemini Enhanced)
+              Version 6.6.4 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -2446,7 +2446,6 @@
             loadingOverlay.classList.remove('hidden-view');
             
             const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
-            // --- UPDATED: More restrictive prompt for currency detection ---
             const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency, transactionDate (YYYY-MM-DD), transactionTime (HH:MM 24-hour), and all individual line items. IMPORTANT: For the 'currency' field, return the 3-letter ISO code ONLY if it is explicitly printed on the receipt. If no currency code or symbol (like $, £, €) is visible, return null for the currency field. For line items, if a quantity is indicated (e.g., '3 x Water'), expand it into multiple separate items in the JSON. Translate line item descriptions into ${targetLanguage}. List tax or tip as separate line items. Provide the output as a single, valid JSON object and nothing else.`;
 
             const payload = {
@@ -2490,7 +2489,7 @@
                 if (data.merchantName) descInput.value = data.merchantName;
                 if (data.total) amountInput.value = data.total;
                 
-                // Set currency, defaulting to base currency if not found or if AI returns null
+                // Set currency for the main form, defaulting to base currency if not found or if AI returns null
                 if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
                 } else {
@@ -2509,9 +2508,10 @@
                     exchangeRate = rateData.conversion_rate;
                 }
                 
-                // If line items exist, store them and show the toggle button
+                // --- FIXED: If line items exist, ensure they have a valid currency before storing ---
                 if (data.lineItems && data.lineItems.length > 0) {
-                    currentItemization = { ...data, exchangeRate };
+                    const itemizationCurrency = data.currency || currentTrip.baseCurrency;
+                    currentItemization = { ...data, currency: itemizationCurrency, exchangeRate };
                     splitModeToggleContainer.classList.remove('hidden');
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
