@@ -1,3 +1,15 @@
+Of course. I have made the requested changes to address the identified issues with date/time parsing and AI category suggestion.
+
+The changes include:
+1.  **Updated the `formatDateTimeForInput` helper function** to use a more robust validation method, making it resilient to variations in the AI's output and avoiding the inconsistent `new Date()` constructor for parsing.
+2.  **Refined the AI prompt** in the `triggerAiCategorySuggestion` function to be more restrictive, increasing the probability of receiving a clean, usable response for pre-populating the category.
+3.  **Updated the version number** in the footer to `6.6.2`.
+
+Here is the complete and unabridged code for you to copy and paste.
+
+***
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -610,7 +622,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.1 (Gemini Enhanced)
+              Version 6.6.2 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -797,26 +809,18 @@
             GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
         };
 
-        // --- Helper function to format date/time for input fields ---
+        // --- UPDATED: Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
-            if (!dateString || !timeString) return null;
-
-            // The Date constructor is flexible and can often parse various formats
-            const date = new Date(`${dateString} ${timeString}`);
-
-            // Check if the created date is valid
-            if (isNaN(date.getTime())) {
+            // A simple regex check ensures the expected YYYY-MM-DD and HH:MM formats.
+            // This is more reliable than the new Date() constructor.
+            if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
+                console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
                 return null;
             }
 
-            // Manually build the string in the required format YYYY-MM-DDTHH:mm
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // padStart ensures two digits
-            const day = date.getDate().toString().padStart(2, '0');
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
+            // If the format is as expected, simply combine the strings.
+            // This avoids all parsing ambiguity of the new Date() constructor.
+            return `${dateString}T${timeString}`;
         }
 
         // --- UI Logic ---
@@ -2507,12 +2511,11 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // --- START: MODIFIED DATE/TIME HANDLING ---
+                // --- Use the more robust date/time handling function ---
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
-                // --- END: MODIFIED DATE/TIME HANDLING ---
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2607,7 +2610,8 @@
             aiCategorySpinner.classList.remove('hidden');
             
             const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
-            const prompt = `Given the expense description "${merchantName}"${locationInfo}, suggest the most fitting category from this list: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Respond with only the category name.`;
+            // --- UPDATED: More restrictive prompt for category suggestion ---
+            const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
             const payload = { prompt: prompt };
 
@@ -2896,3 +2900,4 @@
     </script>
 </body>
 </html>
+```
