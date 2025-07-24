@@ -635,7 +635,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.0.0 (Reliable Gemini Integration)
+              Version 7.1.0 (Robust Gemini JSON Parsing)
             </p>
         </footer>
     </div>
@@ -1760,8 +1760,8 @@
 
             const transactions = [];
             while (debtors.size > 0 && creditors.size > 0) {
-                const [debtorId, debtorAmount] = [...debtors.entries()].sort((a, b) => b[1] - a[1])[0];
-                const [creditorId, creditorAmount] = [...creditors.entries()].sort((a, b) => b[1] - a[1])[0];
+                const [debtorId, debtorAmount] = [...debtors.entries()].sort((a, b) => b - a);
+                const [creditorId, creditorAmount] = [...creditors.entries()].sort((a, b) => b - a);
                 const payment = Math.min(debtorAmount, creditorAmount);
                 transactions.push({ from: debtorId, to: creditorId, amount: payment });
                 debtors.set(debtorId, debtorAmount - payment);
@@ -2142,7 +2142,7 @@
                 const q = query(usersRef, where("email", "==", emailToInvite));
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) throw new Error("User with that email address not found.");
-                const userToInvite = querySnapshot.docs[0].data();
+                const userToInvite = querySnapshot.docs.data();
                 if (currentTrip.memberIds.includes(userToInvite.uid)) throw new Error("This user is already a member of the trip.");
                 
                 const tripRef = doc(db, "trips", currentTrip.id);
@@ -2160,7 +2160,7 @@
 
 
         const handleProfilePicUpload = async (e) => {
-            const file = e.target.files[0];
+            const file = e.target.files;
             if (!file) return;
 
 
@@ -2613,7 +2613,7 @@
         }
 
 
-        // --- Gemini AI Analysis Function ---
+        // --- Gemini AI Analysis Function (UPDATED) ---
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analyzing receipt with Gemini...";
             loadingOverlay.classList.remove('hidden-view');
@@ -2655,23 +2655,27 @@ Translate the "description" for each line item into ${targetLanguage}.`;
 
                 const result = await response.json();
                 
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+                if (!result.candidates || !result.candidates.content.parts.text) {
                     throw new Error("Invalid response structure from Cloud Function.");
                 }
 
+                // ** NEW ROBUST PARSING LOGIC **
+                const rawText = result.candidates.content.parts.text;
+                const match = rawText.match(/```json\s*([\s\S]*?)\s*```|({[\s\S]*})/);
 
-                const jsonText = result.candidates[0].content.parts[0].text.trim();
-                const data = JSON.parse(jsonText);
+                if (!match) {
+                    throw new Error("Could not find a valid JSON object in the AI response.");
+                }
 
-
-                console.log('Gemini Response:', data);
-
+                const cleanedJsonText = match || match;
+                const data = JSON.parse(cleanedJsonText);
+                
+                console.log('Gemini Response (parsed):', data);
 
                 // Open the expense modal and populate it with the extracted data
                 addExpenseForm.reset();
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
-
 
                 const descInput = document.getElementById('expense-description');
                 const amountInput = document.getElementById('expense-amount');
@@ -2683,17 +2687,14 @@ Translate the "description" for each line item into ${targetLanguage}.`;
                 if (data.merchantName) descInput.value = data.merchantName;
                 if (data.total) amountInput.value = data.total;
                 
-                // Set currency
+                // Set currency from receipt, otherwise it remains the trip's base currency.
                 if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
-                } else {
-                    currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // Set date and time (now more reliable)
+                // Set date and time
                 if (data.transactionDate && data.transactionTime) {
                     const dateTimeString = `${data.transactionDate}T${data.transactionTime}`;
-                    // Check if it's a plausible date before setting
                     if (!isNaN(new Date(dateTimeString).getTime())) {
                         occurredAtInput.value = dateTimeString;
                     }
@@ -2711,24 +2712,26 @@ Translate the "description" for each line item into ${targetLanguage}.`;
                     exchangeRate = rateData.conversion_rate;
                 }
                 
-                // If line items exist, store them and show the toggle button
                 if (data.lineItems && data.lineItems.length > 0) {
                     currentItemization = { ...data, exchangeRate };
                     splitModeToggleContainer.classList.remove('hidden');
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
                 
-                // Trigger UI updates
                 await handleCurrencyChange();
                 autoDistributeAmount();
-
 
             } catch (error) {
                 console.error('Gemini Scan failed:', error);
                 showMessage(`Gemini analysis failed: ${error.message}. Please enter the expense manually.`);
-                addExpenseForm.reset();
-                await populateExpenseModal();
-                openModal(addExpenseModal);
+                // Ensure modal is usable for manual entry on failure
+                if (!addExpenseModal.classList.contains('hidden-view')) {
+                     // Already open, do nothing
+                } else {
+                    addExpenseForm.reset();
+                    await populateExpenseModal();
+                    openModal(addExpenseModal);
+                }
             } finally {
                 loadingOverlay.classList.add('hidden-view');
             }
@@ -2742,7 +2745,7 @@ Translate the "description" for each line item into ${targetLanguage}.`;
                 canvasElement.height = videoElement.videoHeight;
                 context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
                 const imageDataUrl = canvasElement.toDataURL('image/jpeg', 0.8);
-                const base64Image = imageDataUrl.split(',')[1];
+                const base64Image = imageDataUrl.split(',');
                 
                 closeCameraView();
                 await analyzeImageWithGemini(base64Image);
@@ -2755,7 +2758,7 @@ Translate the "description" for each line item into ${targetLanguage}.`;
 
 
         async function handleReceiptFileUpload(event) {
-            const file = event.target.files[0];
+            const file = event.target.files;
             if (!file) return;
 
 
@@ -2773,7 +2776,7 @@ Translate the "description" for each line item into ${targetLanguage}.`;
                 
                 const base64Image = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+                    reader.onload = (e) => resolve(e.target.result.split(','));
                     reader.onerror = (error) => reject(error);
                     reader.readAsDataURL(compressedFile);
                 });
