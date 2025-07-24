@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.2 (Gemini Enhanced)
+              Version 6.6.3 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -797,17 +797,14 @@
             GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
         };
 
-        // --- UPDATED: Helper function to format date/time for input fields ---
+        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             // A simple regex check ensures the expected YYYY-MM-DD and HH:MM formats.
-            // This is more reliable than the new Date() constructor.
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
                 return null;
             }
-
             // If the format is as expected, simply combine the strings.
-            // This avoids all parsing ambiguity of the new Date() constructor.
             return `${dateString}T${timeString}`;
         }
 
@@ -2449,7 +2446,8 @@
             loadingOverlay.classList.remove('hidden-view');
             
             const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
-            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency (as a 3-letter ISO code), transactionDate (in YYYY-MM-DD format), transactionTime (in HH:MM 24-hour format), and all individual line items with their descriptions and prices. Translate the description for each line item into ${targetLanguage}. IMPORTANT: If a line item indicates a quantity greater than one (e.g., '3 x Water @ $2.00 each'), expand it into multiple separate items in the JSON array (e.g., three distinct 'Water' items each with a price of 2.00). If you find tax or tip, list them as separate line items. Provide the output in a valid JSON format. Do not include any text outside of the JSON object.`;
+            // --- UPDATED: More restrictive prompt for currency detection ---
+            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency, transactionDate (YYYY-MM-DD), transactionTime (HH:MM 24-hour), and all individual line items. IMPORTANT: For the 'currency' field, return the 3-letter ISO code ONLY if it is explicitly printed on the receipt. If no currency code or symbol (like $, £, €) is visible, return null for the currency field. For line items, if a quantity is indicated (e.g., '3 x Water'), expand it into multiple separate items in the JSON. Translate line item descriptions into ${targetLanguage}. List tax or tip as separate line items. Provide the output as a single, valid JSON object and nothing else.`;
 
             const payload = {
                 prompt: prompt,
@@ -2492,14 +2490,13 @@
                 if (data.merchantName) descInput.value = data.merchantName;
                 if (data.total) amountInput.value = data.total;
                 
-                // Set currency, defaulting to base currency if not found
+                // Set currency, defaulting to base currency if not found or if AI returns null
                 if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
                 } else {
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // --- Use the more robust date/time handling function ---
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
@@ -2598,7 +2595,6 @@
             aiCategorySpinner.classList.remove('hidden');
             
             const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
-            // --- UPDATED: More restrictive prompt for category suggestion ---
             const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
             const payload = { prompt: prompt };
