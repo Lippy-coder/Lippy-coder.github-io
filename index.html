@@ -69,8 +69,8 @@
         }
         /* Toggle Switch Styles */
         .toggle-switch:checked ~ .dot {
-          transform: translateX(100%);
-          background-color: #4f46e5; /* Tailwind indigo-600 */
+         transform: translateX(100%);
+         background-color: #4f46e5; /* Tailwind indigo-600 */
         }
         .toggle-switch:checked ~ .block {
             background-color: #a5b4fc; /* Tailwind indigo-300 */
@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.6 (Gemini Enhanced)
+              Version 6.6.7 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -1516,21 +1516,23 @@
                 if (!profile) return;
 
                 const groupDiv = document.createElement('div');
-                groupDiv.className = 'flex items-center justify-between split-input-group';
+                // USE GRID for better alignment control.
+                // Column 1 (1fr): Member name, takes up remaining space.
+                // Column 2 (auto): Input box.
+                // Column 3 (auto): Currency symbol.
+                groupDiv.className = 'grid grid-cols-[1fr_auto_auto] items-center gap-x-2 split-input-group';
                 groupDiv.dataset.uid = uid;
                 
-                const inputHtml = `
-                    <div class="flex items-center space-x-2 flex-shrink-0">
-                        <input type="number" step="0.01" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
-                        <span class="text-xs text-gray-500 w-8">${originalCurrency}</span>
-                    </div>`;
-
                 groupDiv.innerHTML = `
+                    <!-- Column 1: Member Name -->
                     <div class="flex items-center flex-grow min-w-0">
                         <input id="split-${uid}" type="checkbox" value="${uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 truncate">${profile.displayName}</label>
                     </div>
-                    ${inputHtml}
+                    <!-- Column 2: Amount Input (Right Aligned) -->
+                    <input type="number" step="0.01" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm text-right" disabled>
+                    <!-- Column 3: Currency Symbol -->
+                    <span class="text-sm text-gray-500 w-8 text-left">${originalCurrency}</span>
                 `;
                 expenseSplitBetweenDiv.appendChild(groupDiv);
             });
