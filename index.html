@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.5 (Gemini Enhanced)
+              Version 6.6.6 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -1520,13 +1520,13 @@
                 groupDiv.dataset.uid = uid;
                 
                 const inputHtml = `
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 flex-shrink-0">
                         <input type="number" step="0.01" data-uid="${uid}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm" disabled>
                         <span class="text-xs text-gray-500 w-8">${originalCurrency}</span>
                     </div>`;
 
                 groupDiv.innerHTML = `
-                    <div class="flex items-center flex-grow">
+                    <div class="flex items-center flex-grow min-w-0">
                         <input id="split-${uid}" type="checkbox" value="${uid}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <label for="split-${uid}" class="ml-2 block text-sm text-gray-900 truncate">${profile.displayName}</label>
                     </div>
