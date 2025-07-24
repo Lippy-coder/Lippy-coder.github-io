@@ -610,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.6.0 (Gemini Enhanced)
+              Version 6.6.1 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -796,6 +796,28 @@
         const currencySymbols = {
             GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
         };
+
+        // --- Helper function to format date/time for input fields ---
+        function formatDateTimeForInput(dateString, timeString) {
+            if (!dateString || !timeString) return null;
+
+            // The Date constructor is flexible and can often parse various formats
+            const date = new Date(`${dateString} ${timeString}`);
+
+            // Check if the created date is valid
+            if (isNaN(date.getTime())) {
+                return null;
+            }
+
+            // Manually build the string in the required format YYYY-MM-DDTHH:mm
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // padStart ensures two digits
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
 
         // --- UI Logic ---
         function showView(viewId) {
@@ -2485,19 +2507,12 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // Set date and time from receipt if available
-                if (data.transactionDate && data.transactionTime) {
-                    try {
-                        // Attempt to form a valid datetime string for the input
-                        const dateTimeString = `${data.transactionDate}T${data.transactionTime}`;
-                        // Check if it's a plausible date before setting
-                        if (!isNaN(new Date(dateTimeString).getTime())) {
-                            occurredAtInput.value = dateTimeString;
-                        }
-                    } catch (e) {
-                        console.warn("Could not parse date/time from receipt, using current time.", e);
-                    }
+                // --- START: MODIFIED DATE/TIME HANDLING ---
+                const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
+                if (formattedDateTime) {
+                    occurredAtInput.value = formattedDateTime;
                 }
+                // --- END: MODIFIED DATE/TIME HANDLING ---
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2881,4 +2896,3 @@
     </script>
 </body>
 </html>
-
