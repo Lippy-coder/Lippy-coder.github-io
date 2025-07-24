@@ -337,7 +337,7 @@
                         <input type="datetime-local" id="expense-occurred-at" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
                     </div>
                     <div class="mb-4">
-                         <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
+                         <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                          <div class="flex items-center space-x-2">
                             <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
                                  <option value="">-- Select a Category --</option>
@@ -348,13 +348,8 @@
                                  <option value="Shopping">Shopping</option>
                                  <option value="Other">Other</option>
                             </select>
-                            <button type="button" id="ai-category-suggest-btn" title="Suggest Category with AI" class="p-2 bg-indigo-100 text-indigo-600 rounded-md hover:bg-indigo-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586zM12 6a1 1 0 100-2 1 1 0 000 2zM12 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" />
-                                </svg>
-                            </button>
                          </div>
-                         <div id="ai-category-spinner" class="mt-2 hidden"></div>
+                         <div id="ai-category-spinner" class="mt-2 h-6 flex items-center hidden"></div>
                     </div>
                     <div class="mb-4">
                         <label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label>
@@ -615,7 +610,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 6.5.0 (Gemini Enhanced)
+              Version 6.6.0 (Gemini Enhanced)
             </p>
         </footer>
     </div>
@@ -720,7 +715,6 @@
         const equalSplitSection = document.getElementById('equal-split-section');
         const splitModeToggleContainer = document.getElementById('split-mode-toggle-container');
         const toggleSplitModeBtn = document.getElementById('toggle-split-mode-btn');
-        const aiCategorySuggestBtn = document.getElementById('ai-category-suggest-btn');
         const aiCategorySpinner = document.getElementById('ai-category-spinner');
 
         const inviteMemberBtn = document.getElementById('invite-member-btn');
@@ -2441,7 +2435,7 @@
             loadingOverlay.classList.remove('hidden-view');
             
             const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
-            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency (as a 3-letter ISO code), and all individual line items with their descriptions and prices. Translate the description for each line item into ${targetLanguage}. IMPORTANT: If a line item indicates a quantity greater than one (e.g., '3 x Water @ $2.00 each'), expand it into multiple separate items in the JSON array (e.g., three distinct 'Water' items each with a price of 2.00). If you find tax or tip, list them as separate line items. Provide the output in a valid JSON format. Do not include any text outside of the JSON object.`;
+            const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency (as a 3-letter ISO code), transactionDate (in YYYY-MM-DD format), transactionTime (in HH:MM 24-hour format), and all individual line items with their descriptions and prices. Translate the description for each line item into ${targetLanguage}. IMPORTANT: If a line item indicates a quantity greater than one (e.g., '3 x Water @ $2.00 each'), expand it into multiple separate items in the JSON array (e.g., three distinct 'Water' items each with a price of 2.00). If you find tax or tip, list them as separate line items. Provide the output in a valid JSON format. Do not include any text outside of the JSON object.`;
 
             const payload = {
                 prompt: prompt,
@@ -2479,20 +2473,36 @@
                 const descInput = document.getElementById('expense-description');
                 const amountInput = document.getElementById('expense-amount');
                 const currencySelect = document.getElementById('expense-currency');
+                const occurredAtInput = document.getElementById('expense-occurred-at');
                 
                 if (data.merchantName) descInput.value = data.merchantName;
                 if (data.total) amountInput.value = data.total;
-                if (data.currency) {
-                    if (![...currencySelect.options].some(opt => opt.value === data.currency)) {
-                        const newOption = new Option(data.currency, data.currency, true, true);
-                        currencySelect.add(newOption);
-                    }
+                
+                // Set currency, defaulting to base currency if not found
+                if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
+                } else {
+                    currencySelect.value = currentTrip.baseCurrency;
+                }
+
+                // Set date and time from receipt if available
+                if (data.transactionDate && data.transactionTime) {
+                    try {
+                        // Attempt to form a valid datetime string for the input
+                        const dateTimeString = `${data.transactionDate}T${data.transactionTime}`;
+                        // Check if it's a plausible date before setting
+                        if (!isNaN(new Date(dateTimeString).getTime())) {
+                            occurredAtInput.value = dateTimeString;
+                        }
+                    } catch (e) {
+                        console.warn("Could not parse date/time from receipt, using current time.", e);
+                    }
                 }
                 
                 let exchangeRate = 1;
-                if (data.currency && data.currency !== currentTrip.baseCurrency) {
-                    const rateData = await getExchangeRate(data.currency, currentTrip.baseCurrency);
+                const selectedCurrency = currencySelect.value;
+                if (selectedCurrency && selectedCurrency !== currentTrip.baseCurrency) {
+                    const rateData = await getExchangeRate(selectedCurrency, currentTrip.baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
                 
@@ -2503,7 +2513,7 @@
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
                 
-                // Always default to the amount view first
+                // Trigger updates
                 await handleCurrencyChange();
                 autoDistributeAmount();
                 triggerAiCategorySuggestion(); // Automatically suggest category after scan
@@ -2606,7 +2616,7 @@
 
             } catch (error) {
                 console.error("Error getting category suggestion:", error);
-                showMessage("Could not get AI category suggestion.", true);
+                // Do not show a user-facing error for this non-critical feature
             } finally {
                 aiCategorySpinner.classList.add('hidden');
             }
@@ -2644,8 +2654,6 @@
         
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
-
-        aiCategorySuggestBtn.addEventListener('click', triggerAiCategorySuggestion);
 
         // --- NEW: Event Listener for the Split Mode Toggle Button ---
         toggleSplitModeBtn.addEventListener('click', () => {
