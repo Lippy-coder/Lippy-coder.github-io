@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -630,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.9 (Layout & Archive Fix)
+              Version 7.1.9 (Final Polish)
             </p>
         </footer>
     </div>
@@ -793,9 +794,6 @@
         const actionSheetArchiveBtn = document.getElementById('action-sheet-archive-btn');
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
-
-        // All the JS functions will go inside this script tag.
-        // The following is the complete, unabridged script.
 
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
@@ -2603,6 +2601,25 @@
                 showMessage(error.message);
             }
         }
+        
+        loginTabBtn.addEventListener('click', () => {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            loginTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            registerTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            registerTabBtn.classList.add('text-gray-500');
+            hideAuthMessage();
+        });
+
+
+        registerTabBtn.addEventListener('click', () => {
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            registerTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            loginTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            loginTabBtn.classList.add('text-gray-500');
+            hideAuthMessage();
+        });
 
         expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
