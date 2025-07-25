@@ -1011,9 +1011,11 @@
                 }
 
                 const allMemberUids = [...new Set(
-                    trips.flatMap(trip => trip.members.filter(m => m.status === 'active').map(m => m.uid))
+                    trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
-                await fetchUserProfiles(allMemberUids);
+                if (allMemberUids.length > 0) {
+                    await fetchUserProfiles(allMemberUids);
+                }
                 
                 await renderTrips(trips);
 
@@ -1051,7 +1053,7 @@
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
 
-                const memberAvatars = trip.members.slice(0, 4).map(member => {
+                const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
                         const profile = userProfilesCache.get(member.uid);
                         if (profile && profile.photoURL) {
@@ -1075,7 +1077,7 @@
                             ${archivedBadge}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
-                                ${trip.members.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.members.length - 4}</div>` : ''}
+                                ${trip.members && trip.members.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.members.length - 4}</div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1164,7 +1166,9 @@
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
-                    balances.set(memberId, (balances.get(memberId) || 0) - share);
+                    if(balances.has(memberId)) {
+                        balances.set(memberId, (balances.get(memberId) || 0) - share);
+                    }
                 }
             });
             const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
@@ -2323,3 +2327,5 @@
     </script>
 </body>
 </html>
+
+
