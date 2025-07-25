@@ -687,7 +687,7 @@
         let remainderAssignments = new Set(); // To hold UIDs for the remainder
 
 
-        // --- DOM Element References (All references remain the same) ---
+        // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
         const allModals = document.querySelectorAll('.modal-overlay');
         const authView = document.getElementById('auth-view');
@@ -795,11 +795,18 @@
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
 
-        // --- All functions from here down are included in full ---
 
-        const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
-        const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
+        // Currency Symbol Helper
+        const currencySymbols = {
+            GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
+        };
+        const allCurrencies = {
+            'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)',
+            'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)'
+        };
 
+
+        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -808,17 +815,21 @@
             return `${dateString}T${timeString}`;
         }
         
+        // --- NEW/FIXED: Helper function to set current datetime in local timezone ---
         function getCurrentLocalDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
         }
 
+
+        // --- UI Logic ---
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
-            allModals.forEach(modal => modal.classList.add('hidden-view'));
+            allModals.forEach(modal => modal.classList.add('hidden-view')); // Close all modals on view change
             document.getElementById(viewId).classList.remove('hidden-view');
         }
+
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -827,10 +838,12 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
+
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
+
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -844,9 +857,12 @@
             }
         }
 
+
+        // --- View Navigation & Trip Selection ---
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
+
 
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
@@ -862,12 +878,15 @@
             showView('trip-detail-view');
         }
 
+
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
 
+
+        // --- User Profile Management ---
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
             if (profilesToFetch.length > 0) {
@@ -884,6 +903,7 @@
             });
             return profiles;
         }
+
 
         async function loadUserPreferences(userId) {
             try {
@@ -908,6 +928,7 @@
             }
         }
 
+
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -918,12 +939,15 @@
             }
         }
 
+
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
-            profileArea.innerHTML = '';
+            profileArea.innerHTML = ''; // Clear previous content
+
 
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
+
 
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
@@ -938,6 +962,7 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
+
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
@@ -968,9 +993,11 @@
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
+
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
+
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
@@ -989,6 +1016,7 @@
                 }
             });
 
+
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1005,6 +1033,7 @@
                 listenForTrips(auth.currentUser.uid);
             });
         }
+
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -1024,6 +1053,8 @@
             }
         });
 
+
+        // --- Trip Management ---
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
@@ -1037,6 +1068,7 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
+
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1046,11 +1078,13 @@
                 
                 await renderTrips(trips);
 
+
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
+
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1068,6 +1102,7 @@
                 const isSettled = trip.isSettled || false;
                 const isArchived = trip.isArchived || false;
 
+
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1075,10 +1110,12 @@
                     bgClass = 'bg-green-100';
                 }
 
+
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
+
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1092,6 +1129,7 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
+
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1114,9 +1152,11 @@
                     selectTrip(trip);
                 });
 
+
                 tripsList.appendChild(tripElement);
             });
         }
+
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -1127,9 +1167,11 @@
                 let avatarHTML = '';
                 let nameHTML = '';
 
+
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
+
 
                     if (profile.photoURL) {
                         avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
@@ -1138,6 +1180,7 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+
 
                 } else if (member.status === 'pending') {
                     avatarHTML = `
@@ -1154,6 +1197,8 @@
             }
         }
 
+
+        // --- Expense Management ---
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
             const q = query(expensesRef);
@@ -1526,6 +1571,12 @@
                 let finalBaseSplits = {};
                 let finalPendingSplits = {};
 
+                let exchangeRate = 1;
+                if (originalCurrency !== baseCurrency) {
+                    const rateData = await getExchangeRate(originalCurrency, baseCurrency);
+                    exchangeRate = rateData.conversion_rate;
+                }
+
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
 
                 if (isItemizedMode) {
@@ -1533,46 +1584,20 @@
                     finalBaseSplits = memberShares;
                     finalPendingSplits = pendingShares;
                 } else {
-                    const activeOriginalSplits = new Map();
-                    const pendingOriginalSplits = new Map();
-                    let originalSplitSum = 0;
-
                     expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
                         const group = cb.closest('.split-input-group');
                         const status = group.dataset.status;
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
-                        
+                        const baseShare = parseFloat((share * exchangeRate).toFixed(2));
+
                         if (status === 'active') {
-                            activeOriginalSplits.set(group.dataset.uid, share);
+                            finalBaseSplits[group.dataset.uid] = baseShare;
                         } else if (status === 'pending') {
-                            pendingOriginalSplits.set(group.dataset.email, share);
+                            finalPendingSplits[group.dataset.email] = baseShare;
                         }
-                        originalSplitSum += share;
-                    });
-
-                    if (activeOriginalSplits.size === 0 && pendingOriginalSplits.size === 0) throw new Error("Expense must be split with at least one person.");
-                    if (Math.abs(originalAmount - originalSplitSum) > 0.015) throw new Error("The split amounts do not add up to the total expense.");
-                    
-                    let exchangeRate = 1;
-                    if (originalCurrency !== baseCurrency) {
-                        const rateData = await getExchangeRate(originalCurrency, baseCurrency);
-                        exchangeRate = rateData.conversion_rate;
-                    }
-                    
-                    activeOriginalSplits.forEach((originalShare, uid) => {
-                        finalBaseSplits[uid] = parseFloat((originalShare * exchangeRate).toFixed(2));
-                    });
-
-                    pendingOriginalSplits.forEach((originalShare, email) => {
-                        finalPendingSplits[email] = parseFloat((originalShare * exchangeRate).toFixed(2));
                     });
                 }
-
-                let exchangeRate = 1;
-                if (originalCurrency !== baseCurrency) {
-                    const rateData = await getExchangeRate(originalCurrency, baseCurrency);
-                    exchangeRate = rateData.conversion_rate;
-                }
+                
                 const totalBaseAmount = originalAmount * exchangeRate;
                 
                 const newExpense = {
@@ -2080,7 +2105,7 @@
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
                 
-                await handleCurrencyChange();
+                await handleCurrencyChange(); // This will also update currency symbols now
                 autoDistributeAmount();
                 triggerAiCategorySuggestion();
 
@@ -2288,19 +2313,25 @@
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBase = 0;
+            const originalCurrency = currentItemization.currency;
+            
             for (const uid in memberShares) {
                 if (memberShares[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${memberShares[uid].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
+                    const shareInOriginal = memberShares[uid] / currentItemization.exchangeRate;
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal.toFixed(2)} ${originalCurrency}</span></div>`;
                     totalAssignedInBase += memberShares[uid];
                 }
             }
+
             for (const email in pendingShares) {
                 if (pendingShares[email] > 0) {
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-500"><span class="italic truncate">${email}</span><span class="font-medium italic">${pendingShares[email].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
+                    const shareInOriginal = pendingShares[email] / currentItemization.exchangeRate;
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-500"><span class="italic truncate">${email}</span><span class="font-medium italic">${shareInOriginal.toFixed(2)} ${originalCurrency}</span></div>`;
                     totalAssignedInBase += pendingShares[email];
                 }
             }
+
             itemizedSummaryDiv.innerHTML += summaryHTML;
             const totalInBase = currentItemization.total * currentItemization.exchangeRate;
             const difference = totalInBase - totalAssignedInBase;
@@ -2311,7 +2342,8 @@
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                validationEl.textContent = `Unassigned: ${difference.toFixed(2)} ${currentTrip.baseCurrency}`;
+                const diffInOriginal = difference / currentItemization.exchangeRate;
+                validationEl.textContent = `Unassigned: ${diffInOriginal.toFixed(2)} ${originalCurrency}`;
                 validationEl.className += ' text-red-600';
                 submitExpenseBtn.disabled = true;
             }
@@ -2335,6 +2367,14 @@
             loginTabBtn.classList.add('text-gray-500');
             hideAuthMessage();
         });
+
+        function updateSplitInputCurrency() {
+            const selectedCurrency = expenseCurrencySelect.value;
+            const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
+            expenseSplitBetweenDiv.querySelectorAll('.currency-symbol').forEach(span => {
+                span.textContent = symbol;
+            });
+        }
 
         function populateExpenseModal() {
             if (!currentTrip) return;
@@ -2376,17 +2416,18 @@
                         const memberId = `split-member-${member.uid}`;
                         group.dataset.uid = member.uid;
                         group.dataset.status = 'active';
-                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm">${profile.displayName}</span></label><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm">${profile.displayName}</span></label><div class="relative"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                         expenseSplitBetweenDiv.appendChild(group);
                     }
                 } else if (member.status === 'pending') {
                     const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`;
                     group.dataset.email = member.email;
                     group.dataset.status = 'pending';
-                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                     expenseSplitBetweenDiv.appendChild(group);
                 }
             });
+            updateSplitInputCurrency();
             addSplitInputListeners();
         }
 
@@ -2428,7 +2469,9 @@
 
             checkedSharers.forEach((group, index) => {
                 const amountInput = group.querySelector('input[type="number"]');
-                amountInput.value = (shares[index] / 100).toFixed(2);
+                const originalIndex = allSharers.indexOf(group);
+                const shareIndex = checkedSharers.indexOf(group);
+                amountInput.value = (shares[shareIndex] / 100).toFixed(2);
             });
             
             validateSplitTotal();
@@ -2476,6 +2519,8 @@
             const selectedCurrency = expenseCurrencySelect.value;
             const baseCurrency = currentTrip.baseCurrency;
             const amount = parseFloat(expenseAmountInput.value);
+
+            updateSplitInputCurrency(); // Update UI symbols whenever currency changes
 
             if (selectedCurrency === baseCurrency || !amount) {
                 fxConversionDisplay.innerHTML = '';
