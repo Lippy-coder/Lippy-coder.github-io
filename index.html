@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.5 (Remainder & Itemization Fix)
+              Version 7.1.6 (Fair Remainder Fix)
             </p>
         </footer>
     </div>
@@ -687,7 +687,7 @@
         let remainderAssignments = new Set(); // To hold UIDs for the remainder
 
 
-        // --- DOM Element References ---
+        // --- DOM Element References (All references remain the same) ---
         const allViews = document.querySelectorAll('.view');
         const allModals = document.querySelectorAll('.modal-overlay');
         const authView = document.getElementById('auth-view');
@@ -795,18 +795,11 @@
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
 
+        // --- All functions from here down are included in full ---
 
-        // Currency Symbol Helper
-        const currencySymbols = {
-            GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
-        };
-        const allCurrencies = {
-            'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)',
-            'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)'
-        };
+        const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
+        const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
-
-        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -815,21 +808,17 @@
             return `${dateString}T${timeString}`;
         }
         
-        // --- NEW/FIXED: Helper function to set current datetime in local timezone ---
         function getCurrentLocalDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
         }
 
-
-        // --- UI Logic ---
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
-            allModals.forEach(modal => modal.classList.add('hidden-view')); // Close all modals on view change
+            allModals.forEach(modal => modal.classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
         }
-
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -838,12 +827,10 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
-
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
-
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -857,12 +844,9 @@
             }
         }
 
-
-        // --- View Navigation & Trip Selection ---
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
-
 
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
@@ -878,15 +862,12 @@
             showView('trip-detail-view');
         }
 
-
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
 
-
-        // --- User Profile Management ---
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
             if (profilesToFetch.length > 0) {
@@ -903,7 +884,6 @@
             });
             return profiles;
         }
-
 
         async function loadUserPreferences(userId) {
             try {
@@ -928,7 +908,6 @@
             }
         }
 
-
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -939,15 +918,12 @@
             }
         }
 
-
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
-            profileArea.innerHTML = ''; // Clear previous content
-
+            profileArea.innerHTML = '';
 
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
-
 
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
@@ -962,7 +938,6 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
-
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
@@ -993,11 +968,9 @@
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
-
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
-
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
@@ -1016,7 +989,6 @@
                 }
             });
 
-
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1033,7 +1005,6 @@
                 listenForTrips(auth.currentUser.uid);
             });
         }
-
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -1053,11 +1024,8 @@
             }
         });
 
-
-        // --- Trip Management ---
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
-            // ROBUST QUERY: Use the simple 'memberUids' array for querying.
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
                 let trips = [];
@@ -1069,7 +1037,6 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
-
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1079,13 +1046,11 @@
                 
                 await renderTrips(trips);
 
-
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
-
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1103,7 +1068,6 @@
                 const isSettled = trip.isSettled || false;
                 const isArchived = trip.isArchived || false;
 
-
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1111,12 +1075,10 @@
                     bgClass = 'bg-green-100';
                 }
 
-
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
-
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1130,7 +1092,6 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
-
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1153,11 +1114,9 @@
                     selectTrip(trip);
                 });
 
-
                 tripsList.appendChild(tripElement);
             });
         }
-
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -1168,11 +1127,9 @@
                 let avatarHTML = '';
                 let nameHTML = '';
 
-
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
-
 
                     if (profile.photoURL) {
                         avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
@@ -1181,7 +1138,6 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
-
 
                 } else if (member.status === 'pending') {
                     avatarHTML = `
@@ -1198,8 +1154,6 @@
             }
         }
 
-
-        // --- Expense Management ---
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
             const q = query(expensesRef);
@@ -1337,7 +1291,6 @@
             tripItemsList.appendChild(paymentWrapper);
         }
         
-        // --- Modal Logic & Form Submissions ---
         function openModal(modalElement) { document.body.classList.add('modal-open'); modalElement.classList.remove('hidden-view'); }
         function closeModal(modalElement) { document.body.classList.remove('modal-open'); modalElement.classList.add('hidden-view'); }
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
@@ -1461,7 +1414,7 @@
 
             if (invitationsSnapshot.empty) {
                 console.log(`No pending invitations found for ${userEmail}. This registration will be rolled back.`);
-                return false; // Indicate failure
+                return false;
             }
 
             const batch = writeBatch(db);
@@ -1492,7 +1445,7 @@
 
             await batch.commit();
             showMessage("You've been added to your pending trips!", false);
-            return true; // Indicate success
+            return true;
         }
 
         const handleRegister = async () => {
@@ -1572,7 +1525,6 @@
 
                 let finalBaseSplits = {};
                 let finalPendingSplits = {};
-                let activeSharerUIDs = [];
 
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
 
@@ -1580,7 +1532,6 @@
                     const { memberShares, pendingShares } = calculateItemizedShares();
                     finalBaseSplits = memberShares;
                     finalPendingSplits = pendingShares;
-                    activeSharerUIDs = Object.keys(memberShares);
                 } else {
                     const activeOriginalSplits = new Map();
                     const pendingOriginalSplits = new Map();
@@ -1615,8 +1566,6 @@
                     pendingOriginalSplits.forEach((originalShare, email) => {
                         finalPendingSplits[email] = parseFloat((originalShare * exchangeRate).toFixed(2));
                     });
-                    
-                    activeSharerUIDs = Array.from(activeOriginalSplits.keys());
                 }
 
                 let exchangeRate = 1;
@@ -1625,17 +1574,6 @@
                     exchangeRate = rateData.conversion_rate;
                 }
                 const totalBaseAmount = originalAmount * exchangeRate;
-                
-                let calculatedBaseSum = 0;
-                Object.values(finalBaseSplits).forEach(share => calculatedBaseSum += share);
-                Object.values(finalPendingSplits).forEach(share => calculatedBaseSum += share);
-
-                const remainder = parseFloat((totalBaseAmount - calculatedBaseSum).toFixed(2));
-
-                if (Math.abs(remainder) > 0 && activeSharerUIDs.length > 0) {
-                    const randomUid = activeSharerUIDs[Math.floor(Math.random() * activeSharerUIDs.length)];
-                    finalBaseSplits[randomUid] = parseFloat((finalBaseSplits[randomUid] + remainder).toFixed(2));
-                }
                 
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
@@ -1669,7 +1607,7 @@
                 submitExpenseBtn.disabled = false;
             }
         };
-
+        
         const handleProfilePicUpload = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -2036,20 +1974,14 @@
         }
 
         function getLanguageForCurrency(currencyCode) {
-            const languageMap = {
-                'JPY': 'Japanese',
-                'CNY': 'Chinese',
-            };
+            const languageMap = { 'JPY': 'Japanese', 'CNY': 'Chinese' };
             return languageMap[currencyCode] || 'English';
         }
 
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    userLocation = {
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude
-                    };
+                    userLocation = { lat: position.coords.latitude, lon: position.coords.longitude };
                     console.log('Location acquired:', userLocation);
                 },
                 (error) => {
@@ -2062,12 +1994,8 @@
         async function openCameraView() {
             openModal(aiScanModal);
             try {
-                if (cameraStream) {
-                    cameraStream.getTracks().forEach(track => track.stop());
-                }
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
+                if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); }
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 videoElement.srcObject = cameraStream;
                 videoElement.play();
             } catch (err) {
@@ -2078,9 +2006,7 @@
         }
 
         function closeCameraView() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
+            if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); }
             videoElement.srcObject = null;
             closeModal(aiScanModal);
         }
@@ -2092,10 +2018,7 @@
             const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
             const prompt = `Analyze this receipt image. Extract the merchant name, total amount, currency, transactionDate (YYYY-MM-DD), transactionTime (HH:MM 24-hour), and all individual line items. IMPORTANT: For the 'currency' field, return the 3-letter ISO code ONLY if it is explicitly printed on the receipt. If no currency code or symbol (like $, £, €) is visible, return null for the currency field. For line items, if a quantity is indicated (e.g., '3 x Water'), expand it into multiple separate items in the JSON. Translate line item descriptions into ${targetLanguage}. List tax or tip as separate line items. Provide the output as a single, valid JSON object and nothing else.`;
 
-            const payload = {
-                prompt: prompt,
-                image: base64Image
-            };
+            const payload = { prompt, image: base64Image };
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -2194,11 +2117,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const options = {
-              maxSizeMB: 2,
-              maxWidthOrHeight: 1920,
-              useWebWorker: true,
-            };
+            const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: true };
 
             try {
                 loadingText.textContent = "Compressing image...";
@@ -2225,9 +2144,7 @@
         
         async function triggerAiCategorySuggestion() {
             const merchantName = document.getElementById('expense-description').value;
-            if (!merchantName || merchantName.length < 3) {
-                return;
-            }
+            if (!merchantName || merchantName.length < 3) return;
             
             aiCategorySpinner.innerHTML = `<div class="mini-spinner"></div><span class="ml-2 text-sm text-indigo-600">Getting suggestion...</span>`;
             aiCategorySpinner.classList.remove('hidden');
@@ -2254,7 +2171,6 @@
                 } else {
                      console.warn(`AI suggested "${suggestedCategory}", but it's not in the list.`);
                 }
-
             } catch (error) {
                 console.error("Error getting category suggestion:", error);
             } finally {
@@ -2264,23 +2180,18 @@
         
         const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000);
 
-        fabToggle.addEventListener('click', () => {
-            fabContainer.classList.toggle('open');
-        });
-
+        fabToggle.addEventListener('click', () => { fabContainer.classList.toggle('open'); });
         fabManualAdd.addEventListener('click', () => {
             fabContainer.classList.remove('open');
             addExpenseForm.reset();
             populateExpenseModal();
             openModal(addExpenseModal);
         });
-
         fabCameraScan.addEventListener('click', () => {
             fabContainer.classList.remove('open');
             getUserLocation();
             openCameraView();
         });
-
         fabGalleryUpload.addEventListener('click', () => {
             fabContainer.classList.remove('open');
             getUserLocation();
@@ -2288,7 +2199,6 @@
         });
         
         receiptUploadInput.addEventListener('change', handleReceiptFileUpload);
-        
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
@@ -2309,12 +2219,10 @@
 
         function renderItemizationUI(itemizationData) {
             itemizedListDiv.innerHTML = '';
-
             itemizationData.lineItems.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'item-row p-2 bg-white rounded-md flex justify-between items-center';
                 itemEl.dataset.index = index;
-                
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     let avatarContainer = '';
                     if (member.status === 'active') {
@@ -2334,14 +2242,7 @@
                     }
                     return avatarContainer;
                 }).join('');
-
-                itemEl.innerHTML = `
-                    <div class="flex-grow pr-4">
-                        <p class="font-medium text-gray-800">${item.description}</p>
-                        <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
-                    </div>
-                    <div class="flex space-x-1">${memberAvatarsHTML}</div>
-                `;
+                itemEl.innerHTML = `<div class="flex-grow pr-4"><p class="font-medium text-gray-800">${item.description}</p><p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p></div><div class="flex space-x-1">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(itemEl);
             });
             updateItemizationSummary();
@@ -2350,10 +2251,8 @@
         itemizedListDiv.addEventListener('click', (e) => {
             const avatarContainer = e.target.closest('[data-uid], [data-email]');
             if (!avatarContainer) return;
-            
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
-
             avatar.classList.toggle('assigned');
             updateItemizationSummary();
         });
@@ -2361,15 +2260,12 @@
         function calculateItemizedShares() {
             const memberShares = {};
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
-            
             const pendingShares = {};
             currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
-
             document.querySelectorAll('.item-row').forEach(row => {
                 const itemIndex = parseInt(row.dataset.index, 10);
                 const item = currentItemization.lineItems[itemIndex];
                 const itemPriceInBase = item.price * currentItemization.exchangeRate;
-
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
                 if (assignedAvatars.length > 0) {
                     const sharePerPerson = itemPriceInBase / assignedAvatars.length;
@@ -2377,22 +2273,13 @@
                         const container = avatarWrapper.closest('[data-uid], [data-email]');
                         const uid = container.dataset.uid;
                         const email = container.dataset.email;
-
-                        if (uid) {
-                            memberShares[uid] += sharePerPerson;
-                        } else if (email) {
-                            pendingShares[email] = (pendingShares[email] || 0) + sharePerPerson;
-                        }
+                        if (uid) { memberShares[uid] += sharePerPerson; }
+                        else if (email) { pendingShares[email] = (pendingShares[email] || 0) + sharePerPerson; }
                     });
                 }
             });
-
-            for (const uid in memberShares) {
-                memberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
-            }
-            for (const email in pendingShares) {
-                pendingShares[email] = parseFloat(pendingShares[email].toFixed(2));
-            }
+            for (const uid in memberShares) { memberShares[uid] = parseFloat(memberShares[uid].toFixed(2)); }
+            for (const email in pendingShares) { pendingShares[email] = parseFloat(pendingShares[email].toFixed(2)); }
             return { memberShares, pendingShares };
         }
 
@@ -2401,37 +2288,22 @@
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBase = 0;
-            
             for (const uid in memberShares) {
                 if (memberShares[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    summaryHTML += `
-                        <div class="flex justify-between text-sm text-gray-700">
-                            <span>${profile.displayName}</span>
-                            <span class="font-medium">${memberShares[uid].toFixed(2)} ${currentTrip.baseCurrency}</span>
-                        </div>
-                    `;
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${memberShares[uid].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
                     totalAssignedInBase += memberShares[uid];
                 }
             }
-
             for (const email in pendingShares) {
                 if (pendingShares[email] > 0) {
-                    summaryHTML += `
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span class="italic truncate">${email}</span>
-                            <span class="font-medium italic">${pendingShares[email].toFixed(2)} ${currentTrip.baseCurrency}</span>
-                        </div>
-                    `;
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-500"><span class="italic truncate">${email}</span><span class="font-medium italic">${pendingShares[email].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
                     totalAssignedInBase += pendingShares[email];
                 }
             }
-
             itemizedSummaryDiv.innerHTML += summaryHTML;
-
             const totalInBase = currentItemization.total * currentItemization.exchangeRate;
             const difference = totalInBase - totalAssignedInBase;
-            
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
             if (Math.abs(difference) < 0.02) {
@@ -2466,16 +2338,13 @@
 
         function populateExpenseModal() {
             if (!currentTrip) return;
-
             currentItemization = null;
             remainderAssignments.clear();
             itemizedSplitSection.classList.add('hidden');
             equalSplitSection.classList.remove('hidden');
             splitModeToggleContainer.classList.add('hidden');
             fxConversionDisplay.innerHTML = '';
-            
             document.getElementById('expense-occurred-at').value = getCurrentLocalDateTime();
-
             expenseCurrencySelect.innerHTML = '';
             for (const code in allCurrencies) {
                 const option = document.createElement('option');
@@ -2484,7 +2353,6 @@
                 expenseCurrencySelect.appendChild(option);
             }
             expenseCurrencySelect.value = currentTrip.baseCurrency;
-
             expensePaidBySelect.innerHTML = '';
             currentTrip.members.forEach(member => {
                 if (member.status === 'active') {
@@ -2498,51 +2366,72 @@
                 }
             });
             expensePaidBySelect.value = auth.currentUser.uid;
-
             expenseSplitBetweenDiv.innerHTML = '';
             currentTrip.members.forEach(member => {
                 const group = document.createElement('div');
                 group.className = 'split-input-group flex items-center justify-between p-2 bg-white rounded-md';
-
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (profile) {
                         const memberId = `split-member-${member.uid}`;
                         group.dataset.uid = member.uid;
                         group.dataset.status = 'active';
-
-                        group.innerHTML = `
-                            <label for="${memberId}" class="flex items-center cursor-pointer flex-grow">
-                                <input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3">
-                                <span class="text-sm">${profile.displayName}</span>
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span>
-                                <input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00">
-                            </div>
-                        `;
+                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm">${profile.displayName}</span></label><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                         expenseSplitBetweenDiv.appendChild(group);
                     }
                 } else if (member.status === 'pending') {
                     const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`;
                     group.dataset.email = member.email;
                     group.dataset.status = 'pending';
-
-                    group.innerHTML = `
-                        <label for="${memberId}" class="flex items-center cursor-pointer flex-grow">
-                            <input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3">
-                            <span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span>
-                            <input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00">
-                        </div>
-                    `;
+                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">${currencySymbols[currentTrip.baseCurrency] || '$'}</span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                     expenseSplitBetweenDiv.appendChild(group);
                 }
             });
-            
             addSplitInputListeners();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function autoDistributeAmount() {
+            const totalAmount = parseFloat(expenseAmountInput.value) || 0;
+            const allSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group'));
+            const checkedSharers = allSharers.filter(group => group.querySelector('input[type="checkbox"]:checked'));
+            
+            allSharers.forEach(group => {
+                group.querySelector('input[type="number"]').value = '0.00';
+            });
+
+            if (checkedSharers.length === 0) {
+                validateSplitTotal();
+                return;
+            }
+
+            const totalCents = Math.round(totalAmount * 100);
+            const numSharers = checkedSharers.length;
+            const baseShareCents = Math.floor(totalCents / numSharers);
+            let remainderCents = totalCents % numSharers;
+
+            const shares = Array(numSharers).fill(baseShareCents);
+            
+            let sharerIndices = Array.from(Array(numSharers).keys());
+            shuffleArray(sharerIndices);
+            
+            for(let i = 0; i < remainderCents; i++) {
+                const randomIndex = sharerIndices[i];
+                shares[randomIndex]++;
+            }
+
+            checkedSharers.forEach((group, index) => {
+                const amountInput = group.querySelector('input[type="number"]');
+                amountInput.value = (shares[index] / 100).toFixed(2);
+            });
+            
+            validateSplitTotal();
         }
 
         function addSplitInputListeners() {
@@ -2560,24 +2449,6 @@
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 autoDistributeAmount();
             });
-        }
-
-        function autoDistributeAmount() {
-            const totalAmount = parseFloat(expenseAmountInput.value) || 0;
-            const checkedBoxes = expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked');
-            const memberCount = checkedBoxes.length;
-            const share = memberCount > 0 ? (totalAmount / memberCount).toFixed(2) : 0;
-
-            expenseSplitBetweenDiv.querySelectorAll('.split-input-group').forEach(group => {
-                const checkbox = group.querySelector('input[type="checkbox"]');
-                const amountInput = group.querySelector('input[type="number"]');
-                if (checkbox.checked) {
-                    amountInput.value = share;
-                } else {
-                    amountInput.value = '0.00';
-                }
-            });
-            validateSplitTotal();
         }
 
         function validateSplitTotal() {
