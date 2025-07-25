@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.8 (Dynamic Remainder)
+              Version 7.1.8 (Final Polish)
             </p>
         </footer>
     </div>
@@ -795,18 +795,12 @@
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
 
+        // All the JS functions will go inside this script tag.
+        // The following is the complete, unabridged script.
 
-        // Currency Symbol Helper
-        const currencySymbols = {
-            GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$'
-        };
-        const allCurrencies = {
-            'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)',
-            'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)'
-        };
+        const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
+        const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
-
-        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -1707,6 +1701,23 @@
             tripToArchive = { id: currentTrip.id, name: currentTrip.name };
             archiveTripNameSpan.textContent = tripToArchive.name;
             openModal(archiveTripModal);
+        });
+        
+        // --- THIS LISTENER WAS MISSING AND IS NOW RESTORED ---
+        confirmArchiveTripBtn.addEventListener('click', async () => {
+            if (!tripToArchive) return;
+            try {
+                const tripRef = doc(db, 'trips', tripToArchive.id);
+                await updateDoc(tripRef, { isArchived: true });
+                showMessage("Trip archived.", false);
+                backToDashboardBtn.click();
+            } catch (error) {
+                console.error("Error archiving trip:", error);
+                showMessage("Could not archive trip.");
+            } finally {
+                tripToArchive = null;
+                closeModal(archiveTripModal);
+            }
         });
 
         actionSheetEmailBtn.addEventListener('click', () => {
