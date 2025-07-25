@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.4 (Pending Share Fix)
+              Version 7.1.5 (Remainder & Itemization Fix)
             </p>
         </footer>
     </div>
@@ -806,6 +806,7 @@
         };
 
 
+        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -814,17 +815,21 @@
             return `${dateString}T${timeString}`;
         }
         
+        // --- NEW/FIXED: Helper function to set current datetime in local timezone ---
         function getCurrentLocalDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
         }
 
+
+        // --- UI Logic ---
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
-            allModals.forEach(modal => modal.classList.add('hidden-view'));
+            allModals.forEach(modal => modal.classList.add('hidden-view')); // Close all modals on view change
             document.getElementById(viewId).classList.remove('hidden-view');
         }
+
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -833,10 +838,12 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
+
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
+
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -850,9 +857,12 @@
             }
         }
 
+
+        // --- View Navigation & Trip Selection ---
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
+
 
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
@@ -868,12 +878,15 @@
             showView('trip-detail-view');
         }
 
+
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
 
+
+        // --- User Profile Management ---
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
             if (profilesToFetch.length > 0) {
@@ -890,6 +903,7 @@
             });
             return profiles;
         }
+
 
         async function loadUserPreferences(userId) {
             try {
@@ -914,6 +928,7 @@
             }
         }
 
+
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -924,12 +939,15 @@
             }
         }
 
+
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
-            profileArea.innerHTML = '';
+            profileArea.innerHTML = ''; // Clear previous content
+
 
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
+
 
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
@@ -944,6 +962,7 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
+
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
@@ -974,9 +993,11 @@
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
+
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
+
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
@@ -995,6 +1016,7 @@
                 }
             });
 
+
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1011,6 +1033,7 @@
                 listenForTrips(auth.currentUser.uid);
             });
         }
+
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -1030,8 +1053,11 @@
             }
         });
 
+
+        // --- Trip Management ---
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
+            // ROBUST QUERY: Use the simple 'memberUids' array for querying.
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
                 let trips = [];
@@ -1043,6 +1069,7 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
+
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1052,11 +1079,13 @@
                 
                 await renderTrips(trips);
 
+
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
+
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1074,6 +1103,7 @@
                 const isSettled = trip.isSettled || false;
                 const isArchived = trip.isArchived || false;
 
+
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1081,10 +1111,12 @@
                     bgClass = 'bg-green-100';
                 }
 
+
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
+
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1098,6 +1130,7 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
+
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1120,9 +1153,11 @@
                     selectTrip(trip);
                 });
 
+
                 tripsList.appendChild(tripElement);
             });
         }
+
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -1133,9 +1168,11 @@
                 let avatarHTML = '';
                 let nameHTML = '';
 
+
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
+
 
                     if (profile.photoURL) {
                         avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
@@ -1144,6 +1181,7 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+
 
                 } else if (member.status === 'pending') {
                     avatarHTML = `
@@ -1160,6 +1198,8 @@
             }
         }
 
+
+        // --- Expense Management ---
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
             const q = query(expensesRef);
@@ -1172,7 +1212,6 @@
                 showMessage("Could not load trip expenses.");
             });
         }
-
         function renderTripItems() {
             tripItemsList.innerHTML = '';
             const expenses = allTripExpenses.map(e => ({ type: 'expense', data: e, date: e.occurredAt.toDate() }));
@@ -1225,8 +1264,7 @@
                 else if (item.type === 'payment') { renderPaymentItem(item.data); }
             });
         }
-
-        // --- REVISED renderExpenseItem FUNCTION ---
+        
         function renderExpenseItem(expense) {
             const isDeleted = expense.isDeleted || false;
             const paidByMe = expense.paidBy === auth.currentUser.uid;
@@ -1244,7 +1282,6 @@
             const date = expense.occurredAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-            // Generate lines for ACTIVE members
             const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
                 const memberName = memberProfile ? memberProfile.displayName : 'Invited Member';
@@ -1253,7 +1290,6 @@
                 return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
             }).join('');
 
-            // Generate lines for PENDING members
             const pendingSplitLines = Object.keys(expense.pendingShares || {}).map(email => {
                 const baseShare = expense.pendingShares[email];
                 const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A';
@@ -1292,7 +1328,7 @@
             });
             tripItemsList.appendChild(expenseWrapper);
         }
-        
+
         function renderPaymentItem(payment) {
             const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>`;
             if (isDeleted) { paymentWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer payment-header"><p class="italic text-gray-500">Deleted Payment</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden payment-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60 flex items-center justify-between">${paymentDetailsHTML}</div></div>`; } 
@@ -1301,6 +1337,7 @@
             tripItemsList.appendChild(paymentWrapper);
         }
         
+        // --- Modal Logic & Form Submissions ---
         function openModal(modalElement) { document.body.classList.add('modal-open'); modalElement.classList.remove('hidden-view'); }
         function closeModal(modalElement) { document.body.classList.remove('modal-open'); modalElement.classList.add('hidden-view'); }
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
@@ -1472,21 +1509,17 @@
             let tempUser = null;
 
             try {
-                // STEP 1: Create the user account first.
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
 
-                // STEP 2: Now that the user is authenticated, check for a valid invitation.
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
 
-                // STEP 3: If no invitation is found, delete the user and throw an error.
                 if (invitationSnapshot.empty) {
                     throw new Error("INVITE_REQUIRED");
                 }
                 
-                // STEP 4: Invitation found. Proceed with creating the user profile and processing invites.
                 await updateProfile(tempUser, { displayName: displayName });
                 
                 await setDoc(doc(db, "users", tempUser.uid), {
@@ -1499,7 +1532,6 @@
                 
                 await processPendingInvitations(tempUser);
 
-                // STEP 5: Send verification email and sign out.
                 await sendEmailVerification(tempUser);
                 showAuthMessage("Success! A verification email has been sent. Please check your inbox and verify your email before logging in.");
                 await signOut(auth);
@@ -1521,7 +1553,6 @@
             }
         };
 
-        // --- REVISED handleAddExpense FUNCTION ---
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1540,21 +1571,17 @@
                 const paidBy = document.getElementById('expense-paid-by').value;
 
                 let finalBaseSplits = {};
-                let finalPendingSplits = {}; // New map for pending users
+                let finalPendingSplits = {};
+                let activeSharerUIDs = [];
 
-                if (currentItemization && !itemizedSplitSection.classList.contains('hidden')) {
-                    // This section would need updating to handle pending users if itemization is used with them.
-                    const memberShares = calculateItemizedShares();
-                    let totalCalculatedAmount = 0;
-                    for (const uid in memberShares) {
-                        totalCalculatedAmount += memberShares[uid];
-                    }
-                    if (Math.abs(totalCalculatedAmount - (currentItemization.total * currentItemization.exchangeRate)) > 0.02) {
-                        throw new Error("The assigned item totals do not match the receipt total. Please check assignments.");
-                    }
+                const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
+
+                if (isItemizedMode) {
+                    const { memberShares, pendingShares } = calculateItemizedShares();
                     finalBaseSplits = memberShares;
-                } 
-                else {
+                    finalPendingSplits = pendingShares;
+                    activeSharerUIDs = Object.keys(memberShares);
+                } else {
                     const activeOriginalSplits = new Map();
                     const pendingOriginalSplits = new Map();
                     let originalSplitSum = 0;
@@ -1588,6 +1615,8 @@
                     pendingOriginalSplits.forEach((originalShare, email) => {
                         finalPendingSplits[email] = parseFloat((originalShare * exchangeRate).toFixed(2));
                     });
+                    
+                    activeSharerUIDs = Array.from(activeOriginalSplits.keys());
                 }
 
                 let exchangeRate = 1;
@@ -1597,18 +1626,21 @@
                 }
                 const totalBaseAmount = originalAmount * exchangeRate;
                 
+                let calculatedBaseSum = 0;
+                Object.values(finalBaseSplits).forEach(share => calculatedBaseSum += share);
+                Object.values(finalPendingSplits).forEach(share => calculatedBaseSum += share);
+
+                const remainder = parseFloat((totalBaseAmount - calculatedBaseSum).toFixed(2));
+
+                if (Math.abs(remainder) > 0 && activeSharerUIDs.length > 0) {
+                    const randomUid = activeSharerUIDs[Math.floor(Math.random() * activeSharerUIDs.length)];
+                    finalBaseSplits[randomUid] = parseFloat((finalBaseSplits[randomUid] + remainder).toFixed(2));
+                }
+                
                 const newExpense = {
-                    description,
-                    occurredAt,
-                    category: category || null,
-                    createdAt: serverTimestamp(),
-                    paidBy,
+                    description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
                     amountDetails: { 
-                        originalAmount,
-                        originalCurrency,
-                        baseAmount: totalBaseAmount,
-                        baseCurrency,
-                        exchangeRate 
+                        originalAmount, originalCurrency, baseAmount: totalBaseAmount, baseCurrency, exchangeRate 
                     },
                     splitBetween: finalBaseSplits,
                     isDeleted: false
@@ -1638,18 +1670,15 @@
             }
         };
 
-
         const handleProfilePicUpload = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
 
             const user = auth.currentUser;
             if (!user) {
                 showMessage("You must be logged in to upload a photo.");
                 return;
             }
-
 
             const options = {
               maxSizeMB: 1,
@@ -1665,7 +1694,6 @@
                 const storagePath = `profile-pictures/${user.uid}`;
                 const storageRef = ref(storage, storagePath);
                 const uploadTask = uploadBytesResumable(storageRef, compressedFile);
-
 
                 uploadTask.on('state_changed', 
                   (snapshot) => {}, 
@@ -2012,7 +2040,7 @@
                 'JPY': 'Japanese',
                 'CNY': 'Chinese',
             };
-            return languageMap[currencyCode] || 'English'; // Default to English
+            return languageMap[currencyCode] || 'English';
         }
 
         function getUserLocation() {
@@ -2288,17 +2316,23 @@
                 itemEl.dataset.index = index;
                 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
-                    if (member.status !== 'active') return '';
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) return '';
-                    let avatar;
-                     if (profile.photoURL) {
-                        avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar">`;
-                    } else {
-                        const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
-                        avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">${initial}</div>`;
+                    let avatarContainer = '';
+                    if (member.status === 'active') {
+                        const profile = userProfilesCache.get(member.uid);
+                        if (!profile) return '';
+                        let avatar;
+                         if (profile.photoURL) {
+                            avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar">`;
+                        } else {
+                            const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
+                            avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">${initial}</div>`;
+                        }
+                        avatarContainer = `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
+                    } else if (member.status === 'pending') {
+                        const avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">?</div>`;
+                        avatarContainer = `<div data-email="${member.email}" title="${member.email}">${avatar}</div>`;
                     }
-                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
+                    return avatarContainer;
                 }).join('');
 
                 itemEl.innerHTML = `
@@ -2306,9 +2340,7 @@
                         <p class="font-medium text-gray-800">${item.description}</p>
                         <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
                     </div>
-                    <div class="flex space-x-1">
-                        ${memberAvatarsHTML}
-                    </div>
+                    <div class="flex space-x-1">${memberAvatarsHTML}</div>
                 `;
                 itemizedListDiv.appendChild(itemEl);
             });
@@ -2316,31 +2348,22 @@
         }
 
         itemizedListDiv.addEventListener('click', (e) => {
-            const avatarContainer = e.target.closest('[data-uid]');
+            const avatarContainer = e.target.closest('[data-uid], [data-email]');
             if (!avatarContainer) return;
             
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
 
-            const row = avatar.closest('.item-row, #remainder-row');
-            if (row && row.id === 'remainder-row') {
-                const uid = avatarContainer.dataset.uid;
-                if (remainderAssignments.has(uid)) {
-                    remainderAssignments.delete(uid);
-                } else {
-                    remainderAssignments.add(uid);
-                }
-            }
-            
             avatar.classList.toggle('assigned');
             updateItemizationSummary();
         });
         
         function calculateItemizedShares() {
             const memberShares = {};
-            currentTrip.members.forEach(member => {
-                if(member.status === 'active') memberShares[member.uid] = 0
-            });
+            currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
+            
+            const pendingShares = {};
+            currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
 
             document.querySelectorAll('.item-row').forEach(row => {
                 const itemIndex = parseInt(row.dataset.index, 10);
@@ -2351,81 +2374,30 @@
                 if (assignedAvatars.length > 0) {
                     const sharePerPerson = itemPriceInBase / assignedAvatars.length;
                     assignedAvatars.forEach(avatarWrapper => {
-                        const uid = avatarWrapper.closest('[data-uid]').dataset.uid;
-                        memberShares[uid] += sharePerPerson;
+                        const container = avatarWrapper.closest('[data-uid], [data-email]');
+                        const uid = container.dataset.uid;
+                        const email = container.dataset.email;
+
+                        if (uid) {
+                            memberShares[uid] += sharePerPerson;
+                        } else if (email) {
+                            pendingShares[email] = (pendingShares[email] || 0) + sharePerPerson;
+                        }
                     });
                 }
             });
-
-            const remainderRow = document.getElementById('remainder-row');
-            if (remainderRow) {
-                const remainderAmount = parseFloat(remainderRow.dataset.remainderAmount);
-                const remainderInBaseCurrency = remainderAmount * currentItemization.exchangeRate;
-
-                if (remainderAssignments.size > 0) {
-                    const sharePerPerson = remainderInBaseCurrency / remainderAssignments.size;
-                    remainderAssignments.forEach(uid => {
-                        memberShares[uid] += sharePerPerson;
-                    });
-                }
-            }
 
             for (const uid in memberShares) {
                 memberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
             }
-            return memberShares;
+            for (const email in pendingShares) {
+                pendingShares[email] = parseFloat(pendingShares[email].toFixed(2));
+            }
+            return { memberShares, pendingShares };
         }
 
         function updateItemizationSummary() {
-            const existingRemainderRow = document.getElementById('remainder-row');
-            if (existingRemainderRow) existingRemainderRow.remove();
-
-            let unassignedItemsTotal = 0;
-            currentItemization.lineItems.forEach((item, index) => {
-                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
-                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
-                    unassignedItemsTotal += item.price;
-                }
-            });
-
-            const itemizedSum = currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
-            const tipAndTaxRemainder = currentItemization.total - itemizedSum;
-            const totalRemainder = unassignedItemsTotal + tipAndTaxRemainder;
-
-            if (totalRemainder > 0.01) {
-                const remainderEl = document.createElement('div');
-                remainderEl.id = 'remainder-row';
-                remainderEl.className = 'p-2 bg-indigo-50 rounded-md flex justify-between items-center';
-                remainderEl.dataset.remainderAmount = totalRemainder.toFixed(2);
-                
-                const memberAvatarsHTML = currentTrip.members.map(member => {
-                    if (member.status !== 'active') return '';
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) return '';
-                    const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
-                    let avatar;
-                     if (profile.photoURL) {
-                        avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`;
-                    } else {
-                        const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
-                        avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${initial}</div>`;
-                    }
-                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
-                }).join('');
-
-                remainderEl.innerHTML = `
-                    <div class="flex-grow pr-4">
-                        <p class="font-medium text-indigo-800">Allocate Remainder</p>
-                        <p class="text-sm text-indigo-600">${totalRemainder.toFixed(2)} ${currentItemization.currency}</p>
-                    </div>
-                    <div class="flex space-x-1">
-                        ${memberAvatarsHTML}
-                    </div>
-                `;
-                itemizedListDiv.appendChild(remainderEl);
-            }
-
-            const memberShares = calculateItemizedShares();
+            const { memberShares, pendingShares } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBase = 0;
@@ -2433,16 +2405,28 @@
             for (const uid in memberShares) {
                 if (memberShares[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    const shareInOriginalCurrency = memberShares[uid] / currentItemization.exchangeRate;
                     summaryHTML += `
                         <div class="flex justify-between text-sm text-gray-700">
                             <span>${profile.displayName}</span>
-                            <span class="font-medium">${shareInOriginalCurrency.toFixed(2)} ${currentItemization.currency}</span>
+                            <span class="font-medium">${memberShares[uid].toFixed(2)} ${currentTrip.baseCurrency}</span>
                         </div>
                     `;
                     totalAssignedInBase += memberShares[uid];
                 }
             }
+
+            for (const email in pendingShares) {
+                if (pendingShares[email] > 0) {
+                    summaryHTML += `
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span class="italic truncate">${email}</span>
+                            <span class="font-medium italic">${pendingShares[email].toFixed(2)} ${currentTrip.baseCurrency}</span>
+                        </div>
+                    `;
+                    totalAssignedInBase += pendingShares[email];
+                }
+            }
+
             itemizedSummaryDiv.innerHTML += summaryHTML;
 
             const totalInBase = currentItemization.total * currentItemization.exchangeRate;
@@ -2455,8 +2439,7 @@
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                const differenceInOriginalCurrency = difference / currentItemization.exchangeRate;
-                validationEl.textContent = `Unassigned: ${differenceInOriginalCurrency.toFixed(2)} ${currentItemization.currency}`;
+                validationEl.textContent = `Unassigned: ${difference.toFixed(2)} ${currentTrip.baseCurrency}`;
                 validationEl.className += ' text-red-600';
                 submitExpenseBtn.disabled = true;
             }
@@ -2481,7 +2464,6 @@
             hideAuthMessage();
         });
 
-        // --- REVISED populateExpenseModal FUNCTION ---
         function populateExpenseModal() {
             if (!currentTrip) return;
 
@@ -2542,7 +2524,7 @@
                         expenseSplitBetweenDiv.appendChild(group);
                     }
                 } else if (member.status === 'pending') {
-                    const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`; // Create a valid ID from email
+                    const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`;
                     group.dataset.email = member.email;
                     group.dataset.status = 'pending';
 
