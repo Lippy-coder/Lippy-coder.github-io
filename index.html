@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.7 (Final Polish)
+              Version 7.1.8 (Dynamic Remainder)
             </p>
         </footer>
     </div>
@@ -806,6 +806,7 @@
         };
 
 
+        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -962,7 +963,7 @@
                         </div>
                     </label>
                     <label for="show-archived-toggle" class="flex items-center justify-between cursor-pointer">
-                        <span class="text-sm text-gray-700">Display archived trips</span>
+                        <span class="text-sm text-gray-700">Display Archived Trips</span>
                         <div class="relative">
                             <input type="checkbox" id="show-archived-toggle" class="sr-only toggle-switch">
                             <div class="block bg-gray-600 w-10 h-6 rounded-full"></div>
@@ -1081,10 +1082,12 @@
                     bgClass = 'bg-green-100';
                 }
 
-                tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
+                tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative`;
+                tripElement.style.backgroundColor = isArchived ? '#e5e7eb' : (isSettled ? '#dcfce7' : '#ffffff');
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
+                const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1094,20 +1097,20 @@
                         }
                         const initial = profile ? profile.displayName.charAt(0).toUpperCase() : '?';
                         return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
-                    } else { // Pending member
+                    } else {
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold ${isArchived ? 'text-gray-500' : 'text-gray-800'}">${trip.name}</h3>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-bold ${isArchived ? 'text-gray-500' : 'text-gray-800'} truncate">${trip.name}</h3>
                             <p class="text-sm ${isArchived ? 'text-gray-400' : 'text-gray-500'}">Base Currency: ${trip.baseCurrency}</p>
                         </div>
-                        <div class="flex items-center space-x-4 pl-4">
+                        <div class="flex items-center space-x-2 pl-2 flex-shrink-0">
                             ${settledBadge}
-                            ${archivedBadge}
+                            ${unarchiveButton || archivedBadge}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
                                 ${trip.members && trip.members.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.members.length - 4}</div>` : ''}
@@ -1117,12 +1120,36 @@
                 `;
                 
                 tripElement.addEventListener('click', (e) => {
+                    if (e.target.closest('.unarchive-btn')) {
+                        return; // Prevent trip selection when clicking unarchive
+                    }
                     selectTrip(trip);
                 });
 
                 tripsList.appendChild(tripElement);
             });
         }
+        
+        const handleUnarchiveTrip = async (tripId) => {
+            if (!tripId) return;
+            try {
+                const tripRef = doc(db, "trips", tripId);
+                await updateDoc(tripRef, { isArchived: false });
+                showMessage("Trip has been unarchived!", false);
+            } catch (error) {
+                console.error("Error unarchiving trip:", error);
+                showMessage("Could not unarchive the trip.");
+            }
+        };
+
+        tripsList.addEventListener('click', (e) => {
+            const unarchiveBtn = e.target.closest('.unarchive-btn');
+            if (unarchiveBtn) {
+                e.stopPropagation(); // Prevent the trip card's main click event
+                const tripId = unarchiveBtn.dataset.tripId;
+                handleUnarchiveTrip(tripId);
+            }
+        });
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -2207,8 +2234,15 @@
             itemizedListDiv.innerHTML = '';
             itemizationData.lineItems.forEach((item, index) => {
                 const itemEl = document.createElement('div');
-                itemEl.className = 'item-row p-2 bg-white rounded-md flex justify-between items-center';
+                itemEl.className = 'item-row bg-white rounded-md p-2 flex flex-col';
                 itemEl.dataset.index = index;
+
+                const detailsHTML = `
+                    <div class="w-full flex justify-between items-center">
+                        <p class="font-medium text-gray-800">${item.description}</p>
+                        <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
+                    </div>`;
+
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     let avatarContainer = '';
                     if (member.status === 'active') {
@@ -2228,7 +2262,8 @@
                     }
                     return avatarContainer;
                 }).join('');
-                itemEl.innerHTML = `<div class="flex-grow pr-4"><p class="font-medium text-gray-800">${item.description}</p><p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p></div><div class="flex space-x-1">${memberAvatarsHTML}</div>`;
+
+                itemEl.innerHTML = `${detailsHTML}<div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(itemEl);
             });
             updateItemizationSummary();
@@ -2309,13 +2344,13 @@
             });
 
             const tipAndTaxRemainder = currentItemization.total - currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
-            const totalRemainder = tipAndTaxRemainder + unassignedItemsTotal;
+            const totalRemainderToAllocate = tipAndTaxRemainder + unassignedItemsTotal;
 
-            if (totalRemainder > 0.01) {
+            if (totalRemainderToAllocate > 0.01) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
-                remainderEl.className = 'p-2 bg-green-50 rounded-md flex justify-between items-center';
-                remainderEl.dataset.remainderAmount = totalRemainder.toFixed(2);
+                remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col';
+                remainderEl.dataset.remainderAmount = totalRemainderToAllocate.toFixed(2);
                 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     let identifier, title, avatar, container;
@@ -2343,11 +2378,11 @@
                 }).join('');
 
                 remainderEl.innerHTML = `
-                    <div class="flex-grow pr-4">
+                    <div class="w-full flex justify-between items-center">
                         <p class="font-medium text-green-800">Allocate Remainder</p>
-                        <p class="text-sm text-green-600">${totalRemainder.toFixed(2)} ${currentItemization.currency}</p>
+                        <p class="text-sm text-green-600">${totalRemainderToAllocate.toFixed(2)} ${currentItemization.currency}</p>
                     </div>
-                    <div class="flex space-x-1">${memberAvatarsHTML}</div>
+                    <div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>
                 `;
                 itemizedListDiv.appendChild(remainderEl);
             }
@@ -2439,14 +2474,14 @@
                         const memberId = `split-member-${member.uid}`;
                         group.dataset.uid = member.uid;
                         group.dataset.status = 'active';
-                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm">${profile.displayName}</span></label><div class="relative"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm truncate">${profile.displayName}</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                         expenseSplitBetweenDiv.appendChild(group);
                     }
                 } else if (member.status === 'pending') {
                     const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`;
                     group.dataset.email = member.email;
                     group.dataset.status = 'pending';
-                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-28 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                     expenseSplitBetweenDiv.appendChild(group);
                 }
             });
