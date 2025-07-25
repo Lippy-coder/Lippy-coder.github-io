@@ -609,7 +609,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.0.0 (Invitation System)
+              Version 7.1.0 (Robust Queries)
             </p>
         </footer>
     </div>
@@ -667,7 +667,6 @@
         const dashboardView = document.getElementById('dashboard-view');
         const tripDetailView = document.getElementById('trip-detail-view');
         const authMessageArea = document.getElementById('auth-message-area');
-        
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const loginTabBtn = document.getElementById('login-tab-btn');
@@ -677,7 +676,6 @@
         const registerBtn = document.getElementById('register-btn');
         const profileArea = document.getElementById('profile-area');
         const profilePicInput = document.getElementById('profile-pic-input');
-
         const tripsList = document.getElementById('trips-list');
         const noTripsMessage = document.getElementById('no-trips-message');
         const createTripBtn = document.getElementById('create-trip-btn');
@@ -685,7 +683,6 @@
         const createTripForm = document.getElementById('create-trip-form');
         const cancelCreateTripBtn = document.getElementById('cancel-create-trip-btn');
         const submitCreateTripBtn = document.getElementById('submit-create-trip-btn');
-
         const backToDashboardBtn = document.getElementById('back-to-dashboard-btn');
         const tripDetailName = document.getElementById('trip-detail-name');
         const tripTotalSpent = document.getElementById('trip-total-spent');
@@ -695,7 +692,6 @@
         const noItemsMessage = document.getElementById('no-items-message');
         const supremoMenuContainer = document.getElementById('supremo-menu-container');
         const supremoMenuBtn = document.getElementById('supremo-menu-btn');
-        
         const addExpenseModal = document.getElementById('add-expense-modal');
         const addExpenseForm = document.getElementById('add-expense-form');
         const cancelAddExpenseBtn = document.getElementById('cancel-add-expense-btn');
@@ -706,8 +702,6 @@
         const expenseSplitBetweenDiv = document.getElementById('expense-split-between');
         const splitTotalValidation = document.getElementById('split-total-validation');
         const submitExpenseBtn = document.getElementById('submit-expense-btn');
-
-        // Itemization and Split Mode DOM refs
         const itemizedSplitSection = document.getElementById('itemized-split-section');
         const itemizedListDiv = document.getElementById('itemized-list');
         const itemizedSummaryDiv = document.getElementById('itemized-summary');
@@ -715,37 +709,30 @@
         const splitModeToggleContainer = document.getElementById('split-mode-toggle-container');
         const toggleSplitModeBtn = document.getElementById('toggle-split-mode-btn');
         const aiCategorySpinner = document.getElementById('ai-category-spinner');
-
         const inviteMemberBtn = document.getElementById('invite-member-btn');
         const inviteMemberModal = document.getElementById('invite-member-modal');
         const inviteMemberForm = document.getElementById('invite-member-form');
         const cancelInviteBtn = document.getElementById('cancel-invite-btn');
         const submitInviteBtn = document.getElementById('submit-invite-btn');
-
         const archiveTripModal = document.getElementById('archive-trip-modal');
         const archiveTripNameSpan = document.getElementById('archive-trip-name');
         const cancelArchiveTripBtn = document.getElementById('cancel-archive-trip-btn');
         const confirmArchiveTripBtn = document.getElementById('confirm-archive-trip-btn');
-
         const editProfileModal = document.getElementById('edit-profile-modal');
         const editProfileForm = document.getElementById('edit-profile-form');
         const cancelEditProfileBtn = document.getElementById('cancel-edit-profile-btn');
-        
         const editExpenseModal = document.getElementById('edit-expense-modal');
         const editExpenseForm = document.getElementById('edit-expense-form');
         const editExpenseIdInput = document.getElementById('edit-expense-id');
         const editExpenseDescriptionInput = document.getElementById('edit-expense-description');
         const cancelEditExpenseBtn = document.getElementById('cancel-edit-expense-btn');
         const confirmEditExpenseBtn = document.getElementById('confirm-edit-expense-btn');
-
         const deleteExpenseModal = document.getElementById('delete-expense-modal');
         const cancelDeleteExpenseBtn = document.getElementById('cancel-delete-expense-btn');
         const confirmDeleteExpenseBtn = document.getElementById('confirm-delete-expense-btn');
-
         const deletePaymentModal = document.getElementById('delete-payment-modal');
         const cancelDeletePaymentBtn = document.getElementById('cancel-delete-payment-btn');
         const confirmDeletePaymentBtn = document.getElementById('confirm-delete-payment-btn');
-        
         const settleUpBtn = document.getElementById('settle-up-btn');
         const settleUpModal = document.getElementById('settle-up-modal');
         const settlementSummary = document.getElementById('settlement-summary');
@@ -753,11 +740,8 @@
         const settlementList = document.getElementById('settlement-list');
         const closeSettleUpBtn = document.getElementById('close-settle-up-btn');
         const closeSettleUpBtnX = document.getElementById('close-settle-up-btn-x');
-        
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
-
-        // Visualisation elements
         const visualiseSettlementBtn = document.getElementById('visualise-settlement-btn');
         const settlementVisualisationModal = document.getElementById('settlement-visualisation-modal');
         const visualisationCurrency = document.getElementById('visualisation-currency');
@@ -765,8 +749,6 @@
         const vizDebtorsList = document.getElementById('viz-debtors-list');
         const vizCreditorsList = document.getElementById('viz-creditors-list');
         const vizPaymentsList = document.getElementById('viz-payments-list');
-
-        // AI Scan Elements
         const aiScanModal = document.getElementById('ai-scan-modal');
         const aiCancelBtn = document.getElementById('ai-cancel-btn');
         const aiCaptureBtn = document.getElementById('ai-capture-btn');
@@ -775,15 +757,11 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
         const receiptUploadInput = document.getElementById('receipt-upload-input');
-
-        // FAB Menu Elements
         const fabContainer = document.getElementById('fab-container');
         const fabToggle = document.getElementById('fab-toggle');
         const fabManualAdd = document.getElementById('fab-manual-add');
         const fabCameraScan = document.getElementById('fab-camera-scan');
         const fabGalleryUpload = document.getElementById('fab-gallery-upload');
-
-        // Action Sheet Elements
         const actionSheetModal = document.getElementById('action-sheet-modal');
         const actionSheetCancelBtn = document.getElementById('action-sheet-cancel-btn');
         const actionSheetArchiveBtn = document.getElementById('action-sheet-archive-btn');
@@ -847,7 +825,6 @@
                 supremoMenuContainer.classList.add('hidden');
             }
             
-            // Use trip.members instead of trip.memberIds
             await renderTripMembers(trip.members); 
             if (expensesUnsubscribe) expensesUnsubscribe();
             listenForExpenses(trip.id);
@@ -1021,8 +998,8 @@
         // --- Trip Management ---
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
-            // UPDATED QUERY: Query based on the new members array structure
-            const q = query(tripsRef, where("members", "array-contains", { uid: userId, status: 'active' }));
+            // ROBUST QUERY: Use the simple 'memberUids' array for querying.
+            const q = query(tripsRef, where("memberUids", "array-contains", userId));
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
                 let trips = [];
                 snapshot.forEach((doc) => {
@@ -1033,7 +1010,6 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
-                // UPDATED: Fetch profiles for all active members across all trips
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => trip.members.filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1075,7 +1051,6 @@
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
 
-                // UPDATED: Render avatars based on the new members array
                 const memberAvatars = trip.members.slice(0, 4).map(member => {
                     if (member.status === 'active') {
                         const profile = userProfilesCache.get(member.uid);
@@ -1163,18 +1138,12 @@
                 showMessage("Could not load trip expenses.");
             });
         }
-
         function renderTripItems() {
             tripItemsList.innerHTML = '';
             const expenses = allTripExpenses.map(e => ({ type: 'expense', data: e, date: e.occurredAt.toDate() }));
             const payments = (currentTrip.settledPayments || []).map(p => ({ type: 'payment', data: p, date: p.paidAt.toDate() }));
-            
             let allItems = [...expenses, ...payments];
-
-            if (!showDeletedItems) {
-                allItems = allItems.filter(item => !item.data.isDeleted);
-            }
-
+            if (!showDeletedItems) { allItems = allItems.filter(item => !item.data.isDeleted); }
             if (allItems.length === 0) {
                 tripItemsList.appendChild(noItemsMessage);
                 noItemsMessage.classList.remove('hidden');
@@ -1182,41 +1151,28 @@
                 tripOutstandingBalance.textContent = '';
                 return;
             }
-            
             noItemsMessage.classList.add('hidden');
             allItems.sort((a, b) => b.date - a.date);
-
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
-            
             const balances = new Map();
-            // Initialize balances for all members (active and pending)
-            currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    balances.set(member.uid, 0);
-                }
-            });
-
+            currentTrip.members.forEach(member => { if (member.status === 'active') { balances.set(member.uid, 0); } });
             const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
                 balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
-                
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
                     balances.set(memberId, (balances.get(memberId) || 0) - share);
                 }
             });
-
             const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
                 balances.set(payment.from, (balances.get(payment.from) || 0) + payment.amount);
                 balances.set(payment.to, (balances.get(payment.to) || 0) - payment.amount);
             });
-
             const myBalance = balances.get(auth.currentUser.uid) || 0;
-
             if (myBalance > 0.01) {
                 tripOutstandingBalance.textContent = `I am owed: ${myBalance.toFixed(2)} ${currentTrip.baseCurrency}`;
                 tripOutstandingBalance.className = 'font-semibold text-green-600';
@@ -1227,647 +1183,141 @@
                 tripOutstandingBalance.textContent = 'All settled for me';
                 tripOutstandingBalance.className = 'font-semibold text-gray-500';
             }
-
             allItems.forEach(item => {
-                if (item.type === 'expense') {
-                    renderExpenseItem(item.data);
-                } else if (item.type === 'payment') {
-                    renderPaymentItem(item.data);
-                }
+                if (item.type === 'expense') { renderExpenseItem(item.data); } 
+                else if (item.type === 'payment') { renderPaymentItem(item.data); }
             });
         }
-
         function renderExpenseItem(expense) {
             const isDeleted = expense.isDeleted || false;
             const paidByMe = expense.paidBy === auth.currentUser.uid;
-            
             const expenseWrapper = document.createElement('div');
             expenseWrapper.className = `rounded-xl shadow-sm transition-shadow hover:shadow-md relative ${!isDeleted && paidByMe ? 'bg-blue-50' : 'bg-white'}`;
-
             const paidByProfile = userProfilesCache.get(expense.paidBy);
             const paidByName = paidByProfile ? paidByProfile.displayName : 'Unknown';
             const ad = expense.amountDetails;
-            const amountDisplay = (ad.originalCurrency === ad.baseCurrency) ?
-                `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span></div>` :
-                `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${ad.originalAmount.toFixed(2)} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
-            
+            const amountDisplay = (ad.originalCurrency === ad.baseCurrency) ? `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span></div>` : `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${ad.originalAmount.toFixed(2)} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
             const date = expense.occurredAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-            const splitWithLines = Object.keys(expense.splitBetween)
-                .map(uid => {
-                    const memberProfile = userProfilesCache.get(uid);
-                    // Handle case where member might be pending and not in cache
-                    const memberName = memberProfile ? memberProfile.displayName : 'Invited Member';
-                    const baseShare = expense.splitBetween[uid];
-                    const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A';
-                    return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
-                }).join('');
-            
+            const splitWithLines = Object.keys(expense.splitBetween).map(uid => { const memberProfile = userProfilesCache.get(uid); const memberName = memberProfile ? memberProfile.displayName : 'Invited Member'; const baseShare = expense.splitBetween[uid]; const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A'; return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`; }).join('');
             const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
             const canModify = paidByMe || (isTripOwner && isTripSupremoEnabled);
-
-            const actionButtons = (canModify && !isDeleted) ? 
-                `<div class="absolute top-2 right-2 flex flex-col space-y-1">
-                    <button data-expense-id="${expense.id}" data-expense-description="${expense.description}" class="edit-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-yellow-100 hover:text-yellow-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </button>
-                    <button data-expense-id="${expense.id}" class="delete-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>` : '';
-            
+            const actionButtons = (canModify && !isDeleted) ? `<div class="absolute top-2 right-2 flex flex-col space-y-1"><button data-expense-id="${expense.id}" data-expense-description="${expense.description}" class="edit-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-yellow-100 hover:text-yellow-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><button data-expense-id="${expense.id}" class="delete-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button></div>` : '';
             let avatarHTML = '';
-            if (paidByProfile && paidByProfile.photoURL) {
-                avatarHTML = `<img src="${paidByProfile.photoURL}" alt="${paidByName}" class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">`;
-            } else {
-                const initial = paidByName.charAt(0).toUpperCase();
-                avatarHTML = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">${initial}</div>`;
-            }
-
-            const detailsContentHTML = `
-                <div class="text-xs text-gray-500 mb-2">${formattedDate}</div>
-                <h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4>
-                <div>${splitWithLines}</div>
-            `;
-            
-            const deletedDetailsContentHTML = `
-                <div class="flex items-center mb-2">
-                    ${avatarHTML}
-                    <div>
-                        <p class="font-semibold">${expense.description}</p>
-                        <p class="text-sm text-gray-600">${paidByMe ? 'You' : paidByName}</p>
-                    </div>
-                </div>
-                ${amountDisplay}
-                ${detailsContentHTML}
-            `;
-
-            if (isDeleted) {
-                expenseWrapper.innerHTML = `
-                    <div class="p-3 flex justify-between items-center cursor-pointer expense-header">
-                        <p class="italic text-gray-500">Deleted Item</p>
-                        <svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
-                        <div class="opacity-60">${deletedDetailsContentHTML}</div>
-                    </div>
-                `;
-            } else {
-                expenseWrapper.innerHTML = `
-                    <div class="p-3 flex justify-between items-center cursor-pointer expense-header">
-                         <div class="flex items-center">
-                            ${avatarHTML}
-                            <div>
-                                <p class="font-semibold">${expense.description}</p>
-                                <p class="text-sm text-gray-600">${paidByMe ? 'You' : paidByName}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            ${amountDisplay}
-                            <svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">
-                        ${detailsContentHTML}
-                    </div>
-                    ${actionButtons}
-                `;
-            }
-
-            expenseWrapper.querySelector('.expense-header').addEventListener('click', (e) => {
-                if (e.target.closest('.delete-expense-btn') || e.target.closest('.edit-expense-btn')) return;
-                const details = expenseWrapper.querySelector('.expense-details');
-                const icon = expenseWrapper.querySelector('.chevron-icon');
-                details.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
-            });
-
+            if (paidByProfile && paidByProfile.photoURL) { avatarHTML = `<img src="${paidByProfile.photoURL}" alt="${paidByName}" class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">`; } else { const initial = paidByName.charAt(0).toUpperCase(); avatarHTML = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">${initial}</div>`; }
+            const detailsContentHTML = `<div class="text-xs text-gray-500 mb-2">${formattedDate}</div><h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4><div>${splitWithLines}</div>`;
+            const deletedDetailsContentHTML = `<div class="flex items-center mb-2">${avatarHTML}<div><p class="font-semibold">${expense.description}</p><p class="text-sm text-gray-600">${paidByMe ? 'You' : paidByName}</p></div></div>${amountDisplay}${detailsContentHTML}`;
+            if (isDeleted) { expenseWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer expense-header"><p class="italic text-gray-500">Deleted Item</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60">${deletedDetailsContentHTML}</div></div>`; } 
+            else { expenseWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer expense-header"><div class="flex items-center">${avatarHTML}<div><p class="font-semibold">${expense.description}</p><p class="text-sm text-gray-600">${paidByMe ? 'You' : paidByName}</p></div></div><div class="flex items-center">${amountDisplay}<svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl">${detailsContentHTML}</div>${actionButtons}`; }
+            expenseWrapper.querySelector('.expense-header').addEventListener('click', (e) => { if (e.target.closest('.delete-expense-btn') || e.target.closest('.edit-expense-btn')) return; const details = expenseWrapper.querySelector('.expense-details'); const icon = expenseWrapper.querySelector('.chevron-icon'); details.classList.toggle('hidden'); icon.classList.toggle('rotate-180'); });
             tripItemsList.appendChild(expenseWrapper);
         }
-
         function renderPaymentItem(payment) {
-            const isDeleted = payment.isDeleted || false;
-            const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown';
-            const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown';
-            const date = payment.paidAt.toDate();
-            const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' });
-            
-            const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
-            const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to;
-            const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled);
-
-            const paymentWrapper = document.createElement('div');
-            paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative';
-
-            const paymentDetailsHTML = `
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="font-semibold">${fromUser} paid ${toUser}</p>
-                        <p class="text-sm text-gray-600">Settlement on ${formattedDate}</p>
-                    </div>
-                </div>
-                <span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>
-            `;
-
-            if (isDeleted) {
-                paymentWrapper.innerHTML = `
-                    <div class="p-3 flex justify-between items-center cursor-pointer payment-header">
-                        <p class="italic text-gray-500">Deleted Payment</p>
-                        <svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden payment-details bg-gray-50/50 rounded-b-xl">
-                        <div class="opacity-60 flex items-center justify-between">${paymentDetailsHTML}</div>
-                    </div>
-                `;
-            } else {
-                const deleteBtn = (canDelete) ? 
-                    `<button data-payment-id="${payment.paidAt.toMillis()}" class="delete-payment-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                        </svg>
-                    </button>` : '';
-                paymentWrapper.innerHTML = `
-                    <div class="p-3 flex items-center justify-between">
-                        ${paymentDetailsHTML}
-                        ${deleteBtn}
-                    </div>
-                `;
-            }
-            
-            if (paymentWrapper.querySelector('.payment-header')) {
-                 paymentWrapper.querySelector('.payment-header').addEventListener('click', (e) => {
-                    const details = paymentWrapper.querySelector('.payment-details');
-                    const icon = paymentWrapper.querySelector('.chevron-icon');
-                    details.classList.toggle('hidden');
-                    icon.classList.toggle('rotate-180');
-                });
-            }
-
+            const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>`;
+            if (isDeleted) { paymentWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer payment-header"><p class="italic text-gray-500">Deleted Payment</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden payment-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60 flex items-center justify-between">${paymentDetailsHTML}</div></div>`; } 
+            else { const deleteBtn = (canDelete) ? `<button data-payment-id="${payment.paidAt.toMillis()}" class="delete-payment-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>` : ''; paymentWrapper.innerHTML = `<div class="p-3 flex items-center justify-between">${paymentDetailsHTML}${deleteBtn}</div>`; }
+            if (paymentWrapper.querySelector('.payment-header')) { paymentWrapper.querySelector('.payment-header').addEventListener('click', (e) => { const details = paymentWrapper.querySelector('.payment-details'); const icon = paymentWrapper.querySelector('.chevron-icon'); details.classList.toggle('hidden'); icon.classList.toggle('rotate-180'); }); }
             tripItemsList.appendChild(paymentWrapper);
         }
-
-        // --- Modal Logic ---
-        function openModal(modalElement) {
-            document.body.classList.add('modal-open');
-            modalElement.classList.remove('hidden-view');
-        }
-
-        function closeModal(modalElement) {
-            document.body.classList.remove('modal-open');
-            modalElement.classList.add('hidden-view');
-        }
-
+        
+        // --- Modal Logic & Form Submissions ---
+        function openModal(modalElement) { document.body.classList.add('modal-open'); modalElement.classList.remove('hidden-view'); }
+        function closeModal(modalElement) { document.body.classList.remove('modal-open'); modalElement.classList.add('hidden-view'); }
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
         cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
-        
         cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
-        
         inviteMemberBtn.addEventListener('click', () => openModal(inviteMemberModal));
         cancelInviteBtn.addEventListener('click', () => closeModal(inviteMemberModal));
-        
-        cancelArchiveTripBtn.addEventListener('click', () => {
-            closeModal(archiveTripModal);
-            tripToArchive = null;
-        });
-        
-        cancelDeleteExpenseBtn.addEventListener('click', () => {
-            closeModal(deleteExpenseModal);
-            expenseToDelete = null;
-        });
-        
-        cancelDeletePaymentBtn.addEventListener('click', () => {
-            closeModal(deletePaymentModal);
-            paymentToDeleteId = null;
-        });
-        
+        cancelArchiveTripBtn.addEventListener('click', () => { closeModal(archiveTripModal); tripToArchive = null; });
+        cancelDeleteExpenseBtn.addEventListener('click', () => { closeModal(deleteExpenseModal); expenseToDelete = null; });
+        cancelDeletePaymentBtn.addEventListener('click', () => { closeModal(deletePaymentModal); paymentToDeleteId = null; });
         settleUpBtn.addEventListener('click', () => calculateAndShowSettlement());
         closeSettleUpBtn.addEventListener('click', () => closeModal(settleUpModal));
         closeSettleUpBtnX.addEventListener('click', () => closeModal(settleUpModal));
-        
-        visualiseSettlementBtn.addEventListener('click', () => {
-            initializeVisualisation();
-            openModal(settlementVisualisationModal);
-        });
+        visualiseSettlementBtn.addEventListener('click', () => { initializeVisualisation(); openModal(settlementVisualisationModal); });
         closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
-
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
 
-        async function handleCurrencyChange() {
-            const originalCurrency = expenseCurrencySelect.value;
-            const baseCurrency = currentTrip.baseCurrency;
-
-            rebuildSplitInputs(); 
-
-            if (originalCurrency === baseCurrency) {
-                fxConversionDisplay.innerHTML = '';
-            } else {
-                fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Fetching rate...</span>`;
-                try {
-                    const rateData = await getExchangeRate(originalCurrency, baseCurrency);
-                    fxConversionDisplay.innerHTML = `1 ${originalCurrency} &equals; <span class="font-semibold mx-1">${rateData.conversion_rate.toFixed(4)} ${baseCurrency}</span>`;
-                } catch (error) {
-                    fxConversionDisplay.innerHTML = `<span class="text-red-600">Could not get rate.</span>`;
-                }
-            }
-            autoDistributeAmount(); 
-        }
-        
-        function updateAndValidateSplit() {
-            const totalOriginalAmount = parseFloat(expenseAmountInput.value) || 0;
-            const memberInputs = expenseSplitBetweenDiv.querySelectorAll('.split-input-group');
-            const submitBtn = document.getElementById('submit-expense-btn');
-            const originalCurrency = expenseCurrencySelect.value;
-            
-            let currentSplitTotal = 0;
-            memberInputs.forEach(group => {
-                const checkbox = group.querySelector('input[type="checkbox"]');
-                const input = group.querySelector('input[type="number"]');
-                input.disabled = !checkbox.checked;
-                if (!checkbox.checked) {
-                    input.value = '';
-                } else {
-                    currentSplitTotal += parseFloat(input.value) || 0;
-                }
-            });
-            
-            const remainder = totalOriginalAmount - currentSplitTotal;
-            if (Math.abs(remainder) < 0.015 && totalOriginalAmount > 0) {
-                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-green-600 font-semibold';
-                splitTotalValidation.textContent = 'Total is fully allocated!';
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            } else {
-                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-red-600 font-semibold';
-                if (totalOriginalAmount <= 0) {
-                    splitTotalValidation.textContent = 'Please enter a valid amount.';
-                } else {
-                    splitTotalValidation.textContent = `Remainder to allocate: ${remainder.toFixed(2)} ${originalCurrency}`;
-                }
-                submitBtn.disabled = true;
-                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            }
-        }
-
-        function rebuildSplitInputs() {
-            expenseSplitBetweenDiv.innerHTML = '';
-            const originalCurrency = expenseCurrencySelect.value;
-
-            // UPDATED: Iterate through the new members array
-            currentTrip.members.forEach(member => {
-                let memberName;
-                let memberId;
-
-                if (member.status === 'active') {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) return;
-                    memberName = profile.displayName;
-                    memberId = member.uid;
-                } else { // pending
-                    memberName = `${member.email} (pending)`;
-                    memberId = member.email; // Use email as a temporary ID for pending users
-                }
-
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'grid grid-cols-[1fr_auto_auto] items-center gap-x-1 split-input-group';
-                groupDiv.dataset.id = memberId; // Use a generic 'id'
-                groupDiv.dataset.status = member.status;
-                if(member.status === 'active') groupDiv.dataset.uid = member.uid;
-
-
-                groupDiv.innerHTML = `
-                    <div class="flex items-center flex-grow min-w-0">
-                        <input id="split-${memberId.replace(/[^a-zA-Z0-9]/g, "")}" type="checkbox" value="${memberId}" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="split-${memberId.replace(/[^a-zA-Z0-9]/g, "")}" class="ml-2 block text-sm text-gray-900 truncate">${memberName}</label>
-                    </div>
-                    <input type="number" step="0.01" data-id="${memberId}" class="w-20 px-2 py-1 border border-gray-300 rounded-md text-sm text-right" disabled>
-                    <span class="text-sm text-gray-500 w-8 text-left">${originalCurrency}</span>
-                `;
-                expenseSplitBetweenDiv.appendChild(groupDiv);
-            });
-        }
-        
-        function autoDistributeAmount() {
-            const totalOriginalAmount = parseFloat(expenseAmountInput.value) || 0;
-            
-            expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="number"]').forEach(input => input.value = '');
-
-            if (totalOriginalAmount <= 0) {
-                updateAndValidateSplit();
-                return;
-            }
-
-            const checkedInputs = Array.from(expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked'));
-            if (checkedInputs.length === 0) {
-                updateAndValidateSplit();
-                return;
-            };
-            
-            const numSharers = checkedInputs.length;
-            const totalInCents = Math.round(totalOriginalAmount * 100);
-            const baseShareInCents = Math.floor(totalInCents / numSharers);
-            let remainderInCents = totalInCents % numSharers;
-
-            checkedInputs.forEach((checkbox) => {
-                const group = checkbox.closest('.split-input-group');
-                const input = group.querySelector('input[type="number"]');
-                let share = baseShareInCents;
-                if (remainderInCents > 0) {
-                    share++;
-                    remainderInCents--;
-                }
-                input.value = (share / 100).toFixed(2);
-            });
-            
-            updateAndValidateSplit();
-        }
-
-        async function populateExpenseModal() {
-            if (!currentTrip) return;
-            // Reset modal to default state
-            addExpenseForm.reset();
-            currentItemization = null;
-            remainderAssignments.clear();
-            itemizedSplitSection.classList.add('hidden');
-            equalSplitSection.classList.remove('hidden');
-            splitModeToggleContainer.classList.add('hidden'); // Hide the toggle button
-
-            const currencies = ["GBP", "USD", "EUR", "JPY", "CAD", "AUD", "CHF", "CNY", "SEK", "NZD", "CZK", "THB"];
-            expenseCurrencySelect.innerHTML = currencies.map(c => `<option value="${c}">${c}</option>`).join('');
-            expenseCurrencySelect.value = currentTrip.baseCurrency;
-            expensePaidBySelect.innerHTML = '';
-            splitTotalValidation.textContent = '';
-            fxConversionDisplay.innerHTML = '';
-
-            // UPDATED: Populate "Paid By" only with active members
-            currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) return;
-                    const option = document.createElement('option');
-                    option.value = profile.uid;
-                    option.textContent = profile.displayName;
-                    expensePaidBySelect.appendChild(option);
-                }
-            });
-
-            expensePaidBySelect.value = auth.currentUser.uid;
-            
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('expense-occurred-at').value = now.toISOString().slice(0,16);
-            
-            rebuildSplitInputs(); 
-            updateAndValidateSplit();
-
-            const expenseDescriptionInput = document.getElementById('expense-description');
-            expenseDescriptionInput.addEventListener('input', debouncedCategorySuggestion);
-
-            expenseAmountInput.addEventListener('input', autoDistributeAmount);
-            expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
-            expenseSplitBetweenDiv.addEventListener('change', (e) => {
-                if(e.target.type === 'checkbox') autoDistributeAmount();
-            });
-            expenseSplitBetweenDiv.addEventListener('input', (e) => {
-                if(e.target.type === 'number') updateAndValidateSplit();
-            });
-            
-            document.getElementById('deselect-all-btn').addEventListener('click', () => {
-                expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                autoDistributeAmount();
-            });
-        }
-
-        // --- Settlement Logic ---
-        function calculateSettlement() {
-            const balances = new Map();
-            // UPDATED: Initialize balances only for active members
-            currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    balances.set(member.uid, 0);
-                }
-            });
-
-            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
-            activeExpenses.forEach(expense => {
-                const paidBy = expense.paidBy;
-                const splitBetween = expense.splitBetween;
-                balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
-                
-                for (const memberId in splitBetween) {
-                    const share = splitBetween[memberId];
-                    // Only adjust balances for active users
-                    if (balances.has(memberId)) {
-                        balances.set(memberId, (balances.get(memberId) || 0) - share);
-                    }
-                }
-            });
-
-            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
-            activePayments.forEach(payment => {
-                balances.set(payment.from, (balances.get(payment.from) || 0) + payment.amount);
-                balances.set(payment.to, (balances.get(payment.to) || 0) - payment.amount);
-            });
-
-            const creditors = new Map();
-            const debtors = new Map();
-            balances.forEach((amount, uid) => {
-                if (amount > 0.01) creditors.set(uid, amount);
-                else if (amount < -0.01) debtors.set(uid, -amount);
-            });
-
-            const transactions = [];
-            while (debtors.size > 0 && creditors.size > 0) {
-                const [debtorId, debtorAmount] = [...debtors.entries()].sort((a, b) => b[1] - a[1])[0];
-                const [creditorId, creditorAmount] = [...creditors.entries()].sort((a, b) => b[1] - a[1])[0];
-                const payment = Math.min(debtorAmount, creditorAmount);
-                transactions.push({ from: debtorId, to: creditorId, amount: payment });
-                debtors.set(debtorId, debtorAmount - payment);
-                creditors.set(creditorId, creditorAmount - payment);
-                if (debtors.get(debtorId) < 0.01) debtors.delete(debtorId);
-                if (creditors.get(creditorId) < 0.01) creditors.delete(creditorId);
-            }
-            return transactions;
-        }
-
-        async function calculateAndShowSettlement() {
-            if (!currentTrip) return;
-            settlementCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
-            const transactions = calculateSettlement();
-            await renderSettlement(transactions);
-            openModal(settleUpModal);
-        }
-
-        async function renderSettlement(transactions) {
-            settlementList.innerHTML = '';
-            const currentUserId = auth.currentUser.uid;
-            
-            const isTripOwner = currentUserId === currentTrip.ownerId;
-            const transactionsToShow = (isTripOwner && isTripSupremoEnabled) ? transactions : transactions.filter(tx => tx.from === currentUserId || tx.to === currentUserId);
-
-            if (transactionsToShow.length === 0) {
-                settlementSummary.textContent = "You are all settled up!";
-                settlementList.innerHTML = '';
-                return;
-            }
-
-            const totalToSettle = transactions.reduce((sum, tx) => sum + tx.amount, 0);
-            settlementSummary.textContent = `Total remaining to be settled for the trip: ${totalToSettle.toFixed(2)} ${currentTrip.baseCurrency}.`;
-            
-            const allMemberIds = [...new Set(transactionsToShow.flatMap(tx => [tx.from, tx.to]))];
-            const profiles = await fetchUserProfiles(allMemberIds);
-
-            transactionsToShow.forEach(tx => {
-                const fromUser = profiles[tx.from];
-                const toUser = profiles[tx.to];
-                const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
-                if (!fromUser || !toUser) return;
-                
-                const transactionEl = document.createElement('div');
-                transactionEl.className = 'p-4 rounded-lg bg-gray-100';
-                
-                let actionControl = '';
-                const canAction = (currentUserId === tx.from || currentUserId === tx.to) || (isTripOwner && isTripSupremoEnabled);
-
-                if (canAction) {
-                    const payeeProfile = userProfilesCache.get(tx.to);
-                    let payLinkBtn = '';
-                    if (payeeProfile?.paymentInfo?.bank && payeeProfile?.paymentInfo?.username) {
-                        let url;
-                        const username = payeeProfile.paymentInfo.username;
-                        const amount = tx.amount.toFixed(2);
-                        if (payeeProfile.paymentInfo.bank === 'Monzo') {
-                            url = `https://monzo.me/${username}/${amount}`;
-                        } else if (payeeProfile.paymentInfo.bank === 'Revolut') {
-                            url = `https://revolut.me/${username}/${amount}`;
-                        }
-                        if (url) {
-                            payLinkBtn = `<a href="${url}" target="_blank" class="pay-link-btn w-full text-center bg-yellow-500 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-yellow-600 block mb-2">Pay with Link</a>`;
-                        }
-                    }
-                    
-                    actionControl = `
-                        ${currentUserId === tx.from ? payLinkBtn : ''}
-                        <button class="paid-manually-toggle-btn text-sm text-gray-600 hover:underline w-full text-center mt-2">Paid manually?</button>
-                        <div class="manual-payment-area">
-                            <div class="flex items-center space-x-2 justify-end">
-                                <input type="number" step="0.01" max="${tx.amount.toFixed(2)}" placeholder="${tx.amount.toFixed(2)}" class="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm">
-                                <button data-from="${tx.from}" data-to="${tx.to}" data-remaining="${tx.amount}" class="pay-btn bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-md hover:bg-green-600">Confirm</button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                transactionEl.innerHTML = `
-                    <div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center">
-                        <span class="font-semibold text-gray-800 break-words text-sm">${fromUser.displayName}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                        <span class="font-semibold text-gray-800 break-words text-sm">${toUser.displayName}</span>
-                        <span class="font-bold text-base text-purple-600 text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
-                    </div>
-                    <div class="mt-3">${actionControl}</div>
-                `;
-                settlementList.appendChild(transactionEl);
-            });
-        }
-
-        settlementList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('paid-manually-toggle-btn')) {
-                const manualArea = e.target.nextElementSibling;
-                manualArea.classList.toggle('open');
-            }
-
-            if (e.target.classList.contains('pay-btn')) {
-                const button = e.target;
-                const remainingAmount = parseFloat(button.dataset.remaining);
-                let paymentAmount = remainingAmount; 
-
-                const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
-                if (auth.currentUser.uid === button.dataset.from || (isTripOwner && isTripSupremoEnabled)) {
-                    const input = button.parentElement.querySelector('input');
-                    const inputValue = parseFloat(input.value);
-                    if (!isNaN(inputValue) && inputValue > 0) {
-                        paymentAmount = inputValue;
-                    }
-                }
-
-                if (isNaN(paymentAmount) || paymentAmount <= 0) {
-                    showMessage("Please enter a valid amount.");
-                    return;
-                }
-                if (paymentAmount > remainingAmount + 0.01) {
-                    showMessage(`Payment cannot be more than the remaining ${remainingAmount.toFixed(2)}.`);
-                    return;
-                }
-
-                button.disabled = true;
-                const transaction = {
-                    from: button.dataset.from,
-                    to: button.dataset.to,
-                    amount: paymentAmount,
-                    paidAt: Timestamp.now(),
-                    isDeleted: false
-                };
-                
-                try {
-                    const tripRef = doc(db, "trips", currentTrip.id);
-                    
-                    const calculatedTransactions = calculateSettlement();
-                    const totalToSettle = calculatedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-                    const isNowSettled = (paymentAmount) >= (totalToSettle - 0.01);
-
-                    const updateData = {
-                        settledPayments: arrayUnion(transaction)
-                    };
-                    if (isNowSettled) {
-                        updateData.isSettled = true;
-                    }
-
-                    await updateDoc(tripRef, updateData);
-
-                    showMessage("Payment recorded!", false);
-                    closeModal(settleUpModal);
-                } catch (error) {
-                    console.error("Error recording payment:", error);
-                    showMessage("Could not record payment.");
-                    button.disabled = false;
-                }
-            }
-        });
-
-        // --- Form Submissions ---
-        confirmArchiveTripBtn.addEventListener('click', async () => {
-            if (!tripToArchive || !auth.currentUser) return;
+        const handleCreateTrip = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            const tripName = document.getElementById('trip-name').value;
+            const baseCurrency = document.getElementById('base-currency').value;
             try {
-                const tripRef = doc(db, 'trips', tripToArchive.id);
-                await updateDoc(tripRef, { isArchived: true });
-                showMessage('Trip archived successfully!', false);
-                closeModal(archiveTripModal);
-                tripToArchive = null;
-                backToDashboardBtn.click();
-            } catch (error) {
-                console.error("Error archiving trip:", error);
-                showMessage("Failed to archive trip.");
-                tripToArchive = null;
-            }
-        });
+                const newTrip = {
+                    name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
+                    members: [{ uid: user.uid, status: 'active' }],
+                    memberUids: [user.uid], // Add this for querying
+                    isSettled: false,
+                    isArchived: false,
+                    settledPayments: []
+                };
+                await addDoc(collection(db, "trips"), newTrip);
+                createTripForm.reset();
+                closeModal(createTripModal);
+                showMessage("Trip created successfully!", false);
+            } catch (error) { showMessage(error.message); }
+        };
 
+        const handleInviteMember = async () => {
+            const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
+            if (!emailToInvite || !currentTrip) return;
+            
+            submitInviteBtn.disabled = true;
+
+            try {
+                const alreadyInTrip = currentTrip.members.some(member => 
+                    (member.status === 'active' && userProfilesCache.get(member.uid)?.email === emailToInvite) ||
+                    (member.status === 'pending' && member.email === emailToInvite)
+                );
+
+                if (alreadyInTrip) {
+                    throw new Error("This person is already part of the trip.");
+                }
+
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", emailToInvite));
+                const querySnapshot = await getDocs(q);
+
+                const tripRef = doc(db, "trips", currentTrip.id);
+
+                if (!querySnapshot.empty) {
+                    const existingUser = querySnapshot.docs[0].data();
+                    await updateDoc(tripRef, {
+                        members: arrayUnion({ uid: existingUser.uid, status: 'active' }),
+                        memberUids: arrayUnion(existingUser.uid) // Add to UIDs array
+                    });
+                    showMessage("Existing user added to the trip!", false);
+
+                } else {
+                    const invitationsRef = collection(db, "invitations");
+                    await addDoc(invitationsRef, {
+                        invitedEmail: emailToInvite,
+                        tripId: currentTrip.id,
+                        tripName: currentTrip.name,
+                        invitedBy: auth.currentUser.uid,
+                        status: 'pending',
+                        createdAt: serverTimestamp()
+                    });
+
+                    await updateDoc(tripRef, {
+                        members: arrayUnion({ email: emailToInvite, status: 'pending' })
+                    });
+                    
+                    showMessage("Invitation sent successfully!", false);
+                }
+
+                inviteMemberForm.reset();
+                closeModal(inviteMemberModal);
+            } catch (error) {
+                console.error("Error inviting member:", error);
+                showMessage(error.message);
+            } finally {
+                submitInviteBtn.disabled = false;
+            }
+        };
+        
         const handleLogin = async () => {
             hideAuthMessage();
             const email = document.getElementById('login-email').value;
@@ -1912,27 +1362,6 @@
             }
         };
 
-        const handleCreateTrip = async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-            const tripName = document.getElementById('trip-name').value;
-            const baseCurrency = document.getElementById('base-currency').value;
-            try {
-                const newTrip = {
-                    name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
-                    // UPDATED: Use new members structure
-                    members: [{ uid: user.uid, status: 'active' }],
-                    isSettled: false,
-                    isArchived: false,
-                    settledPayments: []
-                };
-                await addDoc(collection(db, "trips"), newTrip);
-                createTripForm.reset();
-                closeModal(createTripModal);
-                showMessage("Trip created successfully!", false);
-            } catch (error) { showMessage(error.message); }
-        };
-
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1952,9 +1381,7 @@
 
                 let finalBaseSplits = {};
                 
-                // Check if itemization data exists AND the itemization UI is visible
                 if (currentItemization && !itemizedSplitSection.classList.contains('hidden')) {
-                    // Logic for itemized split
                     const memberShares = calculateItemizedShares();
                     let totalCalculatedAmount = 0;
                     for(const uid in memberShares) {
@@ -1965,7 +1392,6 @@
                     }
                     finalBaseSplits = memberShares;
                 } else {
-                    // Logic for equal/manual split
                     const originalSplits = new Map();
                     let originalSplitSum = 0;
                     expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
@@ -1974,7 +1400,6 @@
                         const status = group.dataset.status;
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                         
-                        // Only include active members in the final split object
                         if (status === 'active') {
                             const uid = group.dataset.uid;
                             originalSplits.set(uid, share);
@@ -2040,69 +1465,6 @@
                 submitBtnText.classList.remove('hidden');
                 spinner.classList.add('hidden');
                 submitExpenseBtn.disabled = false;
-            }
-        };
-
-        const handleInviteMember = async () => {
-            const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
-            if (!emailToInvite || !currentTrip) return;
-            
-            submitInviteBtn.disabled = true;
-
-            try {
-                // 1. Check if the user is already in the trip (active or pending)
-                const alreadyInTrip = currentTrip.members.some(member => 
-                    (member.status === 'active' && userProfilesCache.get(member.uid)?.email === emailToInvite) ||
-                    (member.status === 'pending' && member.email === emailToInvite)
-                );
-
-                if (alreadyInTrip) {
-                    throw new Error("This person is already part of the trip.");
-                }
-
-                // 2. Check if a user account exists with this email
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", emailToInvite));
-                const querySnapshot = await getDocs(q);
-
-                const tripRef = doc(db, "trips", currentTrip.id);
-
-                if (!querySnapshot.empty) {
-                    // User EXISTS: Add them as an active member
-                    const existingUser = querySnapshot.docs[0].data();
-                    await updateDoc(tripRef, {
-                        members: arrayUnion({ uid: existingUser.uid, status: 'active' })
-                    });
-                    showMessage("Existing user added to the trip!", false);
-
-                } else {
-                    // User DOES NOT exist: Create an invitation
-                    const invitationsRef = collection(db, "invitations");
-                    await addDoc(invitationsRef, {
-                        invitedEmail: emailToInvite,
-                        tripId: currentTrip.id,
-                        tripName: currentTrip.name,
-                        invitedBy: auth.currentUser.uid,
-                        status: 'pending',
-                        createdAt: serverTimestamp()
-                    });
-
-                    // Add the pending user to the trip
-                    await updateDoc(tripRef, {
-                        members: arrayUnion({ email: emailToInvite, status: 'pending' })
-                    });
-                    
-                    // The Cloud Function will be triggered automatically to send the email.
-                    showMessage("Invitation sent successfully!", false);
-                }
-
-                inviteMemberForm.reset();
-                closeModal(inviteMemberModal);
-            } catch (error) {
-                console.error("Error inviting member:", error);
-                showMessage(error.message);
-            } finally {
-                submitInviteBtn.disabled = false;
             }
         };
 
