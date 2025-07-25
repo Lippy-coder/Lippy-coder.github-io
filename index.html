@@ -634,7 +634,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.1 (Modal Fix)
+              Version 7.1.2 (Invite Fix)
             </p>
         </footer>
     </div>
@@ -1340,13 +1340,12 @@
             } catch (error) { showMessage(error.message); }
         };
 
-
+        // --- UPDATED handleInviteMember FUNCTION ---
         const handleInviteMember = async () => {
             const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToInvite || !currentTrip) return;
             
             submitInviteBtn.disabled = true;
-
 
             try {
                 const alreadyInTrip = currentTrip.members.some(member => 
@@ -1354,32 +1353,31 @@
                     (member.status === 'pending' && member.email === emailToInvite)
                 );
 
-
                 if (alreadyInTrip) {
-                    throw new Error("This person is already part of the trip.");
+                    throw new Error("This person is already part of the trip or has a pending invitation.");
                 }
-
 
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToInvite));
                 const querySnapshot = await getDocs(q);
 
-
                 const tripRef = doc(db, "trips", currentTrip.id);
 
-
                 if (!querySnapshot.empty) {
+                    // User already exists, add them directly
                     const existingUser = querySnapshot.docs[0].data();
                     await updateDoc(tripRef, {
                         members: arrayUnion({ uid: existingUser.uid, status: 'active' }),
-                        memberUids: arrayUnion(existingUser.uid) // Add to UIDs array
+                        memberUids: arrayUnion(existingUser.uid)
                     });
                     showMessage("Existing user added to the trip!", false);
 
-
                 } else {
-                    const invitationsRef = collection(db, "invitations");
-                    await addDoc(invitationsRef, {
+                    // User does not exist, create a pending invitation with a predictable ID
+                    const invitationId = `${emailToInvite}_${currentTrip.id}`;
+                    const invitationRef = doc(db, "invitations", invitationId);
+
+                    await setDoc(invitationRef, {
                         invitedEmail: emailToInvite,
                         tripId: currentTrip.id,
                         tripName: currentTrip.name,
@@ -1388,14 +1386,12 @@
                         createdAt: serverTimestamp()
                     });
 
-
                     await updateDoc(tripRef, {
                         members: arrayUnion({ email: emailToInvite, status: 'pending' })
                     });
                     
                     showMessage("Invitation sent successfully!", false);
                 }
-
 
                 inviteMemberForm.reset();
                 closeModal(inviteMemberModal);
@@ -1422,8 +1418,7 @@
             }
         };
 
-        // --- NEW HELPER FUNCTION ---
-        // Finds and converts pending invitations for a new user into active trip memberships.
+        // --- NEW HELPER FUNCTION for processing invitations after registration ---
         async function processPendingInvitations(newUser) {
             const userEmail = newUser.email;
             const invitationsRef = collection(db, "invitations");
@@ -1436,7 +1431,6 @@
                 return;
             }
 
-            // Use a batch to perform all updates atomically for reliability
             const batch = writeBatch(db);
 
             for (const invDoc of invitationsSnapshot.docs) {
@@ -1445,12 +1439,10 @@
                 
                 console.log(`Processing invitation for trip: ${invitation.tripName}`);
 
-                // We need to get the current trip data to update the 'members' array
                 const tripDoc = await getDoc(tripRef);
                 if (tripDoc.exists()) {
                     const tripData = tripDoc.data();
                     
-                    // Find the pending member by email and replace it with the new user's active status
                     const updatedMembers = tripData.members.map(member => {
                         if (member.status === 'pending' && member.email === userEmail) {
                             return { uid: newUser.uid, status: 'active' };
@@ -1458,18 +1450,15 @@
                         return member;
                     });
 
-                    // Update the trip with the new member list and add the UID to the queryable array
                     batch.update(tripRef, {
                         members: updatedMembers,
                         memberUids: arrayUnion(newUser.uid)
                     });
 
-                    // Delete the invitation since it has been processed
-                    batch.delete(invDoc.ref);
+                    batch.delete(invDoc.ref); // This uses the correct reference from the snapshot
                 }
             }
 
-            // Commit all the batched writes to the database
             await batch.commit();
             showMessage("You've been added to your pending trips!", false);
         }
@@ -1487,14 +1476,14 @@
             }
 
             try {
-                // STEP 1: Check if a pending invitation exists for this email address.
+                // STEP 1: Check if a pending invitation exists. This query is now allowed by the new security rules.
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
 
                 if (invitationSnapshot.empty) {
                     showAuthMessage("Registration failed. You must be invited by an existing user to create an account.");
-                    return; // Block registration
+                    return; // Block registration if no pending invite is found
                 }
                 
                 // STEP 2: Invitation exists, so proceed with creating the user account.
@@ -1503,7 +1492,6 @@
                 
                 await updateProfile(user, { displayName: displayName });
                 
-                // Create the user document in the 'users' collection
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     displayName: displayName,
@@ -1515,13 +1503,12 @@
                 // STEP 3: Automatically link the new user to all their pending trips.
                 await processPendingInvitations(user);
 
-                // STEP 4: Send verification email and sign out to force login after verification.
+                // STEP 4: Send verification email and sign out.
                 await sendEmailVerification(user);
                 showAuthMessage("Success! A verification email has been sent. Please check your inbox and verify your email before logging in.");
                 await signOut(auth);
 
             } catch (error) { 
-                // Provide more specific error messages
                 if (error.code === 'auth/email-already-in-use') {
                     showMessage("This email is already registered. Please log in instead.");
                 } else {
