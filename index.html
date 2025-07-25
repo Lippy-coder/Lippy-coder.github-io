@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.9 (Final Polish)
+              Version 7.1.10 (Final Code)
             </p>
         </footer>
     </div>
@@ -1907,19 +1907,105 @@
                 closeModal(deletePaymentModal);
             }
         });
+        
+        // --- RESTORED SETTLEMENT LOGIC ---
+        function calculateSettlement() {
+            const balances = new Map();
+            currentTrip.members.forEach(member => {
+                if (member.status === 'active') {
+                    balances.set(member.uid, 0);
+                }
+            });
 
-        async function getExchangeRate(fromCurrency, toCurrency) {
-            const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Currency API error: ${response.statusText}`);
-                const data = await response.json();
-                if (data.result === 'error') throw new Error(`Currency API error: ${data['error-type']}`);
-                return data;
-            } catch (error) {
-                console.error("Failed to fetch exchange rate:", error);
-                throw new Error("Could not get exchange rate. Please try again.");
+            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
+            activeExpenses.forEach(expense => {
+                const paidBy = expense.paidBy;
+                const splitBetween = expense.splitBetween;
+                balances.set(paidBy, (balances.get(paidBy) || 0) + expense.amountDetails.baseAmount);
+                for (const memberId in splitBetween) {
+                    const share = splitBetween[memberId];
+                    if (balances.has(memberId)) {
+                        balances.set(memberId, (balances.get(memberId) || 0) - share);
+                    }
+                }
+            });
+
+            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
+            activePayments.forEach(payment => {
+                balances.set(payment.from, (balances.get(payment.from) || 0) + payment.amount);
+                balances.set(payment.to, (balances.get(payment.to) || 0) - payment.amount);
+            });
+
+            const debtors = [];
+            const creditors = [];
+            balances.forEach((amount, uid) => {
+                if (amount < -0.01) {
+                    debtors.push({ uid, amount: -amount });
+                } else if (amount > 0.01) {
+                    creditors.push({ uid, amount });
+                }
+            });
+
+            debtors.sort((a, b) => a.amount - b.amount);
+            creditors.sort((a, b) => a.amount - b.amount);
+            const transactions = [];
+            while (debtors.length > 0 && creditors.length > 0) {
+                const debtor = debtors[0];
+                const creditor = creditors[0];
+                const amount = Math.min(debtor.amount, creditor.amount);
+
+                transactions.push({ from: debtor.uid, to: creditor.uid, amount });
+                debtor.amount -= amount;
+                creditor.amount -= amount;
+
+                if (debtor.amount < 0.01) debtors.shift();
+                if (creditor.amount < 0.01) creditors.shift();
             }
+            return transactions;
+        }
+
+        async function calculateAndShowSettlement() {
+            const transactions = calculateSettlement();
+            const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
+            await fetchUserProfiles(allMemberIds);
+            
+            settlementCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
+            settlementList.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                settlementSummary.textContent = "Everyone is settled up!";
+            } else {
+                settlementSummary.textContent = "Here's the simplest way to settle all debts:";
+                transactions.forEach(tx => {
+                    const fromUser = userProfilesCache.get(tx.from);
+                    const toUser = userProfilesCache.get(tx.to);
+                    const toPaymentInfo = toUser.paymentInfo || {};
+                    let paymentLink = '';
+                    if (toPaymentInfo.bank && toPaymentInfo.username) {
+                        if (toPaymentInfo.bank === 'Monzo') {
+                            paymentLink = `https://monzo.me/${toPaymentInfo.username}/${tx.amount.toFixed(2)}`;
+                        } else if (toPaymentInfo.bank === 'Revolut') {
+                            paymentLink = `https://revolut.me/${toPaymentInfo.username}/${tx.amount.toFixed(2)}`;
+                        }
+                    }
+
+                    const paymentEl = document.createElement('div');
+                    paymentEl.className = 'p-3 bg-gray-100 rounded-lg';
+                    paymentEl.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="font-semibold">${fromUser.displayName}</div>
+                                <svg class="w-5 h-5 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                <div class="font-semibold">${toUser.displayName}</div>
+                            </div>
+                            <div class="font-bold text-lg">${tx.amount.toFixed(2)} ${currentTrip.baseCurrency}</div>
+                        </div>
+                        ${paymentLink ? `<a href="${paymentLink}" target="_blank" class="block mt-2 text-center bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-600">Pay with ${toPaymentInfo.bank}</a>` : ''}
+                    `;
+                    settlementList.appendChild(paymentEl);
+                });
+            }
+            openModal(settleUpModal);
         }
 
         async function initializeVisualisation() {
@@ -2601,7 +2687,7 @@
                 showMessage(error.message);
             }
         }
-        
+
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
@@ -2620,7 +2706,7 @@
             loginTabBtn.classList.add('text-gray-500');
             hideAuthMessage();
         });
-
+        
         expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
         document.getElementById('expense-description').addEventListener('input', debouncedCategorySuggestion);
