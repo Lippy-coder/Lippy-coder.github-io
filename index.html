@@ -806,7 +806,6 @@
         };
 
 
-        // --- Helper function to format date/time for input fields ---
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
                 console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
@@ -815,21 +814,17 @@
             return `${dateString}T${timeString}`;
         }
         
-        // --- NEW/FIXED: Helper function to set current datetime in local timezone ---
         function getCurrentLocalDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
         }
 
-
-        // --- UI Logic ---
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
-            allModals.forEach(modal => modal.classList.add('hidden-view')); // Close all modals on view change
+            allModals.forEach(modal => modal.classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
         }
-
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -838,12 +833,10 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
-
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
-
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -857,12 +850,9 @@
             }
         }
 
-
-        // --- View Navigation & Trip Selection ---
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
-
 
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
@@ -878,15 +868,12 @@
             showView('trip-detail-view');
         }
 
-
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
 
-
-        // --- User Profile Management ---
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
             if (profilesToFetch.length > 0) {
@@ -903,7 +890,6 @@
             });
             return profiles;
         }
-
 
         async function loadUserPreferences(userId) {
             try {
@@ -928,7 +914,6 @@
             }
         }
 
-
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -939,15 +924,12 @@
             }
         }
 
-
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
-            profileArea.innerHTML = ''; // Clear previous content
-
+            profileArea.innerHTML = '';
 
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
-
 
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
@@ -962,7 +944,6 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
-
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
@@ -993,11 +974,9 @@
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
-
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
-
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
@@ -1016,7 +995,6 @@
                 }
             });
 
-
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1033,7 +1011,6 @@
                 listenForTrips(auth.currentUser.uid);
             });
         }
-
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -1053,8 +1030,6 @@
             }
         });
 
-
-        // --- Trip Management ---
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
@@ -1068,7 +1043,6 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
-
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1078,13 +1052,11 @@
                 
                 await renderTrips(trips);
 
-
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
-
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1102,7 +1074,6 @@
                 const isSettled = trip.isSettled || false;
                 const isArchived = trip.isArchived || false;
 
-
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1110,12 +1081,10 @@
                     bgClass = 'bg-green-100';
                 }
 
-
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative ${bgClass}`;
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
-
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1129,7 +1098,6 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
-
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1152,11 +1120,9 @@
                     selectTrip(trip);
                 });
 
-
                 tripsList.appendChild(tripElement);
             });
         }
-
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -1167,11 +1133,9 @@
                 let avatarHTML = '';
                 let nameHTML = '';
 
-
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
-
 
                     if (profile.photoURL) {
                         avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
@@ -1180,7 +1144,6 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
-
 
                 } else if (member.status === 'pending') {
                     avatarHTML = `
@@ -1197,8 +1160,6 @@
             }
         }
 
-
-        // --- Expense Management ---
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
             const q = query(expensesRef);
@@ -2323,9 +2284,9 @@
                 const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
                 const sharePerPerson = remainderInBase / remainderAssignments.size;
                 remainderAssignments.forEach(id => {
-                    if (userProfilesCache.has(id)) { // It's a UID
+                    if (userProfilesCache.has(id)) {
                         memberShares[id] += sharePerPerson;
-                    } else { // It's an email
+                    } else {
                         pendingShares[id] = (pendingShares[id] || 0) + sharePerPerson;
                     }
                 });
@@ -2338,15 +2299,23 @@
 
         function updateItemizationSummary() {
             document.getElementById('remainder-row')?.remove();
+            
+            let unassignedItemsTotal = 0;
+            currentItemization.lineItems.forEach((item, index) => {
+                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
+                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
+                    unassignedItemsTotal += item.price;
+                }
+            });
 
-            const itemizedSum = currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
-            const remainder = currentItemization.total - itemizedSum;
+            const tipAndTaxRemainder = currentItemization.total - currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
+            const totalRemainder = tipAndTaxRemainder + unassignedItemsTotal;
 
-            if (remainder > 0.01) {
+            if (totalRemainder > 0.01) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'p-2 bg-green-50 rounded-md flex justify-between items-center';
-                remainderEl.dataset.remainderAmount = remainder.toFixed(2);
+                remainderEl.dataset.remainderAmount = totalRemainder.toFixed(2);
                 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     let identifier, title, avatar, container;
@@ -2376,7 +2345,7 @@
                 remainderEl.innerHTML = `
                     <div class="flex-grow pr-4">
                         <p class="font-medium text-green-800">Allocate Remainder</p>
-                        <p class="text-sm text-green-600">${remainder.toFixed(2)} ${currentItemization.currency}</p>
+                        <p class="text-sm text-green-600">${totalRemainder.toFixed(2)} ${currentItemization.currency}</p>
                     </div>
                     <div class="flex space-x-1">${memberAvatarsHTML}</div>
                 `;
@@ -2523,9 +2492,7 @@
 
             checkedSharers.forEach((group, index) => {
                 const amountInput = group.querySelector('input[type="number"]');
-                const originalIndex = allSharers.indexOf(group);
-                const shareIndex = checkedSharers.indexOf(group);
-                amountInput.value = (shares[shareIndex] / 100).toFixed(2);
+                amountInput.value = (shares[index] / 100).toFixed(2);
             });
             
             validateSplitTotal();
