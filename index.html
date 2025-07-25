@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.6 (Fair Remainder Fix)
+              Version 7.1.7 (Final Polish)
             </p>
         </footer>
     </div>
@@ -2105,7 +2105,7 @@
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
                 
-                await handleCurrencyChange(); // This will also update currency symbols now
+                await handleCurrencyChange();
                 autoDistributeAmount();
                 triggerAiCategorySuggestion();
 
@@ -2278,6 +2278,19 @@
             if (!avatarContainer) return;
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
+
+            const row = avatar.closest('.item-row, #remainder-row');
+            if (row && row.id === 'remainder-row') {
+                const uid = avatarContainer.dataset.uid;
+                const email = avatarContainer.dataset.email;
+                const identifier = uid || email;
+                if (remainderAssignments.has(identifier)) {
+                    remainderAssignments.delete(identifier);
+                } else {
+                    remainderAssignments.add(identifier);
+                }
+            }
+
             avatar.classList.toggle('assigned');
             updateItemizationSummary();
         });
@@ -2287,6 +2300,7 @@
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
             const pendingShares = {};
             currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
+
             document.querySelectorAll('.item-row').forEach(row => {
                 const itemIndex = parseInt(row.dataset.index, 10);
                 const item = currentItemization.lineItems[itemIndex];
@@ -2303,12 +2317,72 @@
                     });
                 }
             });
+
+            const remainderRow = document.getElementById('remainder-row');
+            if (remainderRow && remainderAssignments.size > 0) {
+                const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
+                const sharePerPerson = remainderInBase / remainderAssignments.size;
+                remainderAssignments.forEach(id => {
+                    if (userProfilesCache.has(id)) { // It's a UID
+                        memberShares[id] += sharePerPerson;
+                    } else { // It's an email
+                        pendingShares[id] = (pendingShares[id] || 0) + sharePerPerson;
+                    }
+                });
+            }
+
             for (const uid in memberShares) { memberShares[uid] = parseFloat(memberShares[uid].toFixed(2)); }
             for (const email in pendingShares) { pendingShares[email] = parseFloat(pendingShares[email].toFixed(2)); }
             return { memberShares, pendingShares };
         }
 
         function updateItemizationSummary() {
+            document.getElementById('remainder-row')?.remove();
+
+            const itemizedSum = currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
+            const remainder = currentItemization.total - itemizedSum;
+
+            if (remainder > 0.01) {
+                const remainderEl = document.createElement('div');
+                remainderEl.id = 'remainder-row';
+                remainderEl.className = 'p-2 bg-green-50 rounded-md flex justify-between items-center';
+                remainderEl.dataset.remainderAmount = remainder.toFixed(2);
+                
+                const memberAvatarsHTML = currentTrip.members.map(member => {
+                    let identifier, title, avatar, container;
+                    if (member.status === 'active') {
+                        const profile = userProfilesCache.get(member.uid);
+                        if (!profile) return '';
+                        identifier = member.uid;
+                        title = profile.displayName;
+                        const isAssigned = remainderAssignments.has(identifier) ? 'assigned' : '';
+                        if (profile.photoURL) {
+                            avatar = `<img src="${profile.photoURL}" alt="${title}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`;
+                        } else {
+                            const initial = title ? title.charAt(0).toUpperCase() : '?';
+                            avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${initial}</div>`;
+                        }
+                        container = `<div data-uid="${identifier}" title="${title}">${avatar}</div>`;
+                    } else { // Pending
+                        identifier = member.email;
+                        title = member.email;
+                        const isAssigned = remainderAssignments.has(identifier) ? 'assigned' : '';
+                        avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">?</div>`;
+                        container = `<div data-email="${identifier}" title="${title}">${avatar}</div>`;
+                    }
+                    return container;
+                }).join('');
+
+                remainderEl.innerHTML = `
+                    <div class="flex-grow pr-4">
+                        <p class="font-medium text-green-800">Allocate Remainder</p>
+                        <p class="text-sm text-green-600">${remainder.toFixed(2)} ${currentItemization.currency}</p>
+                    </div>
+                    <div class="flex space-x-1">${memberAvatarsHTML}</div>
+                `;
+                itemizedListDiv.appendChild(remainderEl);
+            }
+
             const { memberShares, pendingShares } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
@@ -2323,7 +2397,6 @@
                     totalAssignedInBase += memberShares[uid];
                 }
             }
-
             for (const email in pendingShares) {
                 if (pendingShares[email] > 0) {
                     const shareInOriginal = pendingShares[email] / currentItemization.exchangeRate;
@@ -2331,7 +2404,6 @@
                     totalAssignedInBase += pendingShares[email];
                 }
             }
-
             itemizedSummaryDiv.innerHTML += summaryHTML;
             const totalInBase = currentItemization.total * currentItemization.exchangeRate;
             const difference = totalInBase - totalAssignedInBase;
@@ -2349,24 +2421,6 @@
             }
             itemizedSummaryDiv.appendChild(validationEl);
         }
-
-        loginTabBtn.addEventListener('click', () => {
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-            loginTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-            registerTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-            registerTabBtn.classList.add('text-gray-500');
-            hideAuthMessage();
-        });
-
-        registerTabBtn.addEventListener('click', () => {
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-            registerTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-            loginTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-            loginTabBtn.classList.add('text-gray-500');
-            hideAuthMessage();
-        });
 
         function updateSplitInputCurrency() {
             const selectedCurrency = expenseCurrencySelect.value;
@@ -2520,7 +2574,7 @@
             const baseCurrency = currentTrip.baseCurrency;
             const amount = parseFloat(expenseAmountInput.value);
 
-            updateSplitInputCurrency(); // Update UI symbols whenever currency changes
+            updateSplitInputCurrency();
 
             if (selectedCurrency === baseCurrency || !amount) {
                 fxConversionDisplay.innerHTML = '';
