@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.12 (FX and Payment Fix)
+              Version 7.1.13 (Settlement Visibility Fix)
             </p>
         </footer>
     </div>
@@ -2036,17 +2036,31 @@
             const transactions = calculateSettlement();
             const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
             await fetchUserProfiles(allMemberIds);
+
+            const currentUser = auth.currentUser;
+            const isSupremo = currentUser.uid === currentTrip.ownerId && isTripSupremoEnabled;
+
+            const filteredTransactions = transactions.filter(tx => {
+                if (isSupremo) return true;
+                return tx.from === currentUser.uid || tx.to === currentUser.uid;
+            });
             
             settlementCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             settlementList.innerHTML = '';
             
-            if (transactions.length === 0) {
-                settlementSummary.textContent = "Everyone is settled up!";
+            if (filteredTransactions.length === 0) {
+                if (transactions.length === 0) {
+                    settlementSummary.textContent = "Everyone is settled up!";
+                } else {
+                    settlementSummary.textContent = "You have no outstanding payments to make or receive at this time.";
+                }
             } else {
-                settlementSummary.textContent = "Here's the simplest way to settle all debts:";
-                transactions.forEach(tx => {
+                settlementSummary.textContent = "Here are your outstanding settlements:";
+                filteredTransactions.forEach(tx => {
                     const fromUser = userProfilesCache.get(tx.from);
                     const toUser = userProfilesCache.get(tx.to);
+                    if (!fromUser || !toUser) return; // Skip if user profile isn't loaded
+
                     const toPaymentInfo = toUser.paymentInfo || {};
                     let paymentLink = '';
                     if (toPaymentInfo.bank && toPaymentInfo.username) {
@@ -2056,6 +2070,9 @@
                             paymentLink = `https://revolut.me/${toPaymentInfo.username}/${tx.amount.toFixed(2)}`;
                         }
                     }
+
+                    const amPayer = currentUser.uid === tx.from;
+                    const canRecordPayment = amPayer || isSupremo;
 
                     const paymentEl = document.createElement('div');
                     paymentEl.className = 'p-3 bg-gray-100 rounded-lg';
@@ -2068,13 +2085,15 @@
                             </div>
                             <div class="font-bold text-lg">${tx.amount.toFixed(2)} ${currentTrip.baseCurrency}</div>
                         </div>
-                        ${paymentLink ? `<a href="${paymentLink}" target="_blank" class="block mt-2 text-center bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-600">Pay with ${toPaymentInfo.bank}</a>` : ''}
-                        <button class="record-payment-btn w-full mt-2 bg-green-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-green-600"
-                                data-from-uid="${tx.from}"
-                                data-to-uid="${tx.to}"
-                                data-amount="${tx.amount.toFixed(2)}">
-                            Record as Paid
-                        </button>
+                        ${paymentLink && amPayer ? `<a href="${paymentLink}" target="_blank" class="block mt-2 text-center bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-600">Pay with ${toPaymentInfo.bank}</a>` : ''}
+                        ${canRecordPayment ?
+                            `<button class="record-payment-btn w-full mt-2 bg-green-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-green-600"
+                                    data-from-uid="${tx.from}"
+                                    data-to-uid="${tx.to}"
+                                    data-amount="${tx.amount.toFixed(2)}">
+                                Record as Paid
+                            </button>` : ''
+                        }
                     `;
                     settlementList.appendChild(paymentEl);
                 });
