@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1649,12 +1650,7 @@
                         await updateProfile(user, { photoURL });
                         const userDocRef = doc(db, "users", user.uid);
                         await updateDoc(userDocRef, { photoURL });
-                        
-                        // --- FIX APPLIED HERE ---
-                        const existingProfile = userProfilesCache.get(user.uid) || {};
-                        userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
-                        // --- END OF FIX ---
-
+                        userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
                         renderProfile(user); 
                         showMessage("Profile picture updated!", false);
                     } catch (error) {
@@ -2719,3 +2715,4 @@
     </script>
 </body>
 </html>
+
