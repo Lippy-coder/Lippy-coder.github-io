@@ -1649,7 +1649,12 @@
                         await updateProfile(user, { photoURL });
                         const userDocRef = doc(db, "users", user.uid);
                         await updateDoc(userDocRef, { photoURL });
-                        userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), photoURL });
+                        
+                        // --- FIX APPLIED HERE ---
+                        const existingProfile = userProfilesCache.get(user.uid) || {};
+                        userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
+                        // --- END OF FIX ---
+
                         renderProfile(user); 
                         showMessage("Profile picture updated!", false);
                     } catch (error) {
