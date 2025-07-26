@@ -1681,7 +1681,7 @@
                         const existingProfile = userProfilesCache.get(user.uid) || {};
                         userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
 
-                        renderProfile(user); 
+                        renderProfile(auth.currentUser); // << *** THIS LINE IS THE FIX ***
                         showMessage("Profile picture updated!", false);
                     } catch (error) {
                         console.error("Error updating profile with new photo URL:", error);
