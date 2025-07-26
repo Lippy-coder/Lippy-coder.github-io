@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.11 (Payment Recording Update)
+              Version 7.1.12 (FX and Payment Fix)
             </p>
         </footer>
     </div>
@@ -797,6 +797,26 @@
 
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
+
+        // --- NEW: The missing exchange rate function ---
+        async function getExchangeRate(fromCurrency, toCurrency) {
+            const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                if (data.result === 'success') {
+                    return data;
+                } else {
+                    throw new Error(`FX API error: ${data['error-type']}`);
+                }
+            } catch (error) {
+                console.error("Failed to fetch exchange rate:", error);
+                throw new Error("Could not retrieve the currency exchange rate.");
+            }
+        }
 
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
@@ -1675,7 +1695,6 @@
             }
         };
 
-        // --- NEW: Function to handle recording a settlement payment ---
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) {
                 showMessage("Error: No active trip selected.");
@@ -1841,7 +1860,6 @@
             }
         });
 
-        // --- NEW: Event listener for the dynamically created "Record as Paid" buttons ---
         settlementList.addEventListener('click', (e) => {
             const recordBtn = e.target.closest('.record-payment-btn');
             if (recordBtn) {
@@ -2014,7 +2032,6 @@
             return transactions;
         }
 
-        // --- MODIFIED: Added a "Record as Paid" button to each transaction ---
         async function calculateAndShowSettlement() {
             const transactions = calculateSettlement();
             const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
@@ -2524,7 +2541,7 @@
                         avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">?</div>`;
                         container = `<div data-email="${identifier}" title="${title}">${avatar}</div>`;
                     }
-                    return container;
+                    return avatarContainer;
                 }).join('');
 
                 remainderEl.innerHTML = `
