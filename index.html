@@ -649,7 +649,7 @@
             apiKey: "AIzaSyAi2llnXf_VloWUL6mZgdJMa1W1EOTwLE4",
             authDomain: "splitify-2ec5e.firebaseapp.com",
             projectId: "splitify-2ec5e",
-            storageBucket: "splitify-2ec5e.appspot.com",
+            storageBucket: "splitify-2ec5e.firebasestorage.app", // *** THIS IS THE FIX ***
             messagingSenderId: "1038415606946",
             appId: "1:1038415606946:web:a17be9b5dbbd9a715013fb",
             measurementId: "G-DTBQM17BV6"
@@ -1640,105 +1640,60 @@
             }
         };
         
-        // =================================================================
-        // =========== THIS IS THE NEW DIAGNOSTIC HARNESS FUNCTION =========
-        // =================================================================
         const handleProfilePicUpload = async (e) => {
-            console.clear(); // Clear console for a fresh test run
-            console.log("%c--- STARTING NEW DIAGNOSTIC TEST ---", "color: blue; font-size: 16px; font-weight: bold;");
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage("You must be logged in to upload a photo.");
+                return;
+            }
+
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1024,
+              useWebWorker: true,
+              fileType: 'image/jpeg'
+            }
+            
+            showMessage("Compressing and uploading photo...", false);
             
             try {
-                console.log("[Step 1] Function triggered. The 'change' event object is:", e);
-                const file = e.target.files[0];
-
-                if (!file) {
-                    console.error("[FAIL] No file selected. e.target.files is empty or undefined.", e.target.files);
-                    return;
-                }
-                console.log("[Step 1 SUCCESS] File selected. File object:", file);
-
-                const user = auth.currentUser;
-                if (!user) {
-                    console.error("[FAIL] User is not authenticated. auth.currentUser is null.");
-                    showMessage("You must be logged in to upload a photo.");
-                    return;
-                }
-                console.log("[Step 2 SUCCESS] User authenticated. User object:", user);
-
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1024,
-                    useWebWorker: true,
-                    fileType: 'image/jpeg'
-                };
-                console.log("[Step 3] Preparing to compress image with options:", options);
-
-                let compressedFile;
-                try {
-                    compressedFile = await imageCompression(file, options);
-                    console.log("[Step 3 SUCCESS] Image compression successful. Compressed file object:", compressedFile);
-                } catch (compressionError) {
-                    console.error("[FAIL] Image compression failed.", compressionError);
-                    showMessage("Could not process image. Please try a different one.");
-                    return;
-                }
-
+                const compressedFile = await imageCompression(file, options);
                 const storagePath = `profile-pictures/${user.uid}`;
-                console.log("[Step 4] Defined storage path:", storagePath);
-                
                 const storageRef = ref(storage, storagePath);
-                console.log("[Step 5] Created storage reference object:", storageRef);
-
-                console.log("%c[Step 6] Starting Firebase Storage upload task. Watching for events...", "color: blue; font-weight: bold;");
-                showMessage("Compressing and uploading photo...", false);
                 const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log(`[In Progress] Upload is ${progress.toFixed(2)}% done.`);
-                    },
-                    (error) => {
-                        console.error("%c[FAIL AT STEP 7] Firebase Storage upload failed.", "color: red; font-size: 16px; font-weight: bold;");
-                        console.error("The full error object from Firebase is:", error);
-                        showMessage(`Upload failed: ${error.code}. Check console for details.`);
-                    },
-                    async () => {
-                        console.log("%c[Step 7 SUCCESS] Firebase Storage upload complete.", "color: green; font-weight: bold;");
-                        try {
-                            console.log("[Step 8] Attempting to get download URL...");
-                            const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            console.log("[Step 8 SUCCESS] Got download URL:", photoURL);
+                uploadTask.on('state_changed', 
+                  (snapshot) => {}, 
+                  (error) => {
+                    console.error("Error during photo upload:", error);
+                    showMessage("An error occurred during upload.");
+                  }, 
+                  async () => {
+                    try {
+                        const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await updateProfile(user, { photoURL });
+                        const userDocRef = doc(db, "users", user.uid);
+                        await updateDoc(userDocRef, { photoURL });
+                        
+                        const existingProfile = userProfilesCache.get(user.uid) || {};
+                        userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
 
-                            console.log("[Step 9] Attempting to update Firestore document at path:", `/users/${user.uid}`);
-                            const userDocRef = doc(db, "users", user.uid);
-                            await updateDoc(userDocRef, { photoURL });
-                            console.log("[Step 9 SUCCESS] Firestore document update request sent.");
-
-                            const existingProfile = userProfilesCache.get(user.uid) || {};
-                            userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
-                            console.log("[Step 10 SUCCESS] Local cache updated.");
-
-                            console.log("[Step 11] Re-rendering profile with fresh auth.currentUser object:", auth.currentUser);
-                            renderProfile(auth.currentUser);
-                            showMessage("Profile picture updated!", false);
-                            console.log("%c--- DIAGNOSTIC TEST FINISHED SUCCESSFULLY ---", "color: green; font-size: 16px; font-weight: bold;");
-
-                        } catch (finalizationError) {
-                            console.error("%c[FAIL AT STEP 8/9] Error during URL retrieval or Firestore update.", "color: red; font-size: 16px; font-weight: bold;");
-                            console.error("The full error object is:", finalizationError);
-                            showMessage("Could not save picture after upload.");
-                        }
+                        renderProfile(auth.currentUser); 
+                        showMessage("Profile picture updated!", false);
+                    } catch (error) {
+                        console.error("Error updating profile with new photo URL:", error);
+                        showMessage("Could not save profile picture after upload.");
                     }
+                  }
                 );
-            } catch (outerError) {
-                 console.error("%c[FAIL] A critical unexpected error occurred in the main function body.", "color: red; font-size: 16px; font-weight: bold;");
-                 console.error("The full error object is:", outerError);
+            } catch (error) {
+                console.error("Error compressing image:", error);
+                showMessage("Could not process image. Please try a different one.");
             }
         };
-        // =================================================================
-        // ================= END OF DIAGNOSTIC FUNCTION ====================
-        // =================================================================
 
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) {
