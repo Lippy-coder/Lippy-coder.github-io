@@ -135,6 +135,12 @@
             border-color: #4f46e5; /* indigo-600 */
             transform: scale(1.1);
         }
+        /* AI Report Display Styles */
+        #ai-report-content h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #ai-report-content h3 { font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.25rem; }
+        #ai-report-content ul { list-style-type: disc; margin-left: 1.5rem; }
+        #ai-report-content li { margin-bottom: 0.25rem; }
+        #ai-report-content strong { font-weight: 700; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -220,6 +226,11 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
+                        <button id="ai-report-btn" title="Generate AI Trip Report" class="h-12 w-12 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-transform transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v2.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L9 6.586V4a1 1 0 011-1zM3 10a1 1 0 011-1h2.586l-1.293-1.293a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L6.586 11H4a1 1 0 01-1-1zm14 0a1 1 0 00-1-1h-2.586l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L13.414 11H16a1 1 0 001-1zm-4 5a1 1 0 00-1 1v2.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 10-1.414-1.414L11 16.586V15a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -239,8 +250,6 @@
                                 </svg>
                             </button>
                         </div>
-
-
                     </div>
                 </div>
             </header>
@@ -610,6 +619,50 @@
                 <button id="action-sheet-cancel-btn" class="w-full mt-3 bg-white rounded-xl p-4 text-lg text-blue-600 font-semibold">Cancel</button>
             </div>
         </div>
+        
+        <!-- NEW: AI Report Configuration Modal -->
+        <div id="ai-report-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
+                <h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3>
+                <form id="ai-report-form">
+                    <div class="mb-4">
+                        <label for="ai-report-type" class="block text-sm font-medium text-gray-700 mb-1">Choose a Report Type</label>
+                        <select id="ai-report-type" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+                            <option value="spending_analysis">Spending Analysis</option>
+                            <option value="daily_breakdown">Daily Breakdown</option>
+                            <option value="fun_awards">Fun Awards</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label for="ai-report-question" class="block text-sm font-medium text-gray-700 mb-1">Ask a Specific Question (Optional)</label>
+                        <textarea id="ai-report-question" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., How much did we spend on just wine?"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancel-ai-report-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                        <button type="submit" id="submit-ai-report-btn" class="bg-yellow-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-yellow-600">Generate Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- NEW: AI Report Display Modal -->
+        <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h3 class="text-2xl font-bold">Your Trip Report ✨</h3>
+                    <button type="button" id="close-ai-display-btn-x" class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="ai-report-content" class="prose max-w-none overflow-y-auto flex-grow text-gray-700">
+                    <!-- AI generated content will be injected here -->
+                </div>
+                <div class="flex justify-end mt-8 space-x-4 flex-shrink-0">
+                     <button type="button" id="copy-ai-report-btn" class="bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700">Copy to Clipboard</button>
+                     <button type="button" id="close-ai-display-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
 
 
         <!-- Loading Overlay -->
@@ -631,7 +684,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.2.1 (Itemization Zero-Share Fix)
+              Version 7.3.0 (Interactive AI Reports)
             </p>
         </footer>
     </div>
@@ -685,6 +738,7 @@
         let isTripSupremoEnabled = false;
         let currentItemization = null; // To hold AI-extracted line items
         let remainderAssignments = new Set(); // To hold UIDs for the remainder
+        let lastAiReportMarkdown = ''; // To store the raw markdown for copying
 
 
         // --- DOM Element References ---
@@ -794,6 +848,18 @@
         const actionSheetArchiveBtn = document.getElementById('action-sheet-archive-btn');
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
+
+        // NEW AI Report DOM References
+        const aiReportBtn = document.getElementById('ai-report-btn');
+        const aiReportModal = document.getElementById('ai-report-modal');
+        const aiReportForm = document.getElementById('ai-report-form');
+        const cancelAiReportBtn = document.getElementById('cancel-ai-report-btn');
+        const aiReportDisplayModal = document.getElementById('ai-report-display-modal');
+        const aiReportContent = document.getElementById('ai-report-content');
+        const closeAiDisplayBtn = document.getElementById('close-ai-display-btn');
+        const closeAiDisplayBtnX = document.getElementById('close-ai-display-btn-x');
+        const copyAiReportBtn = document.getElementById('copy-ai-report-btn');
+
 
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
@@ -1359,6 +1425,12 @@
         closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
+
+        // NEW: AI Report Modal Listeners
+        aiReportBtn.addEventListener('click', () => openModal(aiReportModal));
+        cancelAiReportBtn.addEventListener('click', () => closeModal(aiReportModal));
+        closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
+        closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
 
 
         const handleCreateTrip = async () => {
@@ -2479,7 +2551,6 @@
             updateItemizationSummary();
         });
         
-        // --- UPDATED to fix zero-share bug ---
         function calculateItemizedShares() {
             const memberShares = {};
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
@@ -2516,14 +2587,12 @@
                 });
             }
 
-            // THE FIX: Create final objects containing ONLY non-zero shares
             const finalMemberShares = {};
             for (const uid in memberShares) {
-                if (memberShares[uid] > 0.001) { // Use a small threshold for float issues
+                if (memberShares[uid] > 0.001) {
                     finalMemberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
                 }
             }
-
             const finalPendingShares = {};
             for (const email in pendingShares) {
                 if (pendingShares[email] > 0.001) {
@@ -2796,6 +2865,103 @@
                 showMessage(error.message);
             }
         }
+
+        // --- NEW: AI Report Generation ---
+        function simpleMarkdownToHtml(md) {
+            return md
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>')
+                .replace(/<\/ul>\n<ul>/gim, '')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
+        }
+
+        async function handleGenerateAiReport() {
+            const reportType = document.getElementById('ai-report-type').value;
+            const customQuestion = document.getElementById('ai-report-question').value.trim();
+
+            closeModal(aiReportModal);
+            loadingText.textContent = 'Your Gemini AI is analyzing the trip...';
+            loadingOverlay.classList.remove('hidden-view');
+
+            // 1. Prepare data
+            const tripData = {
+                name: currentTrip.name,
+                baseCurrency: currentTrip.baseCurrency,
+                members: currentTrip.members
+                    .filter(m => m.status === 'active')
+                    .map(m => userProfilesCache.get(m.uid)?.displayName || 'Unknown User'),
+                expenses: allTripExpenses
+                    .filter(e => !e.isDeleted)
+                    .map(e => ({
+                        description: e.description,
+                        category: e.category,
+                        amount: e.amountDetails.baseAmount,
+                        paidBy: userProfilesCache.get(e.paidBy)?.displayName || 'Unknown',
+                        date: e.occurredAt.toDate().toISOString().split('T')[0]
+                    })),
+            };
+
+            // 2. Craft dynamic prompt
+            let prompt = `You are a friendly and insightful travel analyst named "Splitify AI". Your task is to generate a report about a trip based on the provided JSON data. The currency for all amounts is ${tripData.baseCurrency}. Format your entire response using simple Markdown (h2 for main titles, h3 for subtitles, * for bullet points, ** for bold). Do not use h1.\n\n`;
+
+            switch(reportType) {
+                case 'daily_breakdown':
+                    prompt += "Provide a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.\n\n";
+                    break;
+                case 'fun_awards':
+                    prompt += "Generate a fun, lighthearted awards summary for the trip. Create at least 3 awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.\n\n";
+                    break;
+                case 'spending_analysis':
+                default:
+                    prompt += "Provide a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.\n\n";
+                    break;
+            }
+
+            if (customQuestion) {
+                prompt += `Finally, please answer this specific question from the user: "${customQuestion}"\n\n`;
+            }
+
+            prompt += "Here is the trip data in JSON format:\n" + JSON.stringify(tripData, null, 2);
+
+            // 3. Call Cloud Function
+            try {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, image: null }) // No image for this call
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                const result = await response.json();
+                const reportText = result.candidates[0].content.parts[0].text;
+                
+                lastAiReportMarkdown = reportText;
+                aiReportContent.innerHTML = simpleMarkdownToHtml(reportText);
+                aiReportForm.reset();
+                openModal(aiReportDisplayModal);
+
+            } catch (error) {
+                console.error("Error generating AI report:", error);
+                showMessage("Sorry, the AI report could not be generated at this time.");
+            } finally {
+                loadingOverlay.classList.add('hidden-view');
+            }
+        }
+
+        aiReportForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleGenerateAiReport();
+        });
+        
+        copyAiReportBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(lastAiReportMarkdown).then(() => {
+                showMessage("Report copied to clipboard!", false);
+            }, () => {
+                showMessage("Failed to copy report.");
+            });
+        });
+
 
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
