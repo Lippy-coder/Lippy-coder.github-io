@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.2.0 (Itemization Remainder Box)
+              Version 7.2.1 (Itemization Zero-Share Fix)
             </p>
         </footer>
     </div>
@@ -798,7 +798,6 @@
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
-        // --- NEW: The missing exchange rate function ---
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
             try {
@@ -2455,8 +2454,7 @@
             });
             updateItemizationSummary();
         }
-
-        // --- UPDATED per user suggestion ---
+        
         itemizedListDiv.addEventListener('click', (e) => {
             const avatarContainer = e.target.closest('[data-uid], [data-email]');
             if (!avatarContainer) return;
@@ -2481,7 +2479,7 @@
             updateItemizationSummary();
         });
         
-        // --- UPDATED per user suggestion ---
+        // --- UPDATED to fix zero-share bug ---
         function calculateItemizedShares() {
             const memberShares = {};
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
@@ -2518,12 +2516,24 @@
                 });
             }
 
-            for (const uid in memberShares) { memberShares[uid] = parseFloat(memberShares[uid].toFixed(2)); }
-            for (const email in pendingShares) { pendingShares[email] = parseFloat(pendingShares[email].toFixed(2)); }
-            return { memberShares, pendingShares };
-        }
+            // THE FIX: Create final objects containing ONLY non-zero shares
+            const finalMemberShares = {};
+            for (const uid in memberShares) {
+                if (memberShares[uid] > 0.001) { // Use a small threshold for float issues
+                    finalMemberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
+                }
+            }
 
-        // --- UPDATED per user suggestion ---
+            const finalPendingShares = {};
+            for (const email in pendingShares) {
+                if (pendingShares[email] > 0.001) {
+                    finalPendingShares[email] = parseFloat(pendingShares[email].toFixed(2));
+                }
+            }
+            
+            return { memberShares: finalMemberShares, pendingShares: finalPendingShares };
+        }
+        
         function updateItemizationSummary() {
             document.getElementById('remainder-row')?.remove();
             
