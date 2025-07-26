@@ -2871,7 +2871,6 @@
                 .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
         }
 
-        // --- UPDATED to fix AI prompt ---
         async function handleGenerateAiReport() {
             const reportType = document.getElementById('ai-report-type').value;
             const customQuestion = document.getElementById('ai-report-question').value.trim();
@@ -2897,28 +2896,37 @@
                     })),
             };
 
-            let prompt = `Based on the following JSON data which represents a trip's expenses:\n\n${JSON.stringify(tripData, null, 2)}\n\n--- END OF DATA ---\n\n`;
-            prompt += `Now, act as a friendly and insightful travel analyst for Splitify. Your task is to generate a report based on the data provided above. `;
+            // --- CORRECTED PROMPT STRUCTURE ---
+            let prompt = `You are a friendly and insightful travel analyst for Splitify. Your ONLY task is to generate a report about a trip based on the provided JSON data. Your entire response MUST be formatted using simple Markdown. You MUST NOT output the raw JSON data or any code.
 
+Here is the trip data you will analyze:
+${JSON.stringify(tripData, null, 2)}
+
+--- END OF DATA ---
+
+Now, please generate the following report based on the data above.
+`;
+            let taskInstruction = "";
             switch(reportType) {
                 case 'daily_breakdown':
-                    prompt += "The report should be a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.";
+                    taskInstruction = "The report should be a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.";
                     break;
                 case 'fun_awards':
-                    prompt += "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
+                    taskInstruction = "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
                     break;
                 case 'spending_analysis':
                 default:
-                    prompt += "The report should be a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.";
+                    taskInstruction = "The report should be a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.";
                     break;
             }
+            prompt += taskInstruction;
 
             if (customQuestion) {
-                prompt += `\n\nIn addition to the main report, please answer this specific question from the user: "${customQuestion}"`;
+                prompt += `\n\nAdditionally, please answer this specific question from the user: "${customQuestion}"`;
             }
 
-            prompt += `\n\nFormat your entire response using simple Markdown (h2 for main titles, h3 for subtitles, * for bullet points, ** for bold). Do not use h1 or any other formatting.`;
-            
+            prompt += `\n\nRemember to use a friendly tone and format your entire response using only simple Markdown (h2, h3, *, **).`;
+
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
