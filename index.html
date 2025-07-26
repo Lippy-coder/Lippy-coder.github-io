@@ -1640,91 +1640,105 @@
             }
         };
         
-        // *** THIS IS THE DIAGNOSTIC VERSION OF THE FUNCTION ***
+        // =================================================================
+        // =========== THIS IS THE NEW DIAGNOSTIC HARNESS FUNCTION =========
+        // =================================================================
         const handleProfilePicUpload = async (e) => {
-            console.log("--- Starting Test 1: Client-Side Logging ---");
-            const file = e.target.files[0];
-            if (!file) {
-                console.error("Test Error: No file selected.");
-                return;
-            }
-            console.log("1. File selected:", file.name);
-
-            const user = auth.currentUser;
-            if (!user) {
-                console.error("Test Error: User is not authenticated.");
-                showMessage("You must be logged in to upload a photo.");
-                return;
-            }
-            console.log("2. User is authenticated with UID:", user.uid);
-
-            const options = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1024,
-                useWebWorker: true,
-                fileType: 'image/jpeg'
-            }
-
-            showMessage("Compressing and uploading photo...", false);
-
+            console.clear(); // Clear console for a fresh test run
+            console.log("%c--- STARTING NEW DIAGNOSTIC TEST ---", "color: blue; font-size: 16px; font-weight: bold;");
+            
             try {
-                console.log("3. Attempting to compress image...");
-                const compressedFile = await imageCompression(file, options);
-                console.log("4. Image compression SUCCESSFUL. Compressed file:", compressedFile);
+                console.log("[Step 1] Function triggered. The 'change' event object is:", e);
+                const file = e.target.files[0];
+
+                if (!file) {
+                    console.error("[FAIL] No file selected. e.target.files is empty or undefined.", e.target.files);
+                    return;
+                }
+                console.log("[Step 1 SUCCESS] File selected. File object:", file);
+
+                const user = auth.currentUser;
+                if (!user) {
+                    console.error("[FAIL] User is not authenticated. auth.currentUser is null.");
+                    showMessage("You must be logged in to upload a photo.");
+                    return;
+                }
+                console.log("[Step 2 SUCCESS] User authenticated. User object:", user);
+
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1024,
+                    useWebWorker: true,
+                    fileType: 'image/jpeg'
+                };
+                console.log("[Step 3] Preparing to compress image with options:", options);
+
+                let compressedFile;
+                try {
+                    compressedFile = await imageCompression(file, options);
+                    console.log("[Step 3 SUCCESS] Image compression successful. Compressed file object:", compressedFile);
+                } catch (compressionError) {
+                    console.error("[FAIL] Image compression failed.", compressionError);
+                    showMessage("Could not process image. Please try a different one.");
+                    return;
+                }
 
                 const storagePath = `profile-pictures/${user.uid}`;
-                console.log("5. Defined storage path:", storagePath);
+                console.log("[Step 4] Defined storage path:", storagePath);
+                
                 const storageRef = ref(storage, storagePath);
+                console.log("[Step 5] Created storage reference object:", storageRef);
+
+                console.log("%c[Step 6] Starting Firebase Storage upload task. Watching for events...", "color: blue; font-weight: bold;");
+                showMessage("Compressing and uploading photo...", false);
                 const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
-                console.log("6. Starting Firebase Storage upload task...");
                 uploadTask.on('state_changed',
                     (snapshot) => {
-                        // Optional: You can log progress here if needed
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log('Upload is ' + progress + '% done');
+                        console.log(`[In Progress] Upload is ${progress.toFixed(2)}% done.`);
                     },
                     (error) => {
-                        // THIS IS A CRITICAL FAILURE POINT
-                        console.error("--- TEST FAILED AT STEP 7 ---");
-                        console.error("7. Firebase Storage upload FAILED. Error object:", error);
-                        showMessage(`Upload failed. Code: ${error.code}`);
+                        console.error("%c[FAIL AT STEP 7] Firebase Storage upload failed.", "color: red; font-size: 16px; font-weight: bold;");
+                        console.error("The full error object from Firebase is:", error);
+                        showMessage(`Upload failed: ${error.code}. Check console for details.`);
                     },
                     async () => {
-                        // THIS IS THE SUCCESS CALLBACK
-                        console.log("8. Firebase Storage upload SUCCESSFUL.");
+                        console.log("%c[Step 7 SUCCESS] Firebase Storage upload complete.", "color: green; font-weight: bold;");
                         try {
-                            console.log("9. Attempting to get download URL...");
+                            console.log("[Step 8] Attempting to get download URL...");
                             const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            console.log("10. Got download URL:", photoURL);
+                            console.log("[Step 8 SUCCESS] Got download URL:", photoURL);
 
-                            console.log("11. Attempting to update Firestore document...");
+                            console.log("[Step 9] Attempting to update Firestore document at path:", `/users/${user.uid}`);
                             const userDocRef = doc(db, "users", user.uid);
                             await updateDoc(userDocRef, { photoURL });
-                            console.log("12. Firestore document update request sent successfully.");
+                            console.log("[Step 9 SUCCESS] Firestore document update request sent.");
 
                             const existingProfile = userProfilesCache.get(user.uid) || {};
                             userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
-                            console.log("13. Local cache updated.");
+                            console.log("[Step 10 SUCCESS] Local cache updated.");
 
-                            console.log("14. Re-rendering profile with auth.currentUser...");
+                            console.log("[Step 11] Re-rendering profile with fresh auth.currentUser object:", auth.currentUser);
                             renderProfile(auth.currentUser);
                             showMessage("Profile picture updated!", false);
-                            console.log("--- Test Finished Successfully ---");
+                            console.log("%c--- DIAGNOSTIC TEST FINISHED SUCCESSFULLY ---", "color: green; font-size: 16px; font-weight: bold;");
 
-                        } catch (error) {
-                            console.error("--- TEST FAILED AT STEP 11 or later ---");
-                            console.error("11a. Error during URL retrieval or Firestore update:", error);
+                        } catch (finalizationError) {
+                            console.error("%c[FAIL AT STEP 8/9] Error during URL retrieval or Firestore update.", "color: red; font-size: 16px; font-weight: bold;");
+                            console.error("The full error object is:", finalizationError);
                             showMessage("Could not save picture after upload.");
                         }
                     }
                 );
-            } catch (error) {
-                console.error("--- TEST FAILED AT STEP 3 ---");
-                console.error("3a. Error compressing image:", error);
-                showMessage("Could not process image. Please try a different one.");
+            } catch (outerError) {
+                 console.error("%c[FAIL] A critical unexpected error occurred in the main function body.", "color: red; font-size: 16px; font-weight: bold;");
+                 console.error("The full error object is:", outerError);
             }
         };
+        // =================================================================
+        // ================= END OF DIAGNOSTIC FUNCTION ====================
+        // =================================================================
 
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) {
@@ -2381,7 +2395,7 @@
             aiCategorySpinner.classList.remove('hidden');
             
             const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
-            const prompt = `From the following list, choose the single for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
+            const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
             const payload = { prompt: prompt };
 
