@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.13 (Settlement Visibility Fix)
+              Version 7.1.14 (Supremo Mode Fix)
             </p>
         </footer>
     </div>
@@ -2072,7 +2072,8 @@
                     }
 
                     const amPayer = currentUser.uid === tx.from;
-                    const canRecordPayment = amPayer || isSupremo;
+                    const amPayee = currentUser.uid === tx.to;
+                    const canRecordPayment = amPayer || amPayee || isSupremo;
 
                     const paymentEl = document.createElement('div');
                     paymentEl.className = 'p-3 bg-gray-100 rounded-lg';
