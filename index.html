@@ -620,7 +620,7 @@
             </div>
         </div>
         
-        <!-- NEW: AI Report Configuration Modal -->
+        <!-- AI Report Configuration Modal -->
         <div id="ai-report-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3>
@@ -645,7 +645,7 @@
             </div>
         </div>
 
-        <!-- NEW: AI Report Display Modal -->
+        <!-- AI Report Display Modal -->
         <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -684,7 +684,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.3.0 (Interactive AI Reports)
+              Version 7.3.1 (AI Report Prompt Fix)
             </p>
         </footer>
     </div>
@@ -848,8 +848,6 @@
         const actionSheetArchiveBtn = document.getElementById('action-sheet-archive-btn');
         const actionSheetEmailBtn = document.getElementById('action-sheet-email-btn');
         const supremoToggleActionSheet = document.getElementById('supremo-toggle-action-sheet');
-
-        // NEW AI Report DOM References
         const aiReportBtn = document.getElementById('ai-report-btn');
         const aiReportModal = document.getElementById('ai-report-modal');
         const aiReportForm = document.getElementById('ai-report-form');
@@ -1425,8 +1423,6 @@
         closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
-
-        // NEW: AI Report Modal Listeners
         aiReportBtn.addEventListener('click', () => openModal(aiReportModal));
         cancelAiReportBtn.addEventListener('click', () => closeModal(aiReportModal));
         closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
@@ -2866,7 +2862,6 @@
             }
         }
 
-        // --- NEW: AI Report Generation ---
         function simpleMarkdownToHtml(md) {
             return md
                 .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -2876,6 +2871,7 @@
                 .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
         }
 
+        // --- UPDATED to fix AI prompt ---
         async function handleGenerateAiReport() {
             const reportType = document.getElementById('ai-report-type').value;
             const customQuestion = document.getElementById('ai-report-question').value.trim();
@@ -2884,7 +2880,6 @@
             loadingText.textContent = 'Your Gemini AI is analyzing the trip...';
             loadingOverlay.classList.remove('hidden-view');
 
-            // 1. Prepare data
             const tripData = {
                 name: currentTrip.name,
                 baseCurrency: currentTrip.baseCurrency,
@@ -2902,34 +2897,33 @@
                     })),
             };
 
-            // 2. Craft dynamic prompt
-            let prompt = `You are a friendly and insightful travel analyst named "Splitify AI". Your task is to generate a report about a trip based on the provided JSON data. The currency for all amounts is ${tripData.baseCurrency}. Format your entire response using simple Markdown (h2 for main titles, h3 for subtitles, * for bullet points, ** for bold). Do not use h1.\n\n`;
+            let prompt = `Based on the following JSON data which represents a trip's expenses:\n\n${JSON.stringify(tripData, null, 2)}\n\n--- END OF DATA ---\n\n`;
+            prompt += `Now, act as a friendly and insightful travel analyst for Splitify. Your task is to generate a report based on the data provided above. `;
 
             switch(reportType) {
                 case 'daily_breakdown':
-                    prompt += "Provide a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.\n\n";
+                    prompt += "The report should be a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.";
                     break;
                 case 'fun_awards':
-                    prompt += "Generate a fun, lighthearted awards summary for the trip. Create at least 3 awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.\n\n";
+                    prompt += "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
                     break;
                 case 'spending_analysis':
                 default:
-                    prompt += "Provide a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.\n\n";
+                    prompt += "The report should be a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.";
                     break;
             }
 
             if (customQuestion) {
-                prompt += `Finally, please answer this specific question from the user: "${customQuestion}"\n\n`;
+                prompt += `\n\nIn addition to the main report, please answer this specific question from the user: "${customQuestion}"`;
             }
 
-            prompt += "Here is the trip data in JSON format:\n" + JSON.stringify(tripData, null, 2);
-
-            // 3. Call Cloud Function
+            prompt += `\n\nFormat your entire response using simple Markdown (h2 for main titles, h3 for subtitles, * for bullet points, ** for bold). Do not use h1 or any other formatting.`;
+            
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt, image: null }) // No image for this call
+                    body: JSON.stringify({ prompt: prompt, image: null })
                 });
 
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
