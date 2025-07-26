@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.14 (Supremo Mode Fix)
+              Version 7.2.0 (Itemization Remainder Box)
             </p>
         </footer>
     </div>
@@ -2456,6 +2456,7 @@
             updateItemizationSummary();
         }
 
+        // --- UPDATED per user suggestion ---
         itemizedListDiv.addEventListener('click', (e) => {
             const avatarContainer = e.target.closest('[data-uid], [data-email]');
             if (!avatarContainer) return;
@@ -2463,10 +2464,12 @@
             if (!avatar) return;
 
             const row = avatar.closest('.item-row, #remainder-row');
+
             if (row && row.id === 'remainder-row') {
                 const uid = avatarContainer.dataset.uid;
                 const email = avatarContainer.dataset.email;
                 const identifier = uid || email;
+                
                 if (remainderAssignments.has(identifier)) {
                     remainderAssignments.delete(identifier);
                 } else {
@@ -2478,6 +2481,7 @@
             updateItemizationSummary();
         });
         
+        // --- UPDATED per user suggestion ---
         function calculateItemizedShares() {
             const memberShares = {};
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
@@ -2519,24 +2523,24 @@
             return { memberShares, pendingShares };
         }
 
+        // --- UPDATED per user suggestion ---
         function updateItemizationSummary() {
             document.getElementById('remainder-row')?.remove();
             
-            let unassignedItemsTotal = 0;
+            let assignedItemsTotal = 0;
             currentItemization.lineItems.forEach((item, index) => {
                 const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
-                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
-                    unassignedItemsTotal += item.price;
+                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length > 0) {
+                    assignedItemsTotal += item.price;
                 }
             });
 
-            const tipAndTaxRemainder = currentItemization.total - currentItemization.lineItems.reduce((sum, item) => sum + item.price, 0);
-            const totalRemainderToAllocate = tipAndTaxRemainder + unassignedItemsTotal;
+            const totalRemainderToAllocate = currentItemization.total - assignedItemsTotal;
 
             if (totalRemainderToAllocate > 0.01) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
-                remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col';
+                remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
                 remainderEl.dataset.remainderAmount = totalRemainderToAllocate.toFixed(2);
                 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
@@ -2561,15 +2565,16 @@
                         avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">?</div>`;
                         container = `<div data-email="${identifier}" title="${title}">${avatar}</div>`;
                     }
-                    return avatarContainer;
+                    return container;
                 }).join('');
 
                 remainderEl.innerHTML = `
                     <div class="w-full flex justify-between items-center">
-                        <p class="font-medium text-green-800">Allocate Remainder</p>
-                        <p class="text-sm text-green-600">${totalRemainderToAllocate.toFixed(2)} ${currentItemization.currency}</p>
+                        <p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p>
+                        <p class="text-sm font-bold text-green-700">${totalRemainderToAllocate.toFixed(2)} ${currentItemization.currency}</p>
                     </div>
-                    <div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>
+                    <p class="text-xs text-green-600 mb-2">Select who should split this amount:</p>
+                    <div class="w-full flex space-x-1 mt-1">${memberAvatarsHTML}</div>
                 `;
                 itemizedListDiv.appendChild(remainderEl);
             }
