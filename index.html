@@ -631,7 +631,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.1.10 (Final Code)
+              Version 7.1.11 (Payment Recording Update)
             </p>
         </footer>
     </div>
@@ -1191,7 +1191,6 @@
             });
         }
         
-        // --- FIX START: MODIFIED renderTripItems() TO USE INTEGER MATH ---
         function renderTripItems() {
             tripItemsList.innerHTML = '';
             const expenses = allTripExpenses.map(e => ({ type: 'expense', data: e, date: e.occurredAt.toDate() }));
@@ -1208,11 +1207,9 @@
             noItemsMessage.classList.add('hidden');
             allItems.sort((a, b) => b.date - a.date);
             
-            // Calculate total spent (as float for display)
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
 
-            // Calculate balances using integers (cents) for accuracy
             const balances = new Map();
             currentTrip.members.forEach(member => { if (member.status === 'active') { balances.set(member.uid, 0); } });
             
@@ -1220,12 +1217,10 @@
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
-                // Convert to cents and add to payer's balance
                 balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
                     if(balances.has(memberId)) {
-                        // Convert to cents and subtract from sharer's balance
                         balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
                     }
                 }
@@ -1233,14 +1228,12 @@
 
             const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
-                // Convert to cents and adjust balances
                 balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
                 balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
             });
 
             const myBalanceInCents = balances.get(auth.currentUser.uid) || 0;
 
-            // Use integer threshold (1 cent)
             if (myBalanceInCents > 1) {
                 tripOutstandingBalance.textContent = `I am owed: ${(myBalanceInCents / 100).toFixed(2)} ${currentTrip.baseCurrency}`;
                 tripOutstandingBalance.className = 'font-semibold text-green-600';
@@ -1257,7 +1250,6 @@
                 else if (item.type === 'payment') { renderPaymentItem(item.data); }
             });
         }
-        // --- FIX END ---
         
         function renderExpenseItem(expense) {
             const isDeleted = expense.isDeleted || false;
@@ -1683,6 +1675,34 @@
             }
         };
 
+        // --- NEW: Function to handle recording a settlement payment ---
+        const handleRecordPayment = async (fromUid, toUid, amount) => {
+            if (!currentTrip) {
+                showMessage("Error: No active trip selected.");
+                return;
+            }
+
+            const newPayment = {
+                from: fromUid,
+                to: toUid,
+                amount: amount,
+                paidAt: Timestamp.now(),
+                isDeleted: false
+            };
+
+            try {
+                const tripRef = doc(db, 'trips', currentTrip.id);
+                await updateDoc(tripRef, {
+                    settledPayments: arrayUnion(newPayment)
+                });
+                closeModal(settleUpModal);
+                showMessage("Payment recorded successfully!", false);
+            } catch (error) {
+                console.error("Error recording payment:", error);
+                showMessage("Failed to record payment.");
+            }
+        };
+
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
 
@@ -1821,6 +1841,17 @@
             }
         });
 
+        // --- NEW: Event listener for the dynamically created "Record as Paid" buttons ---
+        settlementList.addEventListener('click', (e) => {
+            const recordBtn = e.target.closest('.record-payment-btn');
+            if (recordBtn) {
+                const from = recordBtn.dataset.fromUid;
+                const to = recordBtn.dataset.toUid;
+                const amount = parseFloat(recordBtn.dataset.amount);
+                handleRecordPayment(from, to, amount);
+            }
+        });
+
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = auth.currentUser;
@@ -1927,9 +1958,8 @@
             }
         });
         
-        // --- FIX START: MODIFIED calculateSettlement() TO USE INTEGER MATH ---
         function calculateSettlement() {
-            const balances = new Map(); // Balances will be stored in cents
+            const balances = new Map();
             currentTrip.members.forEach(member => {
                 if (member.status === 'active') {
                     balances.set(member.uid, 0);
@@ -1940,12 +1970,10 @@
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
-                // Add the amount in cents to the payer's balance
                 balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
                     if (balances.has(memberId)) {
-                        // Subtract the share in cents from the sharer's balance
                         balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
                     }
                 }
@@ -1953,7 +1981,6 @@
 
             const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
-                // Adjust balances in cents for each payment
                 balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
                 balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
             });
@@ -1961,11 +1988,10 @@
             const debtors = [];
             const creditors = [];
             balances.forEach((amount, uid) => {
-                // Use an integer threshold (1 cent) to avoid floating point issues
                 if (amount < -1) {
-                    debtors.push({ uid, amount: -amount }); // amount is in cents
+                    debtors.push({ uid, amount: -amount });
                 } else if (amount > 1) {
-                    creditors.push({ uid, amount }); // amount is in cents
+                    creditors.push({ uid, amount });
                 }
             });
 
@@ -1977,7 +2003,6 @@
                 const creditor = creditors[0];
                 const amountInCents = Math.min(debtor.amount, creditor.amount);
 
-                // Create transaction with amount converted back to float for display
                 transactions.push({ from: debtor.uid, to: creditor.uid, amount: amountInCents / 100 });
                 
                 debtor.amount -= amountInCents;
@@ -1988,8 +2013,8 @@
             }
             return transactions;
         }
-        // --- FIX END ---
 
+        // --- MODIFIED: Added a "Record as Paid" button to each transaction ---
         async function calculateAndShowSettlement() {
             const transactions = calculateSettlement();
             const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
@@ -2027,6 +2052,12 @@
                             <div class="font-bold text-lg">${tx.amount.toFixed(2)} ${currentTrip.baseCurrency}</div>
                         </div>
                         ${paymentLink ? `<a href="${paymentLink}" target="_blank" class="block mt-2 text-center bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-600">Pay with ${toPaymentInfo.bank}</a>` : ''}
+                        <button class="record-payment-btn w-full mt-2 bg-green-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-green-600"
+                                data-from-uid="${tx.from}"
+                                data-to-uid="${tx.to}"
+                                data-amount="${tx.amount.toFixed(2)}">
+                            Record as Paid
+                        </button>
                     `;
                     settlementList.appendChild(paymentEl);
                 });
@@ -2034,10 +2065,8 @@
             openModal(settleUpModal);
         }
 
-        // --- FIX START: MODIFIED initializeVisualisation() TO USE INTEGER MATH ---
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
-            // Balances will be stored in cents
             const balances = new Map();
             currentTrip.members.forEach(member => {
                 if (member.status === 'active') {
@@ -2049,13 +2078,11 @@
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
-                // Add amount in cents to payer's balance
                 balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
                 
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
                     if (balances.has(memberId)) {
-                        // Subtract share in cents from sharer's balance
                         balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
                     }
                 }
@@ -2063,7 +2090,6 @@
             
             const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
-                // Adjust balances in cents
                 balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
                 balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
             });
@@ -2078,7 +2104,6 @@
                 const user = profiles[uid];
                 if (!user) return;
                 
-                // Use integer threshold (1 cent)
                 if (amountInCents > 1) {
                     creditors.push({ name: user.displayName, amount: amountInCents / 100 });
                 } else if (amountInCents < -1) {
@@ -2086,7 +2111,7 @@
                 }
             });
 
-            const transactions = calculateSettlement(); // This function now returns amounts as floats
+            const transactions = calculateSettlement();
 
             vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${currencySymbol}${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
@@ -2101,7 +2126,6 @@
                 </div>`;
             }).join('') : '<p>All settled!</p>';
         }
-        // --- FIX END ---
         
         function debounce(func, delay) {
             let timeout;
