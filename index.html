@@ -667,16 +667,18 @@
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3>
                 <form id="ai-report-form">
+                    <!-- CHANGE 2.1: HTML structure updated -->
                     <div class="mb-4">
                         <label for="ai-report-type" class="block text-sm font-medium text-gray-700 mb-1">Choose a Report Type</label>
                         <select id="ai-report-type" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
                             <option value="spending_analysis">Spending Analysis</option>
                             <option value="daily_breakdown">Daily Breakdown</option>
                             <option value="fun_awards">Fun Awards</option>
+                            <option value="custom_question">Your own question...</option>
                         </select>
                     </div>
-                    <div class="mb-6">
-                        <label for="ai-report-question" class="block text-sm font-medium text-gray-700 mb-1">Ask a Specific Question (Optional)</label>
+                    <div id="custom-question-area" class="mb-6 hidden">
+                        <label for="ai-report-question" class="block text-sm font-medium text-gray-700 mb-1">Ask a Specific Question</label>
                         <textarea id="ai-report-question" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., How much did we spend on just wine?"></textarea>
                     </div>
                     <div class="flex justify-end space-x-4">
@@ -710,7 +712,7 @@
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
-            <p id="loading-text" class="text-white mt-4">Analyzing your expense...</p>
+            <p id="loading-text" class="text-white mt-4">Analysing Scene...</p>
         </div>
 
 
@@ -726,7 +728,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 8.0.0 (Smart Scene Analysis)
+              Version 8.0.1 (UI Polish)
             </p>
         </footer>
     </div>
@@ -900,6 +902,9 @@
         const closeAiDisplayBtn = document.getElementById('close-ai-display-btn');
         const closeAiDisplayBtnX = document.getElementById('close-ai-display-btn-x');
         const copyAiReportBtn = document.getElementById('copy-ai-report-btn');
+        // CHANGE 2.2: Added new DOM references
+        const aiReportTypeSelect = document.getElementById('ai-report-type');
+        const customQuestionArea = document.getElementById('custom-question-area');
 
 
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
@@ -2335,12 +2340,11 @@
         }
 
         async function analyzeImageWithGemini(base64Image) {
-            loadingText.textContent = "Analyzing scene with Gemini...";
+            // CHANGE 1.1: Updated loading text
+            loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
             const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
-            
-            // --- CHANGE 1: Send user location to the backend ---
             const payload = { prompt, image: base64Image, userLocation };
 
             try {
@@ -2366,10 +2370,8 @@
 
                 console.log('Gemini Smart Scene Response:', data);
 
-                // --- CHANGE 2: Completely new logic to handle the sophisticated response ---
-                
                 addExpenseForm.reset();
-                await populateExpenseModal(); // This still resets the form and fills member lists
+                await populateExpenseModal();
                 openModal(addExpenseModal); 
 
                 const descInput = document.getElementById('expense-description');
@@ -2379,7 +2381,7 @@
 
                 // A. Populate Description and add reasoning tooltip if available
                 let finalDescription = data.description || data.merchantName || '';
-                aiReasoningTooltip.innerHTML = ''; // Clear previous tooltip
+                aiReasoningTooltip.innerHTML = '';
                 aiReasoningTooltip.classList.add('hidden');
 
                 if (data.confidence && data.confidence !== 'high' && data.merchantName) {
@@ -2392,7 +2394,7 @@
                     aiReasoningTooltip.classList.remove('hidden');
                 }
 
-                // B. Populate Amount (only if available, which it will be for receipts)
+                // B. Populate Amount
                 if (data.total !== null) {
                     amountInput.value = data.total;
                 } else {
@@ -2406,13 +2408,13 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // D. Populate Date & Time (only if available, for receipts)
+                // D. Populate Date & Time
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
 
-                // E. Set up for Itemized Split (only for high-confidence receipts with items)
+                // E. Set up for Itemized Split
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
                 if (selectedCurrency && selectedCurrency !== currentTrip.baseCurrency) {
@@ -2952,11 +2954,12 @@
         }
 
         async function handleGenerateAiReport() {
+            // CHANGE 1.2: Updated loading text
+            loadingText.textContent = 'Your AI is analysing the trip data...';
             const reportType = document.getElementById('ai-report-type').value;
             const customQuestion = document.getElementById('ai-report-question').value.trim();
 
             closeModal(aiReportModal);
-            loadingText.textContent = 'Your Gemini AI is analyzing the trip...';
             loadingOverlay.classList.remove('hidden-view');
 
             const tripData = {
@@ -2990,6 +2993,9 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 case 'fun_awards':
                     taskInstruction = "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
                     break;
+                case 'custom_question':
+                    // Handled by the customQuestion check below
+                    break;
                 case 'spending_analysis':
                 default:
                     taskInstruction = "The report should be a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.";
@@ -3021,6 +3027,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 lastAiReportMarkdown = reportText;
                 aiReportContent.innerHTML = simpleMarkdownToHtml(reportText);
                 aiReportForm.reset();
+                customQuestionArea.classList.add('hidden'); // Re-hide for next time
                 openModal(aiReportDisplayModal);
 
             } catch (error) {
@@ -3044,7 +3051,6 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             });
         });
 
-
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
@@ -3053,7 +3059,6 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             registerTabBtn.classList.add('text-gray-500');
             hideAuthMessage();
         });
-
 
         registerTabBtn.addEventListener('click', () => {
             registerForm.classList.remove('hidden');
@@ -3067,6 +3072,15 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
         expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
         document.getElementById('expense-description').addEventListener('input', debouncedCategorySuggestion);
+
+        // CHANGE 2.3: Added event listener for the AI Report modal dropdown
+        aiReportTypeSelect.addEventListener('change', () => {
+            if (aiReportTypeSelect.value === 'custom_question') {
+                customQuestionArea.classList.remove('hidden');
+            } else {
+                customQuestionArea.classList.add('hidden');
+            }
+        });
 
     </script>
 </body>
