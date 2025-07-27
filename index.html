@@ -684,7 +684,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 7.3.1 (AI Report Prompt Fix)
+              Version 7.3.2 (Robust AI Report Prompting)
             </p>
         </footer>
     </div>
@@ -2896,16 +2896,12 @@
                     })),
             };
 
-            // --- CORRECTED PROMPT STRUCTURE ---
-            let prompt = `You are a friendly and insightful travel analyst for Splitify. Your ONLY task is to generate a report about a trip based on the provided JSON data. Your entire response MUST be formatted using simple Markdown. You MUST NOT output the raw JSON data or any code.
+            const systemPrompt = `You are "Splitify AI," a friendly and insightful travel analyst. Your ONLY goal is to write a human-readable report in Markdown based on data you are given.
+CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code. Your entire response must be creative, well-written prose formatted in simple Markdown (h2, h3, *, **).`;
 
-Here is the trip data you will analyze:
-${JSON.stringify(tripData, null, 2)}
-
---- END OF DATA ---
-
-Now, please generate the following report based on the data above.
-`;
+            let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripData, null, 2)}\n\n--- END OF DATA ---\n\n`;
+            userPrompt += "Now, please generate the following report based on the data provided above.\n";
+            
             let taskInstruction = "";
             switch(reportType) {
                 case 'daily_breakdown':
@@ -2919,19 +2915,23 @@ Now, please generate the following report based on the data above.
                     taskInstruction = "The report should be a spending analysis. Include the total amount spent, a breakdown of spending by category, identify the single largest expense, and list the total spending per person.";
                     break;
             }
-            prompt += taskInstruction;
+            userPrompt += taskInstruction;
 
             if (customQuestion) {
-                prompt += `\n\nAdditionally, please answer this specific question from the user: "${customQuestion}"`;
+                userPrompt += `\n\nAdditionally, please answer this specific question from the user: "${customQuestion}"`;
             }
 
-            prompt += `\n\nRemember to use a friendly tone and format your entire response using only simple Markdown (h2, h3, *, **).`;
-
+            userPrompt += `\n\nRemember to use a friendly tone and format your entire response using only simple Markdown (h2, h3, *, **).`;
+            
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt, image: null })
+                    body: JSON.stringify({ 
+                        systemPrompt: systemPrompt, 
+                        userPrompt: userPrompt,
+                        image: null 
+                    })
                 });
 
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
