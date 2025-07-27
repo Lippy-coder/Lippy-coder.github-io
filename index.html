@@ -2306,9 +2306,20 @@
             };
         }
 
+        // *** THIS IS THE UPDATED FUNCTION ***
         function getLanguageForCurrency(currencyCode) {
-            const languageMap = { 'JPY': 'Japanese', 'CNY': 'Chinese' };
-            return languageMap[currencyCode] || 'English';
+            // You can expand this map for other languages
+            const languageMap = { 
+                'JPY': 'Japanese', 
+                'CNY': 'Chinese',
+                'KRW': 'Korean',
+                'EUR': 'the local language (e.g., French, German, Italian) or English if unsure',
+                'GBP': 'English',
+                'USD': 'English',
+                'CAD': 'English',
+                'AUD': 'English'
+            };
+            return languageMap[currencyCode] || 'English'; // Default to English
         }
 
         function getUserLocation() {
@@ -2344,12 +2355,16 @@
             closeModal(aiScanModal);
         }
 
+        // *** THIS IS THE UPDATED FUNCTION ***
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
             const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
-            const payload = { prompt, image: base64Image, userLocation };
+            
+            // --- THIS IS THE CHANGE ---
+            const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
+            const payload = { prompt, image: base64Image, userLocation, targetLanguage }; // Add targetLanguage here
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
