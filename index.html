@@ -1242,17 +1242,14 @@
             }
         }
 
-        // --- NEW FUNCTION (PART 2 of Handshake) ---
-        // This is run by an EXISTING trip member to process 'accepted' invitations.
+        // --- PART 2 of Handshake Logic ---
         async function processAcceptedInvitations(tripId) {
             const user = auth.currentUser;
-            // Only existing members should run this check.
             if (!user || !currentTrip || !currentTrip.memberUids.includes(user.uid)) {
                 return;
             }
 
             const invitationsRef = collection(db, "invitations");
-            // Find invitations for THIS trip that have been 'accepted'.
             const q = query(invitationsRef, where("tripId", "==", tripId), where("status", "==", "accepted"));
             const acceptedSnapshot = await getDocs(q);
 
@@ -1269,19 +1266,14 @@
                 const newUserUid = invitation.acceptedByUid;
 
                 if (newUserUid) {
-                    // Update the trip document to finalize the new member
                     const updatedMembers = currentTrip.members
-                        // Remove the old pending placeholder
                         .filter(member => member.email !== invitation.invitedEmail)
-                        // Add the new active member
                         .concat([{ uid: newUserUid, status: 'active' }]);
                     
                     batch.update(tripRef, {
                         members: updatedMembers,
                         memberUids: arrayUnion(newUserUid)
                     });
-
-                    // Delete the processed invitation
                     batch.delete(invDoc.ref);
                 }
             });
@@ -1297,18 +1289,12 @@
 
 
         async function selectTrip(trip) {
-            // If there's an old listener, unsubscribe from it first
             if (singleTripUnsubscribe) singleTripUnsubscribe();
 
-            // --- MODIFICATION: ADDED THIS CALL ---
-            // The existing member's browser will now check for and process accepted invites.
-            // We do this BEFORE setting up the listener to avoid race conditions.
             await processAcceptedInvitations(trip.id);
-            // ------------------------------------
 
             const tripRef = doc(db, 'trips', trip.id);
             
-            // Create the new listener for the specific trip document
             singleTripUnsubscribe = onSnapshot(tripRef, async (doc) => {
                 if (doc.exists()) {
                     currentTrip = { id: doc.id, ...doc.data() };
@@ -1323,14 +1309,11 @@
 
                     await renderTripMembers(currentTrip.members);
 
-                    // Now that the trip object is updated, re-render the items
-                    // This will use the fresh `currentTrip.settledPayments`
                     if(allTripExpenses.length > 0 || currentTrip.settledPayments?.length > 0) {
                          renderTripItems();
                     }
 
                 } else {
-                    // Handle case where trip might have been deleted
                     console.error("Selected trip no longer exists.");
                     backToDashboardBtn.click();
                 }
@@ -1340,7 +1323,7 @@
             });
             
             if (expensesUnsubscribe) expensesUnsubscribe();
-            listenForExpenses(trip.id); // This remains the same
+            listenForExpenses(trip.id);
             
             showView('trip-detail-view');
         }
@@ -2043,14 +2026,11 @@
             }
         };
 
-        // --- NEW FUNCTION (PART 1 of Handshake) ---
-        // This function is run by the NEWLY registered user.
-        // It finds their invitation and updates its status to 'accepted'.
+        // --- PART 1 of Handshake Logic ---
         async function acceptPendingInvitations(newUser) {
             if (!newUser || !newUser.email) return;
 
             const invitationsRef = collection(db, "invitations");
-            // Find invitations for this user's email that are still pending
             const q = query(invitationsRef, where("invitedEmail", "==", newUser.email), where("status", "==", "pending"));
             const invitationsSnapshot = await getDocs(q);
 
@@ -2059,16 +2039,13 @@
                 return;
             }
 
-            // Use a batch to update all invitations at once
             const batch = writeBatch(db);
             invitationsSnapshot.forEach(invDoc => {
                 console.log(`Accepting invitation ${invDoc.id}`);
                 const invRef = doc(db, "invitations", invDoc.id);
-                // This is the "handshake". We are updating the invitation itself.
-                // We are NOT touching the trip document here.
                 batch.update(invRef, {
                     status: 'accepted',
-                    acceptedByUid: newUser.uid, // Stamp the invitation with the new user's ID
+                    acceptedByUid: newUser.uid,
                     acceptedAt: serverTimestamp()
                 });
             });
@@ -2091,7 +2068,7 @@
             let tempUser = null;
 
             try {
-                // First, check if an invitation exists. This is a read operation.
+                // This check now SUCCEEDS because of the new 'allow list' security rule.
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
@@ -2099,14 +2076,12 @@
                 if (invitationSnapshot.empty) {
                     throw new Error("INVITE_REQUIRED");
                 }
-
-                // If invite exists, proceed with creating the user
+                
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
                 
                 await updateProfile(tempUser, { displayName: displayName });
                 
-                // Create the user's own profile document. This should be allowed by security rules.
                 await setDoc(doc(db, "users", tempUser.uid), {
                     uid: tempUser.uid,
                     displayName: displayName,
@@ -2115,11 +2090,10 @@
                     paymentInfo: { bank: '', username: '' }
                 });
                 
-                // MODIFIED: Instead of trying to modify the trip, the new user just "accepts" the invite.
+                // The new user "accepts" their invites. An existing member will finalize it later.
                 await acceptPendingInvitations(tempUser);
 
                 await sendEmailVerification(tempUser);
-                // MODIFIED: Update the message to give the correct expectation.
                 showAuthMessage("Success! A verification email has been sent. You will be added to the trip the next time a member views it.");
                 await signOut(auth);
 
@@ -3030,7 +3004,6 @@
                 }
 
 
-                // >>> CHANGE 2: USE THE NEW `transactionTimestamp` FIELD <<<
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
