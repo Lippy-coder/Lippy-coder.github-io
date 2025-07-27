@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,10 @@
     
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.appspot.com/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
     <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.appspot.com/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
+
+
+
+
 
 
 
@@ -82,6 +87,10 @@
 
 
 
+
+
+
+
         /* FAB Menu Styles */
         #fab-container.open #fab-icon-plus {
             transform: rotate(45deg);
@@ -132,6 +141,10 @@
 
 
 
+
+
+
+
         /* Itemization Styles */
         .item-assignment-avatar {
             transition: all 0.2s ease-in-out;
@@ -147,6 +160,14 @@
         #ai-report-content ul { list-style-type: disc; margin-left: 1.5rem; }
         #ai-report-content li { margin-bottom: 0.25rem; }
         #ai-report-content strong { font-weight: 700; }
+        #ai-report-content pre {
+            background-color: #f3f4f6;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
         
         /* AI Reasoning Tooltip */
         .info-icon {
@@ -193,7 +214,15 @@
 
 
 
+
+
+
+
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
+
+
+
+
 
 
 
@@ -242,6 +271,10 @@
 
 
 
+
+
+
+
         <!-- Dashboard View -->
         <div id="dashboard-view" class="view hidden-view py-8">
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -256,6 +289,10 @@
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
                 </div>
+
+
+
+
 
 
 
@@ -326,10 +363,18 @@
 
 
 
+
+
+
+
                 <div id="trip-items-list" class="space-y-1">
                     <p id="no-items-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">No expenses or payments logged for this trip yet.</p>
                 </div>
             </main>
+
+
+
+
 
 
 
@@ -359,6 +404,10 @@
 
 
 
+
+
+
+
                 <!-- Main FAB Toggle Button -->
                 <button id="fab-toggle" title="Add Item" class="relative h-16 w-16 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-10">
                     <div id="fab-icon-plus" class="transition-transform duration-300">
@@ -369,6 +418,10 @@
                 </button>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -400,6 +453,10 @@
                 </form>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -460,6 +517,10 @@
 
 
 
+
+
+
+
                     <!-- Itemized Split Section -->
                     <div id="itemized-split-section" class="hidden">
                         <div class="flex justify-between items-center mb-2">
@@ -470,6 +531,10 @@
                         <div id="itemized-summary" class="mt-2 text-sm">
                         </div>
                     </div>
+
+
+
+
 
 
 
@@ -496,6 +561,10 @@
                 </form>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -533,6 +602,10 @@
 
 
 
+
+
+
+
         <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
@@ -554,6 +627,10 @@
 
 
 
+
+
+
+
         <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
@@ -570,6 +647,10 @@
                 </form>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -597,6 +678,10 @@
                 </div>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -631,6 +716,10 @@
                 </div>
             </div>
         </div>
+
+
+
+
 
 
 
@@ -690,6 +779,10 @@
 
 
 
+
+
+
+
         <!-- Action Sheet Modal -->
         <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end z-50 hidden-view">
             <div class="action-sheet-panel w-full bg-gray-100 rounded-t-2xl p-4">
@@ -720,7 +813,7 @@
                         <label for="ai-report-type" class="block text-sm font-medium text-gray-700 mb-1">Choose a Report Type</label>
                         <select id="ai-report-type" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
                             <option value="spending_analysis">Spending Analysis</option>
-                            <option value="daily_breakdown">Daily Breakdown</option>
+                            <option value="spreadsheet_data">Data for Spreadsheet (CSV)</option>
                             <option value="fun_awards">Fun Awards</option>
                             <option value="custom_question">Your own question...</option>
                         </select>
@@ -736,6 +829,8 @@
                 </form>
             </div>
         </div>
+
+
 
 
         <!-- AI Report Display Modal -->
@@ -760,11 +855,19 @@
 
 
 
+
+
+
+
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p id="loading-text" class="text-white mt-4">Analysing Scene...</p>
         </div>
+
+
+
+
 
 
 
@@ -781,6 +884,10 @@
 
 
 
+
+
+
+
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
               Version 8.1.0 (Single-Call AI Logic)
@@ -791,11 +898,19 @@
 
 
 
+
+
+
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+
+
+
 
 
 
@@ -818,12 +933,20 @@
 
 
 
+
+
+
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
         setLogLevel('debug');
+
+
+
+
 
 
 
@@ -836,6 +959,7 @@
         let paymentToDeleteId = null;
         let allTripExpenses = [];
         let tripsUnsubscribe = null;
+        let singleTripUnsubscribe = null;
         let expensesUnsubscribe = null;
         const userProfilesCache = new Map();
         let cameraStream = null;
@@ -846,6 +970,10 @@
         let currentItemization = null; // To hold AI-extracted line items
         let remainderAssignments = new Set(); // To hold UIDs for the remainder
         let lastAiReportMarkdown = ''; // To store the raw markdown for copying
+
+
+
+
 
 
 
@@ -973,8 +1101,14 @@
 
 
 
+
+
+
+
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
+
+
 
 
         // --- REFACTORING: Balance Calculation (Applied) ---
@@ -988,12 +1122,14 @@
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
 
+
             // 1. Initialize balances for all active members to zero.
             trip.members.forEach(member => {
                 if (member.status === 'active') {
                     balances.set(member.uid, 0);
                 }
             });
+
 
             // 2. Process all non-deleted expenses.
             const activeExpenses = allExpenses.filter(e => !e.isDeleted);
@@ -1013,6 +1149,7 @@
                 }
             });
 
+
             // 3. Process all non-deleted settlement payments.
             const activePayments = (trip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
@@ -1022,8 +1159,10 @@
                 balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
             });
 
+
             return balances;
         }
+
 
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
@@ -1044,6 +1183,7 @@
             }
         }
 
+
         // >>> CHANGE 1: SIMPLIFY THE DATE/TIME FORMATTING FUNCTION <<<
         function formatDateTimeForInput(timestampString) {
             // The AI now provides a reliable timestamp like '2024-07-15T14:30:00'.
@@ -1062,11 +1202,15 @@
         }
 
 
+
+
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
             allModals.forEach(modal => modal.classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
         }
+
+
 
 
         function showMessage(message, isError = true) {
@@ -1077,10 +1221,14 @@
         }
 
 
+
+
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
+
+
 
 
         function hideAuthMessage() {
@@ -1096,31 +1244,62 @@
         }
 
 
+
+
         async function selectTrip(trip) {
-            currentTrip = trip;
-            tripDetailName.textContent = trip.name;
+            // If there's an old listener, unsubscribe from it first
+            if (singleTripUnsubscribe) singleTripUnsubscribe();
 
-
-            const user = auth.currentUser;
-            if (user && user.uid === currentTrip.ownerId) {
-                supremoMenuContainer.classList.remove('hidden');
-            } else {
-                supremoMenuContainer.classList.add('hidden');
-            }
+            const tripRef = doc(db, 'trips', trip.id);
             
-            await renderTripMembers(trip.members); 
+            // Create the new listener for the specific trip document
+            singleTripUnsubscribe = onSnapshot(tripRef, async (doc) => {
+                if (doc.exists()) {
+                    currentTrip = { id: doc.id, ...doc.data() };
+                    tripDetailName.textContent = currentTrip.name;
+
+                    const user = auth.currentUser;
+                    if (user && user.uid === currentTrip.ownerId) {
+                        supremoMenuContainer.classList.remove('hidden');
+                    } else {
+                        supremoMenuContainer.classList.add('hidden');
+                    }
+
+                    await renderTripMembers(currentTrip.members);
+
+                    // Now that the trip object is updated, re-render the items
+                    // This will use the fresh `currentTrip.settledPayments`
+                    if(allTripExpenses.length > 0 || currentTrip.settledPayments?.length > 0) {
+                         renderTripItems();
+                    }
+
+                } else {
+                    // Handle case where trip might have been deleted
+                    console.error("Selected trip no longer exists.");
+                    backToDashboardBtn.click();
+                }
+            }, (error) => {
+                console.error("Error listening to single trip:", error);
+                showMessage("Could not get real-time trip updates.");
+            });
+            
             if (expensesUnsubscribe) expensesUnsubscribe();
-            listenForExpenses(trip.id);
+            listenForExpenses(trip.id); // This remains the same
             
             showView('trip-detail-view');
         }
 
 
+
+
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
+            if (singleTripUnsubscribe) singleTripUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
+
+
 
 
         async function fetchUserProfiles(uids) {
@@ -1139,6 +1318,8 @@
             });
             return profiles;
         }
+
+
 
 
         async function loadUserPreferences(userId) {
@@ -1165,6 +1346,8 @@
         }
 
 
+
+
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -1176,13 +1359,19 @@
         }
 
 
+
+
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
             profileArea.innerHTML = '';
 
 
+
+
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
+
+
 
 
             const profilePicBtn = document.createElement('button');
@@ -1198,6 +1387,8 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
+
+
 
 
             const dropdown = document.createElement('div');
@@ -1230,9 +1421,13 @@
             `;
 
 
+
+
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
+
+
 
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
@@ -1253,6 +1448,8 @@
             });
 
 
+
+
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1271,6 +1468,8 @@
         }
 
 
+
+
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -1283,11 +1482,14 @@
             } else {
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 if (expensesUnsubscribe) expensesUnsubscribe();
+                if (singleTripUnsubscribe) singleTripUnsubscribe();
                 currentTrip = null;
                 userProfilesCache.clear();
                 showView('auth-view');
             }
         });
+
+
 
 
         function listenForTrips(userId) {
@@ -1304,6 +1506,8 @@
                 }
 
 
+
+
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1314,11 +1518,15 @@
                 await renderTrips(trips);
 
 
+
+
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
+
+
 
 
         async function renderTrips(trips) {
@@ -1338,6 +1546,8 @@
                 const isArchived = trip.isArchived || false;
 
 
+
+
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1346,12 +1556,16 @@
                 }
 
 
+
+
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative`;
                 tripElement.style.backgroundColor = isArchived ? '#e5e7eb' : (isSettled ? '#dcfce7' : '#ffffff');
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
+
+
 
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
@@ -1366,6 +1580,8 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
+
+
 
 
                 tripElement.innerHTML = `
@@ -1393,6 +1609,8 @@
                 });
 
 
+
+
                 tripsList.appendChild(tripElement);
             });
         }
@@ -1410,6 +1628,8 @@
         };
 
 
+
+
         tripsList.addEventListener('click', (e) => {
             const unarchiveBtn = e.target.closest('.unarchive-btn');
             if (unarchiveBtn) {
@@ -1418,6 +1638,8 @@
                 handleUnarchiveTrip(tripId);
             }
         });
+
+
 
 
         async function renderTripMembers(members) {
@@ -1430,9 +1652,13 @@
                 let nameHTML = '';
 
 
+
+
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
+
+
 
 
                     if (profile.photoURL) {
@@ -1442,6 +1668,8 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+
+
 
 
                 } else if (member.status === 'pending') {
@@ -1458,6 +1686,8 @@
                 tripMembersList.appendChild(memberEl);
             }
         }
+
+
 
 
         function listenForExpenses(tripId) {
@@ -1492,8 +1722,11 @@
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
 
+
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
             const myBalanceInCents = balances.get(auth.currentUser.uid) || 0;
+
+
 
 
             if (myBalanceInCents > 1) {
@@ -1506,6 +1739,8 @@
                 tripOutstandingBalance.textContent = 'All settled for me';
                 tripOutstandingBalance.className = 'font-semibold text-gray-500';
             }
+
+
 
 
             allItems.forEach(item => {
@@ -1532,6 +1767,8 @@
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 
+
+
             const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
                 const memberName = memberProfile ? memberProfile.displayName : 'Invited Member';
@@ -1541,6 +1778,8 @@
             }).join('');
 
 
+
+
             const pendingSplitLines = Object.keys(expense.pendingShares || {}).map(email => {
                 const baseShare = expense.pendingShares[email];
                 const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A';
@@ -1548,7 +1787,11 @@
             }).join('');
 
 
+
+
             const allSplitLines = activeSplitLines + pendingSplitLines;
+
+
 
 
             const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
@@ -1581,6 +1824,8 @@
             });
             tripItemsList.appendChild(expenseWrapper);
         }
+
+
 
 
         function renderPaymentItem(payment) {
@@ -1616,6 +1861,10 @@
 
 
 
+
+
+
+
         const handleCreateTrip = async () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -1638,11 +1887,15 @@
         };
 
 
+
+
         const handleInviteMember = async () => {
             const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToInvite || !currentTrip) return;
             
             submitInviteBtn.disabled = true;
+
+
 
 
             try {
@@ -1652,9 +1905,13 @@
                 );
 
 
+
+
                 if (alreadyInTrip) {
                     throw new Error("This person is already part of the trip or has a pending invitation.");
                 }
+
+
 
 
                 const usersRef = collection(db, "users");
@@ -1662,7 +1919,11 @@
                 const querySnapshot = await getDocs(q);
 
 
+
+
                 const tripRef = doc(db, "trips", currentTrip.id);
+
+
 
 
                 if (!querySnapshot.empty) {
@@ -1677,6 +1938,8 @@
                     const invitationRef = doc(db, "invitations", invitationId);
 
 
+
+
                     await setDoc(invitationRef, {
                         invitedEmail: emailToInvite,
                         tripId: currentTrip.id,
@@ -1687,12 +1950,16 @@
                     });
 
 
+
+
                     await updateDoc(tripRef, {
                         members: arrayUnion({ email: emailToInvite, status: 'pending' })
                     });
                     
                     showMessage("Invitation sent successfully!", false);
                 }
+
+
 
 
                 inviteMemberForm.reset();
@@ -1721,13 +1988,19 @@
         };
 
 
+
+
         async function processPendingInvitations(newUser) {
             const userEmail = newUser.email;
             const invitationsRef = collection(db, "invitations");
             const q = query(invitationsRef, where("invitedEmail", "==", userEmail), where("status", "==", "pending"));
 
 
+
+
             const invitationsSnapshot = await getDocs(q);
+
+
 
 
             if (invitationsSnapshot.empty) {
@@ -1736,7 +2009,11 @@
             }
 
 
+
+
             const batch = writeBatch(db);
+
+
 
 
             for (const invDoc of invitationsSnapshot.docs) {
@@ -1755,10 +2032,14 @@
                     });
 
 
+
+
                     batch.update(tripRef, {
                         members: updatedMembers,
                         memberUids: arrayUnion(newUser.uid)
                     });
+
+
 
 
                     batch.delete(invDoc.ref);
@@ -1766,10 +2047,14 @@
             }
 
 
+
+
             await batch.commit();
             showMessage("You've been added to your pending trips!", false);
             return true;
         }
+
+
 
 
         const handleRegister = async () => {
@@ -1779,13 +2064,19 @@
             const password = document.getElementById('register-password').value;
 
 
+
+
             if (!displayName || !email || !password) {
                 showMessage("Please fill out all fields.");
                 return;
             }
 
 
+
+
             let tempUser = null;
+
+
 
 
             try {
@@ -1793,9 +2084,13 @@
                 tempUser = userCredential.user;
 
 
+
+
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
+
+
 
 
                 if (invitationSnapshot.empty) {
@@ -1815,9 +2110,13 @@
                 await processPendingInvitations(tempUser);
 
 
+
+
                 await sendEmailVerification(tempUser);
                 showAuthMessage("Success! A verification email has been sent. Please check your inbox and verify your email before logging in.");
                 await signOut(auth);
+
+
 
 
             } catch (error) {
@@ -1838,6 +2137,8 @@
         };
 
 
+
+
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1845,6 +2146,8 @@
             submitBtnText.classList.add('hidden');
             spinner.classList.remove('hidden');
             submitExpenseBtn.disabled = true;
+
+
 
 
             try {
@@ -1857,8 +2160,12 @@
                 const paidBy = document.getElementById('expense-paid-by').value;
 
 
+
+
                 let finalBaseSplits = {};
                 let finalPendingSplits = {};
+
+
 
 
                 let exchangeRate = 1;
@@ -1868,7 +2175,11 @@
                 }
 
 
+
+
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
+
+
 
 
                 if (isItemizedMode) {
@@ -1881,6 +2192,8 @@
                         const status = group.dataset.status;
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                         const baseShare = parseFloat((share * exchangeRate).toFixed(2));
+
+
 
 
                         if (status === 'active') {
@@ -1903,9 +2216,13 @@
                 };
 
 
+
+
                 if (Object.keys(finalPendingSplits).length > 0) {
                     newExpense.pendingShares = finalPendingSplits;
                 }
+
+
 
 
                 const batch = writeBatch(db);
@@ -1914,6 +2231,8 @@
                 const tripRef = doc(db, "trips", currentTrip.id);
                 batch.update(tripRef, { isSettled: false });
                 await batch.commit();
+
+
 
 
                 addExpenseForm.reset();
@@ -1934,11 +2253,15 @@
             if (!file) return;
 
 
+
+
             const user = auth.currentUser;
             if (!user) {
                 showMessage("You must be logged in to upload a photo.");
                 return;
             }
+
+
 
 
             const options = {
@@ -1955,6 +2278,8 @@
                 const storagePath = `profile-pictures/${user.uid}`;
                 const storageRef = ref(storage, storagePath);
                 const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+
+
 
 
                 uploadTask.on('state_changed', 
@@ -1974,6 +2299,8 @@
                         userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
 
 
+
+
                         renderProfile(auth.currentUser); 
                         showMessage("Profile picture updated!", false);
                     } catch (error) {
@@ -1989,11 +2316,15 @@
         };
 
 
+
+
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) {
                 showMessage("Error: No active trip selected.");
                 return;
             }
+
+
 
 
             const newPayment = {
@@ -2003,6 +2334,8 @@
                 paidAt: Timestamp.now(),
                 isDeleted: false
             };
+
+
 
 
             try {
@@ -2019,27 +2352,41 @@
         };
 
 
+
+
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
+
+
 
 
         registerForm.addEventListener('submit', (e) => { e.preventDefault(); handleRegister(); });
         registerBtn.addEventListener('click', (e) => { e.preventDefault(); handleRegister(); });
 
 
+
+
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
+
+
 
 
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
         submitExpenseBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddExpense(); });
 
 
+
+
         inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMember(); });
         submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
 
 
+
+
         profilePicInput.addEventListener('change', handleProfilePicUpload);
+
+
 
 
         supremoMenuBtn.addEventListener('click', () => {
@@ -2048,12 +2395,16 @@
         });
 
 
+
+
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
         actionSheetModal.addEventListener('click', (e) => {
             if (e.target === actionSheetModal) {
                 closeModal(actionSheetModal);
             }
         });
+
+
 
 
         actionSheetArchiveBtn.addEventListener('click', () => {
@@ -2080,10 +2431,14 @@
         });
 
 
+
+
         actionSheetEmailBtn.addEventListener('click', () => {
             closeModal(actionSheetModal);
             showMessage("Email function coming soon!", false);
         });
+
+
 
 
         supremoToggleActionSheet.addEventListener('change', async (e) => {
@@ -2103,6 +2458,8 @@
         });
 
 
+
+
         profileArea.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
             
@@ -2114,6 +2471,8 @@
                     setTimeout(() => dropdown.classList.add('hidden'), 200);
                 }
             }
+
+
 
 
             if (e.target.closest('#change-pic-btn')) {
@@ -2138,12 +2497,16 @@
         });
 
 
+
+
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
             if (dropdown && !e.target.closest('#profile-area')) {
                  dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
         });
+
+
 
 
         tripItemsList.addEventListener('click', (e) => {
@@ -2172,6 +2535,8 @@
         });
 
 
+
+
         settlementList.addEventListener('click', (e) => {
             const recordBtn = e.target.closest('.record-payment-btn');
             if (recordBtn) {
@@ -2183,6 +2548,8 @@
         });
 
 
+
+
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = auth.currentUser;
@@ -2191,16 +2558,22 @@
             const paymentUsername = document.getElementById('payment-username').value.replace('@', '');
 
 
+
+
             if (!newName) {
                 showMessage("Name cannot be empty.");
                 return;
             }
 
 
+
+
             try {
                 if (user.displayName !== newName) {
                     await updateProfile(user, { displayName: newName });
                 }
+
+
 
 
                 const userDocRef = doc(db, "users", user.uid);
@@ -2214,11 +2587,15 @@
                 await updateDoc(userDocRef, updatedData);
 
 
+
+
                 userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), ...updatedData });
                 
                 renderProfile(user);
                 showMessage("Profile updated successfully!", false);
                 closeModal(editProfileModal);
+
+
 
 
             } catch (error) {
@@ -2228,11 +2605,15 @@
         });
 
 
+
+
         editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newDescription = editExpenseDescriptionInput.value;
             const expenseId = editExpenseIdInput.value;
             if (!newDescription || !expenseId || !currentTrip) return;
+
+
 
 
             try {
@@ -2249,6 +2630,8 @@
         });
 
 
+
+
         confirmDeleteExpenseBtn.addEventListener('click', async () => {
             if (!expenseToDelete || !currentTrip) return;
             try {
@@ -2258,8 +2641,12 @@
                 batch.update(expenseRef, { isDeleted: true });
 
 
+
+
                 const tripRef = doc(db, "trips", currentTrip.id);
                 batch.update(tripRef, { isSettled: false });
+
+
 
 
                 await batch.commit();
@@ -2274,6 +2661,8 @@
         });
 
 
+
+
         confirmDeletePaymentBtn.addEventListener('click', async () => {
             if (paymentToDeleteId === null || !currentTrip) return;
             
@@ -2283,6 +2672,8 @@
                 }
                 return p;
             });
+
+
 
 
             try {
@@ -2314,6 +2705,8 @@
             });
 
 
+
+
             debtors.sort((a, b) => a.amount - b.amount);
             creditors.sort((a, b) => a.amount - b.amount);
             const transactions = [];
@@ -2323,10 +2716,14 @@
                 const amountInCents = Math.min(debtor.amount, creditor.amount);
 
 
+
+
                 transactions.push({ from: debtor.uid, to: creditor.uid, amount: amountInCents / 100 });
                 
                 debtor.amount -= amountInCents;
                 creditor.amount -= amountInCents;
+
+
 
 
                 if (debtor.amount < 1) debtors.shift();
@@ -2336,14 +2733,20 @@
         }
 
 
+
+
         async function calculateAndShowSettlement() {
             const transactions = calculateSettlement();
             const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
             await fetchUserProfiles(allMemberIds);
 
 
+
+
             const currentUser = auth.currentUser;
             const isSupremo = currentUser.uid === currentTrip.ownerId && isTripSupremoEnabled;
+
+
 
 
             const filteredTransactions = transactions.filter(tx => {
@@ -2368,6 +2771,8 @@
                     if (!fromUser || !toUser) return; // Skip if user profile isn't loaded
 
 
+
+
                     const toPaymentInfo = toUser.paymentInfo || {};
                     let paymentLink = '';
                     if (toPaymentInfo.bank && toPaymentInfo.username) {
@@ -2379,9 +2784,13 @@
                     }
 
 
+
+
                     const amPayer = currentUser.uid === tx.from;
                     const amPayee = currentUser.uid === tx.to;
                     const canRecordPayment = amPayer || amPayee || isSupremo;
+
+
 
 
                     const paymentEl = document.createElement('div');
@@ -2412,12 +2821,16 @@
         }
 
 
+
+
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
             const allMemberIds = [...new Set(currentTrip.members.filter(m => m.status === 'active').map(m => m.uid))];
             const profiles = await fetchUserProfiles(allMemberIds);
             const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
+
+
 
 
             const creditors = [];
@@ -2434,7 +2847,11 @@
             });
 
 
+
+
             const transactions = calculateSettlement();
+
+
 
 
             vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
@@ -2461,6 +2878,8 @@
         }
 
 
+
+
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -2473,6 +2892,8 @@
                 }
             );
         }
+
+
 
 
         async function openCameraView() {
@@ -2490,11 +2911,15 @@
         }
 
 
+
+
         function closeCameraView() {
             if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); }
             videoElement.srcObject = null;
             closeModal(aiScanModal);
         }
+
+
 
 
         async function analyzeImageWithGemini(base64Image) {
@@ -2511,12 +2936,16 @@
             };
 
 
+
+
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
+
 
 
                 if (!response.ok) {
@@ -2529,12 +2958,18 @@
                 const data = JSON.parse(jsonText);
 
 
+
+
                 console.log('Final Processed Response from Backend:', data);
+
+
 
 
                 addExpenseForm.reset();
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
+
+
 
 
                 const descInput = document.getElementById('expense-description');
@@ -2543,9 +2978,13 @@
                 const occurredAtInput = document.getElementById('expense-occurred-at');
 
 
+
+
                 let finalDescription = data.description || data.merchantName || '';
                 aiReasoningTooltip.innerHTML = '';
                 aiReasoningTooltip.classList.add('hidden');
+
+
 
 
                 if (data.confidence && data.confidence !== 'high' && data.merchantName) {
@@ -2554,10 +2993,14 @@
                 descInput.value = finalDescription;
 
 
+
+
                 if (data.reasoning) {
                     aiReasoningTooltip.innerHTML = `<span class="info-icon">i<span class="tooltip-text">${data.reasoning}</span></span>`;
                     aiReasoningTooltip.classList.remove('hidden');
                 }
+
+
 
 
                 if (data.total !== null) {
@@ -2581,11 +3024,14 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
+
                 // >>> CHANGE 2: USE THE NEW `transactionTimestamp` FIELD <<<
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
+
+
 
 
                 let exchangeRate = 1;
@@ -2607,6 +3053,8 @@
                 triggerAiCategorySuggestion();
 
 
+
+
             } catch (error) {
                 console.error('Gemini Scan failed:', error);
                 showMessage(`Gemini analysis failed: ${error.message}. Please enter the expense manually.`);
@@ -2617,6 +3065,8 @@
                 loadingOverlay.classList.add('hidden-view');
             }
         }
+
+
 
 
         async function handleAiCapture() {
@@ -2638,12 +3088,18 @@
         }
 
 
+
+
         async function handleReceiptFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
 
+
+
             const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: true };
+
+
 
 
             try {
@@ -2659,7 +3115,11 @@
                 });
 
 
+
+
                 await analyzeImageWithGemini(base64Image);
+
+
 
 
             } catch (error) {
@@ -2682,7 +3142,11 @@
             const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
 
+
+
             const payload = { prompt: prompt };
+
+
 
 
             try {
@@ -2692,6 +3156,8 @@
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error("API Error");
+
+
 
 
                 const result = await response.json();
@@ -2711,6 +3177,8 @@
         }
         
         const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000);
+
+
 
 
         fabToggle.addEventListener('click', () => { fabContainer.classList.toggle('open'); });
@@ -2736,6 +3204,8 @@
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
 
+
+
         toggleSplitModeBtn.addEventListener('click', () => {
             const isItemMode = !itemizedSplitSection.classList.contains('hidden');
             if (isItemMode) {
@@ -2752,6 +3222,8 @@
         });
 
 
+
+
         function renderItemizationUI(itemizationData) {
             itemizedListDiv.innerHTML = '';
             itemizationData.lineItems.forEach((item, index) => {
@@ -2760,11 +3232,15 @@
                 itemEl.dataset.index = index;
 
 
+
+
                 const detailsHTML = `
                     <div class="w-full flex justify-between items-center">
                         <p class="font-medium text-gray-800">${item.description}</p>
                         <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
                     </div>`;
+
+
 
 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
@@ -2788,6 +3264,8 @@
                 }).join('');
 
 
+
+
                 itemEl.innerHTML = `${detailsHTML}<div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(itemEl);
             });
@@ -2801,7 +3279,11 @@
             if (!avatar) return;
 
 
+
+
             const row = avatar.closest('.item-row, #remainder-row');
+
+
 
 
             if (row && row.id === 'remainder-row') {
@@ -2817,6 +3299,8 @@
             }
 
 
+
+
             avatar.classList.toggle('assigned');
             updateItemizationSummary();
         });
@@ -2826,6 +3310,8 @@
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
             const pendingShares = {};
             currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
+
+
 
 
             document.querySelectorAll('.item-row').forEach(row => {
@@ -2846,6 +3332,8 @@
             });
 
 
+
+
             const remainderRow = document.getElementById('remainder-row');
             if (remainderRow && remainderAssignments.size > 0) {
                 const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
@@ -2858,6 +3346,8 @@
                     }
                 });
             }
+
+
 
 
             const finalMemberShares = {};
@@ -2888,7 +3378,11 @@
             });
 
 
+
+
             const totalRemainderToAllocate = currentItemization.total - assignedItemsTotal;
+
+
 
 
             if (totalRemainderToAllocate > 0.01) {
@@ -2923,6 +3417,8 @@
                 }).join('');
 
 
+
+
                 remainderEl.innerHTML = `
                     <div class="w-full flex justify-between items-center">
                         <p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p>
@@ -2933,6 +3429,8 @@
                 `;
                 itemizedListDiv.appendChild(remainderEl);
             }
+
+
 
 
             const { memberShares, pendingShares } = calculateItemizedShares();
@@ -2975,6 +3473,8 @@
         }
 
 
+
+
         function updateSplitInputCurrency() {
             const selectedCurrency = expenseCurrencySelect.value;
             const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
@@ -2982,6 +3482,8 @@
                 span.textContent = symbol;
             });
         }
+
+
 
 
         function populateExpenseModal() {
@@ -3040,12 +3542,16 @@
         }
 
 
+
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
+
+
 
 
         function autoDistributeAmount() {
@@ -3058,16 +3564,22 @@
             });
 
 
+
+
             if (checkedSharers.length === 0 || totalAmount === 0) {
                 validateSplitTotal();
                 return;
             }
 
 
+
+
             const totalCents = Math.round(totalAmount * 100);
             const numSharers = checkedSharers.length;
             const baseShareCents = Math.floor(totalCents / numSharers);
             let remainderCents = totalCents % numSharers;
+
+
 
 
             const shares = Array(numSharers).fill(baseShareCents);
@@ -3081,6 +3593,8 @@
             }
 
 
+
+
             checkedSharers.forEach((group, index) => {
                 const amountInput = group.querySelector('input[type="number"]');
                 amountInput.value = (shares[index] / 100).toFixed(2);
@@ -3088,6 +3602,8 @@
             
             validateSplitTotal();
         }
+
+
 
 
         function addSplitInputListeners() {
@@ -3108,6 +3624,8 @@
         }
 
 
+
+
         function validateSplitTotal() {
             const totalAmount = parseFloat(expenseAmountInput.value) || 0;
             let splitSum = 0;
@@ -3116,6 +3634,8 @@
                 const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                 splitSum += share;
             });
+
+
 
 
             const difference = totalAmount - splitSum;
@@ -3136,7 +3656,11 @@
             const amount = parseFloat(expenseAmountInput.value);
 
 
+
+
             updateSplitInputCurrency();
+
+
 
 
             if (selectedCurrency === baseCurrency || !amount) {
@@ -3145,7 +3669,11 @@
             }
 
 
+
+
             fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2 text-sm text-indigo-600">Fetching rate...</span>`;
+
+
 
 
             try {
@@ -3159,6 +3687,8 @@
         }
 
 
+
+
         function simpleMarkdownToHtml(md) {
             return md
                 .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -3169,14 +3699,63 @@
         }
 
 
+
+
+        function generateTripCsv() {
+            const headers = [
+                "Date", "Description", "Category", "Amount", "Currency", 
+                "Paid By", "Split Between", "Is Deleted"
+            ];
+
+            const expensesToExport = allTripExpenses.filter(e => {
+                return showDeletedItems ? true : !e.isDeleted;
+            });
+
+            if (expensesToExport.length === 0) {
+                return "No expense data to export for this trip.";
+            }
+
+            const rows = expensesToExport.map(expense => {
+                const date = expense.occurredAt.toDate().toISOString().split('T')[0];
+                const description = `"${expense.description.replace(/"/g, '""')}"`; 
+                const category = expense.category || 'N/A';
+                const amount = expense.amountDetails.baseAmount.toFixed(2);
+                const currency = expense.amountDetails.baseCurrency;
+                const paidBy = userProfilesCache.get(expense.paidBy)?.displayName || expense.paidBy;
+                const splitWith = Object.keys(expense.splitBetween).map(uid => userProfilesCache.get(uid)?.displayName || uid).join('; ');
+                const isDeleted = expense.isDeleted ? "Yes" : "No";
+
+                return [date, description, category, amount, currency, `"${paidBy}"`, `"${splitWith}"`, isDeleted].join(',');
+            });
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+
+
+
         async function handleGenerateAiReport() {
-            loadingText.textContent = 'Your AI is analysing the trip data...';
             const reportType = document.getElementById('ai-report-type').value;
+
+            if (reportType === 'spreadsheet_data') {
+                const csvData = generateTripCsv();
+                aiReportContent.innerHTML = `<p class="text-sm text-gray-600 mb-2">Copy the data below and paste it into your spreadsheet software (e.g., Excel, Google Sheets).</p><pre><code>${csvData}</code></pre>`;
+                lastAiReportMarkdown = csvData; 
+                closeModal(aiReportModal);
+                openModal(aiReportDisplayModal);
+                return;
+            }
+
+            loadingText.textContent = 'Your AI is analysing the trip data...';
             const customQuestion = document.getElementById('ai-report-question').value.trim();
+
+
 
 
             closeModal(aiReportModal);
             loadingOverlay.classList.remove('hidden-view');
+
+
 
 
             const tripData = {
@@ -3197,8 +3776,12 @@
             };
 
 
+
+
             const systemPrompt = `You are "Splitify AI," a friendly and insightful travel analyst. Your ONLY goal is to write a human-readable report in Markdown based on data you are given.
 CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code. Your entire response must be creative, well-written prose formatted in simple Markdown (h2, h3, *, **).`;
+
+
 
 
             let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripData, null, 2)}\n\n--- END OF DATA ---\n\n`;
@@ -3206,9 +3789,6 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             
             let taskInstruction = "";
             switch(reportType) {
-                case 'daily_breakdown':
-                    taskInstruction = "The report should be a daily breakdown of the spending. For each day with expenses, list what was bought and who paid for it. Summarize the total spent for that day.";
-                    break;
                 case 'fun_awards':
                     taskInstruction = "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
                     break;
@@ -3222,9 +3802,13 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             userPrompt += taskInstruction;
 
 
+
+
             if (customQuestion) {
                 userPrompt += `\n\nAdditionally, please answer this specific question from the user: "${customQuestion}"`;
             }
+
+
 
 
             userPrompt += `\n\nRemember to use a friendly tone and format your entire response using only simple Markdown (h2, h3, *, **).`;
@@ -3241,6 +3825,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 });
 
 
+
+
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 const result = await response.json();
                 const reportText = result.candidates[0].content.parts[0].text;
@@ -3252,6 +3838,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 openModal(aiReportDisplayModal);
 
 
+
+
             } catch (error) {
                 console.error("Error generating AI report:", error);
                 showMessage("Sorry, the AI report could not be generated at this time.");
@@ -3259,6 +3847,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 loadingOverlay.classList.add('hidden-view');
             }
         }
+
+
 
 
         aiReportForm.addEventListener('submit', (e) => {
@@ -3275,6 +3865,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
         });
 
 
+
+
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
@@ -3283,6 +3875,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             registerTabBtn.classList.add('text-gray-500');
             hideAuthMessage();
         });
+
+
 
 
         registerTabBtn.addEventListener('click', () => {
@@ -3299,6 +3893,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
         document.getElementById('expense-description').addEventListener('input', debouncedCategorySuggestion);
 
 
+
+
         aiReportTypeSelect.addEventListener('change', () => {
             if (aiReportTypeSelect.value === 'custom_question') {
                 customQuestionArea.classList.remove('hidden');
@@ -3306,6 +3902,8 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 customQuestionArea.classList.add('hidden');
             }
         });
+
+
 
 
     </script>
