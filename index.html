@@ -881,12 +881,37 @@
             }
         }
 
+        /**
+         * --- CHANGE 1: This function is now more resilient. ---
+         * It no longer uses a strict regex. Instead, it uses JavaScript's Date() constructor,
+         * which can intelligently parse many different date/time formats from the AI.
+         * If parsing is successful, it formats the result into the exact 'YYYY-MM-DDTHH:MM'
+         * string required by the datetime-local input, making the feature reliable.
+         */
         function formatDateTimeForInput(dateString, timeString) {
-            if (!dateString || !timeString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString) || !/^\d{2}:\d{2}$/.test(timeString)) {
-                console.warn(`Invalid or unexpected date/time format received from AI. Date: "${dateString}", Time: "${timeString}". Proceeding without pre-populating date.`);
+            if (!dateString || !timeString) {
+                console.warn(`AI did not return a date or time. Proceeding without pre-populating.`);
                 return null;
             }
-            return `${dateString}T${timeString}`;
+
+            // Combine date and time for robust parsing
+            const combinedString = `${dateString} ${timeString}`;
+            const parsedDate = new Date(combinedString);
+
+            // Check if the created date is valid. new Date('bad string') returns an "Invalid Date" object.
+            if (isNaN(parsedDate.getTime())) {
+                console.warn(`Could not parse date/time from AI: "${combinedString}". Proceeding without pre-populating.`);
+                return null;
+            }
+
+            // Format the valid date into the required YYYY-MM-DDTHH:MM format
+            const year = parsedDate.getFullYear();
+            const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // month is 0-indexed
+            const day = String(parsedDate.getDate()).padStart(2, '0');
+            const hours = String(parsedDate.getHours()).padStart(2, '0');
+            const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
         
         function getCurrentLocalDateTime() {
@@ -2430,6 +2455,7 @@
                 if (!response.ok) throw new Error("API Error");
 
                 const result = await response.json();
+                // --- CHANGE 2: Added .trim() for robustness ---
                 const suggestedCategory = result.candidates[0].content.parts[0].text.trim();
                 
                 const categorySelect = document.getElementById('expense-category');
