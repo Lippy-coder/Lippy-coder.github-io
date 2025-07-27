@@ -2344,6 +2344,7 @@
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
+            // This prompt is now just for context; the main logic is in the backend "super-prompt".
             const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
             
             // The frontend's only job is to provide the trip's base currency.
@@ -2375,6 +2376,7 @@
                 console.log('Final Processed Response from Backend:', data);
 
                 addExpenseForm.reset();
+                // We call populateExpenseModal first to set up the form with defaults.
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
 
@@ -2403,11 +2405,31 @@
                     amountInput.placeholder = "Enter amount manually";
                 }
                 
-                if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
-                    currencySelect.value = data.currency;
+                // *** FIX STARTS HERE: DYNAMIC CURRENCY HANDLING ***
+                // This new logic block fixes the currency override bug.
+
+                const detectedCurrency = data.currency;
+
+                if (detectedCurrency) {
+                    // 1. Check if the detected currency option already exists in the dropdown.
+                    let optionExists = currencySelect.querySelector(`option[value="${detectedCurrency}"]`);
+                    
+                    // 2. If it does NOT exist, create and add it.
+                    if (!optionExists) {
+                        const newOption = document.createElement('option');
+                        newOption.value = detectedCurrency;
+                        newOption.textContent = `${detectedCurrency} (Detected)`;
+                        currencySelect.appendChild(newOption);
+                        console.log(`Dynamically added '${detectedCurrency}' to the currency dropdown.`);
+                    }
+                    
+                    // 3. Now, confidently set the value to the detected currency.
+                    currencySelect.value = detectedCurrency;
                 } else {
+                    // Fallback to trip's base currency if AI provides none.
                     currencySelect.value = currentTrip.baseCurrency;
                 }
+                // *** FIX ENDS HERE ***
 
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
