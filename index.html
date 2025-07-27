@@ -9,6 +9,8 @@
     <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.appspot.com/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
 
 
+
+
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,6 +80,8 @@
         }
 
 
+
+
         /* FAB Menu Styles */
         #fab-container.open #fab-icon-plus {
             transform: rotate(45deg);
@@ -124,6 +128,8 @@
         #action-sheet-modal:not(.hidden-view) .action-sheet-panel {
             transform: translateY(0);
         }
+
+
 
 
         /* Itemization Styles */
@@ -185,7 +191,11 @@
 <body class="bg-gray-50 text-gray-800">
 
 
+
+
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
+
+
 
 
         <!-- Authentication View -->
@@ -230,6 +240,8 @@
         </div>
 
 
+
+
         <!-- Dashboard View -->
         <div id="dashboard-view" class="view hidden-view py-8">
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -244,6 +256,8 @@
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
                 </div>
+
+
 
 
                 <div id="trips-list" class="space-y-4">
@@ -310,10 +324,14 @@
                 </div>
 
 
+
+
                 <div id="trip-items-list" class="space-y-1">
                     <p id="no-items-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">No expenses or payments logged for this trip yet.</p>
                 </div>
             </main>
+
+
 
 
             <!-- FAB Menu Container -->
@@ -339,6 +357,8 @@
                 </button>
 
 
+
+
                 <!-- Main FAB Toggle Button -->
                 <button id="fab-toggle" title="Add Item" class="relative h-16 w-16 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-10">
                     <div id="fab-icon-plus" class="transition-transform duration-300">
@@ -349,6 +369,8 @@
                 </button>
             </div>
         </div>
+
+
 
 
         <!-- Create Trip Modal -->
@@ -378,6 +400,8 @@
                 </form>
             </div>
         </div>
+
+
 
 
         <!-- Add Expense Modal -->
@@ -434,6 +458,8 @@
                     </div>
 
 
+
+
                     <!-- Itemized Split Section -->
                     <div id="itemized-split-section" class="hidden">
                         <div class="flex justify-between items-center mb-2">
@@ -444,6 +470,8 @@
                         <div id="itemized-summary" class="mt-2 text-sm">
                         </div>
                     </div>
+
+
 
 
                     <!-- Equal Split Section -->
@@ -468,6 +496,8 @@
                 </form>
             </div>
         </div>
+
+
 
 
         <!-- Edit Profile Modal -->
@@ -501,6 +531,8 @@
         </div>
 
 
+
+
         <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
@@ -520,6 +552,8 @@
         </div>
 
 
+
+
         <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
@@ -536,6 +570,8 @@
                 </form>
             </div>
         </div>
+
+
 
 
         <!-- Archive Trip Modal -->
@@ -561,6 +597,8 @@
                 </div>
             </div>
         </div>
+
+
 
 
         <!-- Delete Payment Modal -->
@@ -593,6 +631,8 @@
                 </div>
             </div>
         </div>
+
+
 
 
         <!-- Settlement Visualisation Modal -->
@@ -648,6 +688,8 @@
         </div>
 
 
+
+
         <!-- Action Sheet Modal -->
         <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end z-50 hidden-view">
             <div class="action-sheet-panel w-full bg-gray-100 rounded-t-2xl p-4">
@@ -695,6 +737,7 @@
             </div>
         </div>
 
+
         <!-- AI Report Display Modal -->
         <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]">
@@ -715,11 +758,15 @@
         </div>
 
 
+
+
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p id="loading-text" class="text-white mt-4">Analysing Scene...</p>
         </div>
+
+
 
 
         <!-- Message Box -->
@@ -732,6 +779,8 @@
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
 
+
+
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
               Version 8.1.0 (Single-Call AI Logic)
@@ -740,11 +789,15 @@
     </div>
 
 
+
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+
 
 
         // --- Firebase Config Keys (Provided by your environment) ---
@@ -763,12 +816,16 @@
         const FX_API_KEY = '9dedf9a9f74ab256717d8f4f';
 
 
+
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
         setLogLevel('debug');
+
+
 
 
         // --- State ---
@@ -789,6 +846,8 @@
         let currentItemization = null; // To hold AI-extracted line items
         let remainderAssignments = new Set(); // To hold UIDs for the remainder
         let lastAiReportMarkdown = ''; // To store the raw markdown for copying
+
+
 
 
         // --- DOM Element References ---
@@ -912,8 +971,60 @@
         const customQuestionArea = document.getElementById('custom-question-area');
 
 
+
+
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
+
+
+        // >>> REFACTORING START <<<
+        /**
+         * A centralized function to calculate the final balance for every active member of a trip.
+         * This is the single source of truth for who owes money and who is owed money.
+         * @param {object} trip - The current trip object.
+         * @param {Array} allExpenses - An array of all expense objects for the trip.
+         * @returns {Map<string, number>} - A Map where the key is a member's UID and the value is their balance in cents.
+         */
+        function calculateAllBalances(trip, allExpenses) {
+            const balances = new Map();
+
+            // 1. Initialize balances for all active members to zero.
+            trip.members.forEach(member => {
+                if (member.status === 'active') {
+                    balances.set(member.uid, 0);
+                }
+            });
+
+            // 2. Process all non-deleted expenses.
+            const activeExpenses = allExpenses.filter(e => !e.isDeleted);
+            activeExpenses.forEach(expense => {
+                const paidBy = expense.paidBy;
+                const splitBetween = expense.splitBetween;
+                
+                // The person who paid is credited the full amount.
+                balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
+                
+                // Each person the expense was split between is debited their share.
+                for (const memberId in splitBetween) {
+                    const share = splitBetween[memberId];
+                    if(balances.has(memberId)) {
+                        balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
+                    }
+                }
+            });
+
+            // 3. Process all non-deleted settlement payments.
+            const activePayments = (trip.settledPayments || []).filter(p => !p.isDeleted);
+            activePayments.forEach(payment => {
+                // The person who made the payment (debtor) has their balance increased (moves toward zero).
+                balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
+                // The person who received the payment (creditor) has their balance decreased (moves toward zero).
+                balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
+            });
+
+            return balances;
+        }
+        // >>> REFACTORING END <<<
 
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
@@ -934,6 +1045,7 @@
             }
         }
 
+
         function formatDateTimeForInput(dateString, timeString) {
             if (!dateString || !timeString) {
                 return null;
@@ -941,10 +1053,12 @@
             const combinedString = `${dateString} ${timeString}`;
             const parsedDate = new Date(combinedString);
 
+
             if (isNaN(parsedDate.getTime())) {
                 console.warn(`Could not parse date/time from AI: "${combinedString}".`);
                 return null;
             }
+
 
             const year = parsedDate.getFullYear();
             const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
@@ -961,11 +1075,13 @@
             return now.toISOString().slice(0, 16);
         }
 
+
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
             allModals.forEach(modal => modal.classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
         }
+
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -974,10 +1090,12 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
+
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
+
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -991,9 +1109,11 @@
             }
         }
 
+
         async function selectTrip(trip) {
             currentTrip = trip;
             tripDetailName.textContent = trip.name;
+
 
             const user = auth.currentUser;
             if (user && user.uid === currentTrip.ownerId) {
@@ -1009,11 +1129,13 @@
             showView('trip-detail-view');
         }
 
+
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
+
 
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
@@ -1031,6 +1153,7 @@
             });
             return profiles;
         }
+
 
         async function loadUserPreferences(userId) {
             try {
@@ -1055,6 +1178,7 @@
             }
         }
 
+
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -1065,12 +1189,15 @@
             }
         }
 
+
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
             profileArea.innerHTML = '';
 
+
             const profileContainer = document.createElement('div');
             profileContainer.className = 'relative';
+
 
             const profilePicBtn = document.createElement('button');
             profilePicBtn.id = 'profile-pic-btn';
@@ -1085,6 +1212,7 @@
                 avatar = `<div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">${initial}</div>`;
             }
             profilePicBtn.innerHTML = avatar;
+
 
             const dropdown = document.createElement('div');
             dropdown.id = 'profile-dropdown';
@@ -1115,9 +1243,11 @@
                 <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
             `;
 
+
             profileContainer.appendChild(profilePicBtn);
             profileContainer.appendChild(dropdown);
             profileArea.appendChild(profileContainer);
+
 
             const showDeletedToggle = document.getElementById('show-deleted-toggle');
             showDeletedToggle.checked = showDeletedItems;
@@ -1136,6 +1266,7 @@
                 }
             });
 
+
             const showArchivedToggle = document.getElementById('show-archived-toggle');
             showArchivedToggle.checked = showArchivedTrips;
             showArchivedToggle.addEventListener('change', async () => {
@@ -1152,6 +1283,7 @@
                 listenForTrips(auth.currentUser.uid);
             });
         }
+
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
@@ -1171,6 +1303,7 @@
             }
         });
 
+
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
@@ -1184,6 +1317,7 @@
                     trips = trips.filter(trip => !trip.isArchived);
                 }
 
+
                 const allMemberUids = [...new Set(
                     trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid))
                 )];
@@ -1193,11 +1327,13 @@
                 
                 await renderTrips(trips);
 
+
             }, (error) => {
                 console.error("Error listening for trips:", error);
                 showMessage("Could not fetch trips.");
             });
         }
+
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1215,6 +1351,7 @@
                 const isSettled = trip.isSettled || false;
                 const isArchived = trip.isArchived || false;
 
+
                 let bgClass = 'bg-white';
                 if (isArchived) {
                     bgClass = 'bg-gray-200';
@@ -1222,12 +1359,14 @@
                     bgClass = 'bg-green-100';
                 }
 
+
                 tripElement.className = `p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow group relative`;
                 tripElement.style.backgroundColor = isArchived ? '#e5e7eb' : (isSettled ? '#dcfce7' : '#ffffff');
                 
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
+
 
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
                     if (member.status === 'active') {
@@ -1241,6 +1380,7 @@
                         return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
                     }
                 }).join('');
+
 
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1266,6 +1406,7 @@
                     selectTrip(trip);
                 });
 
+
                 tripsList.appendChild(tripElement);
             });
         }
@@ -1282,6 +1423,7 @@
             }
         };
 
+
         tripsList.addEventListener('click', (e) => {
             const unarchiveBtn = e.target.closest('.unarchive-btn');
             if (unarchiveBtn) {
@@ -1290,6 +1432,7 @@
                 handleUnarchiveTrip(tripId);
             }
         });
+
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
@@ -1300,9 +1443,11 @@
                 let avatarHTML = '';
                 let nameHTML = '';
 
+
                 if (member.status === 'active') {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) continue;
+
 
                     if (profile.photoURL) {
                         avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
@@ -1311,6 +1456,7 @@
                         avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                     }
                     nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+
 
                 } else if (member.status === 'pending') {
                     avatarHTML = `
@@ -1326,6 +1472,7 @@
                 tripMembersList.appendChild(memberEl);
             }
         }
+
 
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
@@ -1359,29 +1506,14 @@
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
 
-            const balances = new Map();
-            currentTrip.members.forEach(member => { if (member.status === 'active') { balances.set(member.uid, 0); } });
-            
-            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
-            activeExpenses.forEach(expense => {
-                const paidBy = expense.paidBy;
-                const splitBetween = expense.splitBetween;
-                balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
-                for (const memberId in splitBetween) {
-                    const share = splitBetween[memberId];
-                    if(balances.has(memberId)) {
-                        balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
-                    }
-                }
-            });
 
-            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
-            activePayments.forEach(payment => {
-                balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
-                balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
-            });
+            // >>> REFACTORING POINT 1 (APPLIED) <<<
+            // The old, multi-line balance calculation logic is replaced by this single line.
+            const balances = calculateAllBalances(currentTrip, allTripExpenses);
+
 
             const myBalanceInCents = balances.get(auth.currentUser.uid) || 0;
+
 
             if (myBalanceInCents > 1) {
                 tripOutstandingBalance.textContent = `I am owed: ${(myBalanceInCents / 100).toFixed(2)} ${currentTrip.baseCurrency}`;
@@ -1393,6 +1525,7 @@
                 tripOutstandingBalance.textContent = 'All settled for me';
                 tripOutstandingBalance.className = 'font-semibold text-gray-500';
             }
+
 
             allItems.forEach(item => {
                 if (item.type === 'expense') { renderExpenseItem(item.data); } 
@@ -1417,6 +1550,7 @@
             const date = expense.occurredAt.toDate();
             const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+
             const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
                 const memberName = memberProfile ? memberProfile.displayName : 'Invited Member';
@@ -1425,13 +1559,16 @@
                 return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareText} ${currentTrip.baseCurrency}</span></div>`;
             }).join('');
 
+
             const pendingSplitLines = Object.keys(expense.pendingShares || {}).map(email => {
                 const baseShare = expense.pendingShares[email];
                 const shareText = typeof baseShare === 'number' ? baseShare.toFixed(2) : 'N/A';
                 return `<div class="flex justify-between items-center text-sm text-gray-500 py-0.5"><span class="italic truncate">${email}</span><span class="italic">${shareText} ${currentTrip.baseCurrency}</span></div>`;
             }).join('');
 
+
             const allSplitLines = activeSplitLines + pendingSplitLines;
+
 
             const isTripOwner = auth.currentUser.uid === currentTrip.ownerId;
             const canModify = paidByMe || (isTripOwner && isTripSupremoEnabled);
@@ -1464,6 +1601,7 @@
             tripItemsList.appendChild(expenseWrapper);
         }
 
+
         function renderPaymentItem(payment) {
             const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>`;
             if (isDeleted) { paymentWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer payment-header"><p class="italic text-gray-500">Deleted Payment</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden payment-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60 flex items-center justify-between">${paymentDetailsHTML}</div></div>`; } 
@@ -1495,6 +1633,8 @@
         closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
 
 
+
+
         const handleCreateTrip = async () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -1516,11 +1656,13 @@
             } catch (error) { showMessage(error.message); }
         };
 
+
         const handleInviteMember = async () => {
             const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToInvite || !currentTrip) return;
             
             submitInviteBtn.disabled = true;
+
 
             try {
                 const alreadyInTrip = currentTrip.members.some(member => 
@@ -1528,15 +1670,19 @@
                     (member.status === 'pending' && member.email === emailToInvite)
                 );
 
+
                 if (alreadyInTrip) {
                     throw new Error("This person is already part of the trip or has a pending invitation.");
                 }
+
 
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToInvite));
                 const querySnapshot = await getDocs(q);
 
+
                 const tripRef = doc(db, "trips", currentTrip.id);
+
 
                 if (!querySnapshot.empty) {
                     const existingUser = querySnapshot.docs[0].data();
@@ -1549,6 +1695,7 @@
                     const invitationId = `${emailToInvite}_${currentTrip.id}`;
                     const invitationRef = doc(db, "invitations", invitationId);
 
+
                     await setDoc(invitationRef, {
                         invitedEmail: emailToInvite,
                         tripId: currentTrip.id,
@@ -1558,12 +1705,14 @@
                         createdAt: serverTimestamp()
                     });
 
+
                     await updateDoc(tripRef, {
                         members: arrayUnion({ email: emailToInvite, status: 'pending' })
                     });
                     
                     showMessage("Invitation sent successfully!", false);
                 }
+
 
                 inviteMemberForm.reset();
                 closeModal(inviteMemberModal);
@@ -1590,19 +1739,24 @@
             }
         };
 
+
         async function processPendingInvitations(newUser) {
             const userEmail = newUser.email;
             const invitationsRef = collection(db, "invitations");
             const q = query(invitationsRef, where("invitedEmail", "==", userEmail), where("status", "==", "pending"));
 
+
             const invitationsSnapshot = await getDocs(q);
+
 
             if (invitationsSnapshot.empty) {
                 console.log(`No pending invitations found for ${userEmail}. This registration will be rolled back.`);
                 return false;
             }
 
+
             const batch = writeBatch(db);
+
 
             for (const invDoc of invitationsSnapshot.docs) {
                 const invitation = invDoc.data();
@@ -1619,19 +1773,23 @@
                         return member;
                     });
 
+
                     batch.update(tripRef, {
                         members: updatedMembers,
                         memberUids: arrayUnion(newUser.uid)
                     });
 
+
                     batch.delete(invDoc.ref);
                 }
             }
+
 
             await batch.commit();
             showMessage("You've been added to your pending trips!", false);
             return true;
         }
+
 
         const handleRegister = async () => {
             hideAuthMessage();
@@ -1639,20 +1797,25 @@
             const email = document.getElementById('register-email').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
 
+
             if (!displayName || !email || !password) {
                 showMessage("Please fill out all fields.");
                 return;
             }
 
+
             let tempUser = null;
+
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
 
+
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
+
 
                 if (invitationSnapshot.empty) {
                     throw new Error("INVITE_REQUIRED");
@@ -1670,9 +1833,11 @@
                 
                 await processPendingInvitations(tempUser);
 
+
                 await sendEmailVerification(tempUser);
                 showAuthMessage("Success! A verification email has been sent. Please check your inbox and verify your email before logging in.");
                 await signOut(auth);
+
 
             } catch (error) {
                 if (tempUser) {
@@ -1691,6 +1856,7 @@
             }
         };
 
+
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1698,6 +1864,7 @@
             submitBtnText.classList.add('hidden');
             spinner.classList.remove('hidden');
             submitExpenseBtn.disabled = true;
+
 
             try {
                 const description = document.getElementById('expense-description').value;
@@ -1708,8 +1875,10 @@
                 const category = document.getElementById('expense-category').value;
                 const paidBy = document.getElementById('expense-paid-by').value;
 
+
                 let finalBaseSplits = {};
                 let finalPendingSplits = {};
+
 
                 let exchangeRate = 1;
                 if (originalCurrency !== baseCurrency) {
@@ -1717,7 +1886,9 @@
                     exchangeRate = rateData.conversion_rate;
                 }
 
+
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
+
 
                 if (isItemizedMode) {
                     const { memberShares, pendingShares } = calculateItemizedShares();
@@ -1729,6 +1900,7 @@
                         const status = group.dataset.status;
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                         const baseShare = parseFloat((share * exchangeRate).toFixed(2));
+
 
                         if (status === 'active') {
                             finalBaseSplits[group.dataset.uid] = baseShare;
@@ -1749,9 +1921,11 @@
                     isDeleted: false
                 };
 
+
                 if (Object.keys(finalPendingSplits).length > 0) {
                     newExpense.pendingShares = finalPendingSplits;
                 }
+
 
                 const batch = writeBatch(db);
                 const newExpenseRef = doc(collection(db, 'trips', currentTrip.id, 'expenses'));
@@ -1759,6 +1933,7 @@
                 const tripRef = doc(db, "trips", currentTrip.id);
                 batch.update(tripRef, { isSettled: false });
                 await batch.commit();
+
 
                 addExpenseForm.reset();
                 closeModal(addExpenseModal);
@@ -1777,11 +1952,13 @@
             const file = e.target.files[0];
             if (!file) return;
 
+
             const user = auth.currentUser;
             if (!user) {
                 showMessage("You must be logged in to upload a photo.");
                 return;
             }
+
 
             const options = {
               maxSizeMB: 1,
@@ -1797,6 +1974,7 @@
                 const storagePath = `profile-pictures/${user.uid}`;
                 const storageRef = ref(storage, storagePath);
                 const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+
 
                 uploadTask.on('state_changed', 
                   (snapshot) => {}, 
@@ -1814,6 +1992,7 @@
                         const existingProfile = userProfilesCache.get(user.uid) || {};
                         userProfilesCache.set(user.uid, { ...existingProfile, photoURL });
 
+
                         renderProfile(auth.currentUser); 
                         showMessage("Profile picture updated!", false);
                     } catch (error) {
@@ -1828,11 +2007,13 @@
             }
         };
 
+
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) {
                 showMessage("Error: No active trip selected.");
                 return;
             }
+
 
             const newPayment = {
                 from: fromUid,
@@ -1841,6 +2022,7 @@
                 paidAt: Timestamp.now(),
                 isDeleted: false
             };
+
 
             try {
                 const tripRef = doc(db, 'trips', currentTrip.id);
@@ -1855,27 +2037,35 @@
             }
         };
 
+
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
+
 
         registerForm.addEventListener('submit', (e) => { e.preventDefault(); handleRegister(); });
         registerBtn.addEventListener('click', (e) => { e.preventDefault(); handleRegister(); });
 
+
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
+
 
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
         submitExpenseBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddExpense(); });
 
+
         inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMember(); });
         submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
 
+
         profilePicInput.addEventListener('change', handleProfilePicUpload);
+
 
         supremoMenuBtn.addEventListener('click', () => {
             supremoToggleActionSheet.checked = isTripSupremoEnabled;
             openModal(actionSheetModal);
         });
+
 
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
         actionSheetModal.addEventListener('click', (e) => {
@@ -1883,6 +2073,7 @@
                 closeModal(actionSheetModal);
             }
         });
+
 
         actionSheetArchiveBtn.addEventListener('click', () => {
             closeModal(actionSheetModal);
@@ -1907,10 +2098,12 @@
             }
         });
 
+
         actionSheetEmailBtn.addEventListener('click', () => {
             closeModal(actionSheetModal);
             showMessage("Email function coming soon!", false);
         });
+
 
         supremoToggleActionSheet.addEventListener('change', async (e) => {
             isTripSupremoEnabled = e.target.checked;
@@ -1928,6 +2121,7 @@
             }
         });
 
+
         profileArea.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
             
@@ -1939,6 +2133,7 @@
                     setTimeout(() => dropdown.classList.add('hidden'), 200);
                 }
             }
+
 
             if (e.target.closest('#change-pic-btn')) {
                 e.preventDefault();
@@ -1961,12 +2156,14 @@
             }
         });
 
+
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
             if (dropdown && !e.target.closest('#profile-area')) {
                  dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
         });
+
 
         tripItemsList.addEventListener('click', (e) => {
             const deleteExpenseBtn = e.target.closest('.delete-expense-btn');
@@ -1993,6 +2190,7 @@
             }
         });
 
+
         settlementList.addEventListener('click', (e) => {
             const recordBtn = e.target.closest('.record-payment-btn');
             if (recordBtn) {
@@ -2003,6 +2201,7 @@
             }
         });
 
+
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = auth.currentUser;
@@ -2010,15 +2209,18 @@
             const paymentBank = document.getElementById('payment-bank').value;
             const paymentUsername = document.getElementById('payment-username').value.replace('@', '');
 
+
             if (!newName) {
                 showMessage("Name cannot be empty.");
                 return;
             }
 
+
             try {
                 if (user.displayName !== newName) {
                     await updateProfile(user, { displayName: newName });
                 }
+
 
                 const userDocRef = doc(db, "users", user.uid);
                 const updatedData = {
@@ -2030,11 +2232,13 @@
                 };
                 await updateDoc(userDocRef, updatedData);
 
+
                 userProfilesCache.set(user.uid, { ...userProfilesCache.get(user.uid), ...updatedData });
                 
                 renderProfile(user);
                 showMessage("Profile updated successfully!", false);
                 closeModal(editProfileModal);
+
 
             } catch (error) {
                 console.error("Error updating profile:", error);
@@ -2042,11 +2246,13 @@
             }
         });
 
+
         editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newDescription = editExpenseDescriptionInput.value;
             const expenseId = editExpenseIdInput.value;
             if (!newDescription || !expenseId || !currentTrip) return;
+
 
             try {
                 const expenseRef = doc(db, 'trips', currentTrip.id, 'expenses', expenseId);
@@ -2061,6 +2267,7 @@
             }
         });
 
+
         confirmDeleteExpenseBtn.addEventListener('click', async () => {
             if (!expenseToDelete || !currentTrip) return;
             try {
@@ -2069,8 +2276,10 @@
                 const expenseRef = doc(db, 'trips', currentTrip.id, 'expenses', expenseToDelete);
                 batch.update(expenseRef, { isDeleted: true });
 
+
                 const tripRef = doc(db, "trips", currentTrip.id);
                 batch.update(tripRef, { isSettled: false });
+
 
                 await batch.commit();
                 showMessage("Expense deleted.", false);
@@ -2083,6 +2292,7 @@
             }
         });
 
+
         confirmDeletePaymentBtn.addEventListener('click', async () => {
             if (paymentToDeleteId === null || !currentTrip) return;
             
@@ -2092,6 +2302,7 @@
                 }
                 return p;
             });
+
 
             try {
                 const tripRef = doc(db, 'trips', currentTrip.id);
@@ -2110,31 +2321,10 @@
         });
         
         function calculateSettlement() {
-            const balances = new Map();
-            currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    balances.set(member.uid, 0);
-                }
-            });
+            // >>> REFACTORING POINT 2 (APPLIED) <<<
+            // The old, multi-line balance calculation logic is replaced by this single line.
+            const balances = calculateAllBalances(currentTrip, allTripExpenses);
 
-            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
-            activeExpenses.forEach(expense => {
-                const paidBy = expense.paidBy;
-                const splitBetween = expense.splitBetween;
-                balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
-                for (const memberId in splitBetween) {
-                    const share = splitBetween[memberId];
-                    if (balances.has(memberId)) {
-                        balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
-                    }
-                }
-            });
-
-            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
-            activePayments.forEach(payment => {
-                balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
-                balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
-            });
 
             const debtors = [];
             const creditors = [];
@@ -2146,6 +2336,7 @@
                 }
             });
 
+
             debtors.sort((a, b) => a.amount - b.amount);
             creditors.sort((a, b) => a.amount - b.amount);
             const transactions = [];
@@ -2154,10 +2345,12 @@
                 const creditor = creditors[0];
                 const amountInCents = Math.min(debtor.amount, creditor.amount);
 
+
                 transactions.push({ from: debtor.uid, to: creditor.uid, amount: amountInCents / 100 });
                 
                 debtor.amount -= amountInCents;
                 creditor.amount -= amountInCents;
+
 
                 if (debtor.amount < 1) debtors.shift();
                 if (creditor.amount < 1) creditors.shift();
@@ -2165,13 +2358,16 @@
             return transactions;
         }
 
+
         async function calculateAndShowSettlement() {
             const transactions = calculateSettlement();
             const allMemberIds = [...new Set(transactions.flatMap(tx => [tx.from, tx.to]))];
             await fetchUserProfiles(allMemberIds);
 
+
             const currentUser = auth.currentUser;
             const isSupremo = currentUser.uid === currentTrip.ownerId && isTripSupremoEnabled;
+
 
             const filteredTransactions = transactions.filter(tx => {
                 if (isSupremo) return true;
@@ -2194,6 +2390,7 @@
                     const toUser = userProfilesCache.get(tx.to);
                     if (!fromUser || !toUser) return; // Skip if user profile isn't loaded
 
+
                     const toPaymentInfo = toUser.paymentInfo || {};
                     let paymentLink = '';
                     if (toPaymentInfo.bank && toPaymentInfo.username) {
@@ -2204,9 +2401,11 @@
                         }
                     }
 
+
                     const amPayer = currentUser.uid === tx.from;
                     const amPayee = currentUser.uid === tx.to;
                     const canRecordPayment = amPayer || amPayee || isSupremo;
+
 
                     const paymentEl = document.createElement('div');
                     paymentEl.className = 'p-3 bg-gray-100 rounded-lg';
@@ -2235,38 +2434,19 @@
             openModal(settleUpModal);
         }
 
+
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
-            const balances = new Map();
-            currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    balances.set(member.uid, 0);
-                }
-            });
-
-            const activeExpenses = allTripExpenses.filter(e => !e.isDeleted);
-            activeExpenses.forEach(expense => {
-                const paidBy = expense.paidBy;
-                const splitBetween = expense.splitBetween;
-                balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
-                
-                for (const memberId in splitBetween) {
-                    const share = splitBetween[memberId];
-                    if (balances.has(memberId)) {
-                        balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
-                    }
-                }
-            });
             
-            const activePayments = (currentTrip.settledPayments || []).filter(p => !p.isDeleted);
-            activePayments.forEach(payment => {
-                balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
-                balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
-            });
+            // >>> REFACTORING POINT 3 (APPLIED) <<<
+            // The old, multi-line balance calculation logic is replaced by this single line.
+            const balances = calculateAllBalances(currentTrip, allTripExpenses);
+
 
             const allMemberIds = [...new Set(currentTrip.members.filter(m => m.status === 'active').map(m => m.uid))];
             const profiles = await fetchUserProfiles(allMemberIds);
             const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
+
 
             const creditors = [];
             const debtors = [];
@@ -2281,7 +2461,9 @@
                 }
             });
 
+
             const transactions = calculateSettlement();
+
 
             vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
             vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${currencySymbol}${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
@@ -2306,6 +2488,7 @@
             };
         }
 
+
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -2318,6 +2501,7 @@
                 }
             );
         }
+
 
         async function openCameraView() {
             openModal(aiScanModal);
@@ -2333,11 +2517,13 @@
             }
         }
 
+
         function closeCameraView() {
             if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); }
             videoElement.srcObject = null;
             closeModal(aiScanModal);
         }
+
 
         // *** THIS IS THE UPDATED FUNCTION FOR THE SINGLE-CALL APPROACH ***
         async function analyzeImageWithGemini(base64Image) {
@@ -2356,12 +2542,14 @@
                 baseCurrency: currentTrip.baseCurrency 
             };
 
+
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -2373,31 +2561,38 @@
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
 
+
                 console.log('Final Processed Response from Backend:', data);
+
 
                 addExpenseForm.reset();
                 // We call populateExpenseModal first to set up the form with defaults.
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
 
+
                 const descInput = document.getElementById('expense-description');
                 const amountInput = document.getElementById('expense-amount');
                 const currencySelect = document.getElementById('expense-currency');
                 const occurredAtInput = document.getElementById('expense-occurred-at');
 
+
                 let finalDescription = data.description || data.merchantName || '';
                 aiReasoningTooltip.innerHTML = '';
                 aiReasoningTooltip.classList.add('hidden');
+
 
                 if (data.confidence && data.confidence !== 'high' && data.merchantName) {
                     finalDescription = `${data.description || data.merchantName} (Suggested: ${data.merchantName})`;
                 }
                 descInput.value = finalDescription;
 
+
                 if (data.reasoning) {
                     aiReasoningTooltip.innerHTML = `<span class="info-icon">i<span class="tooltip-text">${data.reasoning}</span></span>`;
                     aiReasoningTooltip.classList.remove('hidden');
                 }
+
 
                 if (data.total !== null) {
                     amountInput.value = data.total;
@@ -2408,7 +2603,9 @@
                 // *** FIX STARTS HERE: DYNAMIC CURRENCY HANDLING ***
                 // This new logic block fixes the currency override bug.
 
+
                 const detectedCurrency = data.currency;
+
 
                 if (detectedCurrency) {
                     // 1. Check if the detected currency option already exists in the dropdown.
@@ -2431,10 +2628,12 @@
                 }
                 // *** FIX ENDS HERE ***
 
+
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
+
 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2454,6 +2653,7 @@
                 autoDistributeAmount();
                 triggerAiCategorySuggestion();
 
+
             } catch (error) {
                 console.error('Gemini Scan failed:', error);
                 showMessage(`Gemini analysis failed: ${error.message}. Please enter the expense manually.`);
@@ -2464,6 +2664,7 @@
                 loadingOverlay.classList.add('hidden-view');
             }
         }
+
 
         async function handleAiCapture() {
             try {
@@ -2483,11 +2684,14 @@
             }
         }
 
+
         async function handleReceiptFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+
             const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: true };
+
 
             try {
                 loadingText.textContent = "Compressing image...";
@@ -2501,7 +2705,9 @@
                     reader.readAsDataURL(compressedFile);
                 });
 
+
                 await analyzeImageWithGemini(base64Image);
+
 
             } catch (error) {
                  console.error("Error processing uploaded file:", error);
@@ -2522,7 +2728,9 @@
             const locationInfo = userLocation ? ` near latitude ${userLocation.lat} and longitude ${userLocation.lon}` : '';
             const prompt = `From the following list, choose the single best category for the expense "${merchantName}"${locationInfo}: Food & Drink, Transport, Accommodation, Activities, Shopping, Other. Your entire response must be ONLY the category name and nothing else.`;
 
+
             const payload = { prompt: prompt };
+
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -2531,6 +2739,7 @@
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error("API Error");
+
 
                 const result = await response.json();
                 const suggestedCategory = result.candidates[0].content.parts[0].text.trim();
@@ -2549,6 +2758,7 @@
         }
         
         const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000);
+
 
         fabToggle.addEventListener('click', () => { fabContainer.classList.toggle('open'); });
         fabManualAdd.addEventListener('click', () => {
@@ -2572,6 +2782,7 @@
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
+
         toggleSplitModeBtn.addEventListener('click', () => {
             const isItemMode = !itemizedSplitSection.classList.contains('hidden');
             if (isItemMode) {
@@ -2587,6 +2798,7 @@
             }
         });
 
+
         function renderItemizationUI(itemizationData) {
             itemizedListDiv.innerHTML = '';
             itemizationData.lineItems.forEach((item, index) => {
@@ -2594,11 +2806,13 @@
                 itemEl.className = 'item-row bg-white rounded-md p-2 flex flex-col';
                 itemEl.dataset.index = index;
 
+
                 const detailsHTML = `
                     <div class="w-full flex justify-between items-center">
                         <p class="font-medium text-gray-800">${item.description}</p>
                         <p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p>
                     </div>`;
+
 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     let avatarContainer = '';
@@ -2620,6 +2834,7 @@
                     return avatarContainer;
                 }).join('');
 
+
                 itemEl.innerHTML = `${detailsHTML}<div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(itemEl);
             });
@@ -2632,7 +2847,9 @@
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
 
+
             const row = avatar.closest('.item-row, #remainder-row');
+
 
             if (row && row.id === 'remainder-row') {
                 const uid = avatarContainer.dataset.uid;
@@ -2646,6 +2863,7 @@
                 }
             }
 
+
             avatar.classList.toggle('assigned');
             updateItemizationSummary();
         });
@@ -2655,6 +2873,7 @@
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
             const pendingShares = {};
             currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
+
 
             document.querySelectorAll('.item-row').forEach(row => {
                 const itemIndex = parseInt(row.dataset.index, 10);
@@ -2673,6 +2892,7 @@
                 }
             });
 
+
             const remainderRow = document.getElementById('remainder-row');
             if (remainderRow && remainderAssignments.size > 0) {
                 const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
@@ -2685,6 +2905,7 @@
                     }
                 });
             }
+
 
             const finalMemberShares = {};
             for (const uid in memberShares) {
@@ -2713,7 +2934,9 @@
                 }
             });
 
+
             const totalRemainderToAllocate = currentItemization.total - assignedItemsTotal;
+
 
             if (totalRemainderToAllocate > 0.01) {
                 const remainderEl = document.createElement('div');
@@ -2746,6 +2969,7 @@
                     return container;
                 }).join('');
 
+
                 remainderEl.innerHTML = `
                     <div class="w-full flex justify-between items-center">
                         <p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p>
@@ -2756,6 +2980,7 @@
                 `;
                 itemizedListDiv.appendChild(remainderEl);
             }
+
 
             const { memberShares, pendingShares } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
@@ -2796,6 +3021,7 @@
             itemizedSummaryDiv.appendChild(validationEl);
         }
 
+
         function updateSplitInputCurrency() {
             const selectedCurrency = expenseCurrencySelect.value;
             const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
@@ -2803,6 +3029,7 @@
                 span.textContent = symbol;
             });
         }
+
 
         function populateExpenseModal() {
             if (!currentTrip) return;
@@ -2859,12 +3086,14 @@
             addSplitInputListeners();
         }
 
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
+
 
         function autoDistributeAmount() {
             const totalAmount = parseFloat(expenseAmountInput.value) || 0;
@@ -2875,15 +3104,18 @@
                 group.querySelector('input[type="number"]').value = '0.00';
             });
 
+
             if (checkedSharers.length === 0 || totalAmount === 0) {
                 validateSplitTotal();
                 return;
             }
 
+
             const totalCents = Math.round(totalAmount * 100);
             const numSharers = checkedSharers.length;
             const baseShareCents = Math.floor(totalCents / numSharers);
             let remainderCents = totalCents % numSharers;
+
 
             const shares = Array(numSharers).fill(baseShareCents);
             
@@ -2895,6 +3127,7 @@
                 shares[randomIndex]++;
             }
 
+
             checkedSharers.forEach((group, index) => {
                 const amountInput = group.querySelector('input[type="number"]');
                 amountInput.value = (shares[index] / 100).toFixed(2);
@@ -2902,6 +3135,7 @@
             
             validateSplitTotal();
         }
+
 
         function addSplitInputListeners() {
             expenseSplitBetweenDiv.querySelectorAll('input').forEach(input => {
@@ -2920,6 +3154,7 @@
             });
         }
 
+
         function validateSplitTotal() {
             const totalAmount = parseFloat(expenseAmountInput.value) || 0;
             let splitSum = 0;
@@ -2928,6 +3163,7 @@
                 const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                 splitSum += share;
             });
+
 
             const difference = totalAmount - splitSum;
             if (Math.abs(difference) < 0.015 || totalAmount === 0) {
@@ -2946,14 +3182,18 @@
             const baseCurrency = currentTrip.baseCurrency;
             const amount = parseFloat(expenseAmountInput.value);
 
+
             updateSplitInputCurrency();
+
 
             if (selectedCurrency === baseCurrency || !amount) {
                 fxConversionDisplay.innerHTML = '';
                 return;
             }
 
+
             fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2 text-sm text-indigo-600">Fetching rate...</span>`;
+
 
             try {
                 const rateData = await getExchangeRate(selectedCurrency, baseCurrency);
@@ -2965,6 +3205,7 @@
             }
         }
 
+
         function simpleMarkdownToHtml(md) {
             return md
                 .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -2974,13 +3215,16 @@
                 .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
         }
 
+
         async function handleGenerateAiReport() {
             loadingText.textContent = 'Your AI is analysing the trip data...';
             const reportType = document.getElementById('ai-report-type').value;
             const customQuestion = document.getElementById('ai-report-question').value.trim();
 
+
             closeModal(aiReportModal);
             loadingOverlay.classList.remove('hidden-view');
+
 
             const tripData = {
                 name: currentTrip.name,
@@ -2999,8 +3243,10 @@
                     })),
             };
 
+
             const systemPrompt = `You are "Splitify AI," a friendly and insightful travel analyst. Your ONLY goal is to write a human-readable report in Markdown based on data you are given.
 CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code. Your entire response must be creative, well-written prose formatted in simple Markdown (h2, h3, *, **).`;
+
 
             let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripData, null, 2)}\n\n--- END OF DATA ---\n\n`;
             userPrompt += "Now, please generate the following report based on the data provided above.\n";
@@ -3022,9 +3268,11 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             }
             userPrompt += taskInstruction;
 
+
             if (customQuestion) {
                 userPrompt += `\n\nAdditionally, please answer this specific question from the user: "${customQuestion}"`;
             }
+
 
             userPrompt += `\n\nRemember to use a friendly tone and format your entire response using only simple Markdown (h2, h3, *, **).`;
             
@@ -3039,6 +3287,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                     })
                 });
 
+
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 const result = await response.json();
                 const reportText = result.candidates[0].content.parts[0].text;
@@ -3049,6 +3298,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 customQuestionArea.classList.add('hidden');
                 openModal(aiReportDisplayModal);
 
+
             } catch (error) {
                 console.error("Error generating AI report:", error);
                 showMessage("Sorry, the AI report could not be generated at this time.");
@@ -3056,6 +3306,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 loadingOverlay.classList.add('hidden-view');
             }
         }
+
 
         aiReportForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -3070,6 +3321,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             });
         });
 
+
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
@@ -3078,6 +3330,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
             registerTabBtn.classList.add('text-gray-500');
             hideAuthMessage();
         });
+
 
         registerTabBtn.addEventListener('click', () => {
             registerForm.classList.remove('hidden');
@@ -3092,6 +3345,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
         document.getElementById('expense-description').addEventListener('input', debouncedCategorySuggestion);
 
+
         aiReportTypeSelect.addEventListener('change', () => {
             if (aiReportTypeSelect.value === 'custom_question') {
                 customQuestionArea.classList.remove('hidden');
@@ -3099,6 +3353,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 customQuestionArea.classList.add('hidden');
             }
         });
+
 
     </script>
 </body>
