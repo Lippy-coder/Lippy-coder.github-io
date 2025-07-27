@@ -265,14 +265,20 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
+                        <!-- CHANGE 1: AI REPORT ICON UPDATED -->
                         <button id="ai-report-btn" title="Generate AI Trip Report" class="h-12 w-12 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v2.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L9 6.586V4a1 1 0 011-1zM3 10a1 1 0 011-1h2.586l-1.293-1.293a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L6.586 11H4a1 1 0 01-1-1zm14 0a1 1 0 00-1-1h-2.586l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L13.414 11H16a1 1 0 001-1zm-4 5a1 1 0 00-1 1v2.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 10-1.414-1.414L11 16.586V15a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                             </svg>
                         </button>
+                        <!-- CHANGE 2: SUMMARY ICON UPDATED -->
                         <button id="visualise-settlement-btn" title="Visualise Summary" class="h-12 w-12 flex items-center justify-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-110">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 18L19 10"></path>
+                                <path d="M12 14v7"></path>
+                                <path d="M9 21h6"></path>
+                                <path d="M6 15.5V14"></path>
+                                <path d="M18 10.5V9"></path>
                             </svg>
                         </button>
                         <button id="settle-up-btn" title="Settle Up" class="h-12 w-12 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-110">
@@ -283,9 +289,10 @@
                         
                         <!-- Supremo Menu Container -->
                         <div id="supremo-menu-container" class="relative hidden">
+                            <!-- CHANGE 3: TRIP SUPREMO ICON UPDATED -->
                             <button id="supremo-menu-btn" title="Trip Supremo Controls" class="h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5.02.997.997 0 001 6v5.5a.5.5 0 00.223.42l7.5 4.5a.5.5 0 00.554 0l7.5-4.5A.5.5 0 0019 11.5V6a.997.997 0 00-1.166-.976A11.954 11.954 0 0110 1.944zM8.5 8.5a1.5 1.5 0 113 0v1.5a1 1 0 102 0V9a4 4 0 10-8 0v1a1 1 0 102 0V8.5z" clip-rule="evenodd" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286z" />
                                 </svg>
                             </button>
                         </div>
@@ -667,7 +674,6 @@
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3>
                 <form id="ai-report-form">
-                    <!-- CHANGE 2.1: HTML structure updated -->
                     <div class="mb-4">
                         <label for="ai-report-type" class="block text-sm font-medium text-gray-700 mb-1">Choose a Report Type</label>
                         <select id="ai-report-type" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
@@ -728,7 +734,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 8.0.1 (UI Polish)
+              Version 8.0.2 (Icon & UI Polish)
             </p>
         </footer>
     </div>
@@ -902,7 +908,6 @@
         const closeAiDisplayBtn = document.getElementById('close-ai-display-btn');
         const closeAiDisplayBtnX = document.getElementById('close-ai-display-btn-x');
         const copyAiReportBtn = document.getElementById('copy-ai-report-btn');
-        // CHANGE 2.2: Added new DOM references
         const aiReportTypeSelect = document.getElementById('ai-report-type');
         const customQuestionArea = document.getElementById('custom-question-area');
 
@@ -2340,7 +2345,6 @@
         }
 
         async function analyzeImageWithGemini(base64Image) {
-            // CHANGE 1.1: Updated loading text
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
@@ -2954,7 +2958,6 @@
         }
 
         async function handleGenerateAiReport() {
-            // CHANGE 1.2: Updated loading text
             loadingText.textContent = 'Your AI is analysing the trip data...';
             const reportType = document.getElementById('ai-report-type').value;
             const customQuestion = document.getElementById('ai-report-question').value.trim();
@@ -2994,7 +2997,6 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                     taskInstruction = "The report should be a fun, lighthearted awards summary for the trip. Create at least 3 creative awards like 'Biggest Spender', 'Caffeine Champion' (most spent on coffee), or 'Night Owl Award' (most spent late at night). Be creative and friendly.";
                     break;
                 case 'custom_question':
-                    // Handled by the customQuestion check below
                     break;
                 case 'spending_analysis':
                 default:
@@ -3027,7 +3029,7 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
                 lastAiReportMarkdown = reportText;
                 aiReportContent.innerHTML = simpleMarkdownToHtml(reportText);
                 aiReportForm.reset();
-                customQuestionArea.classList.add('hidden'); // Re-hide for next time
+                customQuestionArea.classList.add('hidden');
                 openModal(aiReportDisplayModal);
 
             } catch (error) {
@@ -3073,7 +3075,6 @@ CRITICAL RULE: DO NOT, under any circumstances, output raw JSON data or any code
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
         document.getElementById('expense-description').addEventListener('input', debouncedCategorySuggestion);
 
-        // CHANGE 2.3: Added event listener for the AI Report modal dropdown
         aiReportTypeSelect.addEventListener('change', () => {
             if (aiReportTypeSelect.value === 'custom_question') {
                 customQuestionArea.classList.remove('hidden');
