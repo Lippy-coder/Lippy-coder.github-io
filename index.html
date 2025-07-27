@@ -977,7 +977,7 @@
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
 
-        // >>> REFACTORING START <<<
+        // --- REFACTORING: Balance Calculation (Applied) ---
         /**
          * A centralized function to calculate the final balance for every active member of a trip.
          * This is the single source of truth for who owes money and who is owed money.
@@ -1024,7 +1024,6 @@
 
             return balances;
         }
-        // >>> REFACTORING END <<<
 
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
@@ -1045,28 +1044,15 @@
             }
         }
 
-
-        function formatDateTimeForInput(dateString, timeString) {
-            if (!dateString || !timeString) {
+        // >>> CHANGE 1: SIMPLIFY THE DATE/TIME FORMATTING FUNCTION <<<
+        function formatDateTimeForInput(timestampString) {
+            // The AI now provides a reliable timestamp like '2024-07-15T14:30:00'.
+            // The <input type="datetime-local"> needs the format 'YYYY-MM-DDTHH:mm'.
+            // This function just ensures it's correctly sliced for the input field.
+            if (!timestampString || timestampString.length < 16) {
                 return null;
             }
-            const combinedString = `${dateString} ${timeString}`;
-            const parsedDate = new Date(combinedString);
-
-
-            if (isNaN(parsedDate.getTime())) {
-                console.warn(`Could not parse date/time from AI: "${combinedString}".`);
-                return null;
-            }
-
-
-            const year = parsedDate.getFullYear();
-            const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-            const day = String(parsedDate.getDate()).padStart(2, '0');
-            const hours = String(parsedDate.getHours()).padStart(2, '0');
-            const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
-            
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
+            return timestampString.slice(0, 16);
         }
         
         function getCurrentLocalDateTime() {
@@ -1506,12 +1492,7 @@
             let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
             tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
 
-
-            // >>> REFACTORING POINT 1 (APPLIED) <<<
-            // The old, multi-line balance calculation logic is replaced by this single line.
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
-
-
             const myBalanceInCents = balances.get(auth.currentUser.uid) || 0;
 
 
@@ -2321,11 +2302,7 @@
         });
         
         function calculateSettlement() {
-            // >>> REFACTORING POINT 2 (APPLIED) <<<
-            // The old, multi-line balance calculation logic is replaced by this single line.
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
-
-
             const debtors = [];
             const creditors = [];
             balances.forEach((amount, uid) => {
@@ -2437,12 +2414,7 @@
 
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
-            
-            // >>> REFACTORING POINT 3 (APPLIED) <<<
-            // The old, multi-line balance calculation logic is replaced by this single line.
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
-
-
             const allMemberIds = [...new Set(currentTrip.members.filter(m => m.status === 'active').map(m => m.uid))];
             const profiles = await fetchUserProfiles(allMemberIds);
             const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
@@ -2525,16 +2497,12 @@
         }
 
 
-        // *** THIS IS THE UPDATED FUNCTION FOR THE SINGLE-CALL APPROACH ***
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
-            // This prompt is now just for context; the main logic is in the backend "super-prompt".
             const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
             
-            // The frontend's only job is to provide the trip's base currency.
-            // The backend now handles all translation and processing logic.
             const payload = { 
                 prompt, 
                 image: base64Image, 
@@ -2556,7 +2524,6 @@
                     throw new Error(`Cloud Function Error: ${response.status}. ${errorText}`);
                 }
                 
-                // The backend now sends fully processed data, but it's still inside the Gemini API response structure.
                 const result = await response.json();
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
@@ -2566,7 +2533,6 @@
 
 
                 addExpenseForm.reset();
-                // We call populateExpenseModal first to set up the form with defaults.
                 await populateExpenseModal();
                 openModal(addExpenseModal); 
 
@@ -2600,18 +2566,9 @@
                     amountInput.placeholder = "Enter amount manually";
                 }
                 
-                // *** FIX STARTS HERE: DYNAMIC CURRENCY HANDLING ***
-                // This new logic block fixes the currency override bug.
-
-
                 const detectedCurrency = data.currency;
-
-
                 if (detectedCurrency) {
-                    // 1. Check if the detected currency option already exists in the dropdown.
                     let optionExists = currencySelect.querySelector(`option[value="${detectedCurrency}"]`);
-                    
-                    // 2. If it does NOT exist, create and add it.
                     if (!optionExists) {
                         const newOption = document.createElement('option');
                         newOption.value = detectedCurrency;
@@ -2619,17 +2576,13 @@
                         currencySelect.appendChild(newOption);
                         console.log(`Dynamically added '${detectedCurrency}' to the currency dropdown.`);
                     }
-                    
-                    // 3. Now, confidently set the value to the detected currency.
                     currencySelect.value = detectedCurrency;
                 } else {
-                    // Fallback to trip's base currency if AI provides none.
                     currencySelect.value = currentTrip.baseCurrency;
                 }
-                // *** FIX ENDS HERE ***
 
-
-                const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
+                // >>> CHANGE 2: USE THE NEW `transactionTimestamp` FIELD <<<
+                const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
