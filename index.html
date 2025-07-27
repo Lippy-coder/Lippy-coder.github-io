@@ -734,7 +734,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 8.0.2 (Icon & UI Polish)
+              Version 8.1.0 (Single-Call AI Logic)
             </p>
         </footer>
     </div>
@@ -2306,22 +2306,6 @@
             };
         }
 
-        // *** THIS IS THE UPDATED FUNCTION ***
-        function getLanguageForCurrency(currencyCode) {
-            // You can expand this map for other languages
-            const languageMap = { 
-                'JPY': 'Japanese', 
-                'CNY': 'Chinese',
-                'KRW': 'Korean',
-                'EUR': 'the local language (e.g., French, German, Italian) or English if unsure',
-                'GBP': 'English',
-                'USD': 'English',
-                'CAD': 'English',
-                'AUD': 'English'
-            };
-            return languageMap[currencyCode] || 'English'; // Default to English
-        }
-
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -2355,16 +2339,21 @@
             closeModal(aiScanModal);
         }
 
-        // *** THIS IS THE UPDATED FUNCTION ***
+        // *** THIS IS THE UPDATED FUNCTION FOR THE SINGLE-CALL APPROACH ***
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
             
             const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
             
-            // --- THIS IS THE CHANGE ---
-            const targetLanguage = getLanguageForCurrency(currentTrip.baseCurrency);
-            const payload = { prompt, image: base64Image, userLocation, targetLanguage }; // Add targetLanguage here
+            // The frontend's only job is to provide the trip's base currency.
+            // The backend now handles all translation and processing logic.
+            const payload = { 
+                prompt, 
+                image: base64Image, 
+                userLocation, 
+                baseCurrency: currentTrip.baseCurrency 
+            };
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -2377,17 +2366,13 @@
                     const errorText = await response.text();
                     throw new Error(`Cloud Function Error: ${response.status}. ${errorText}`);
                 }
-
-                const result = await response.json();
                 
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
-                    throw new Error("Invalid response structure from Cloud Function.");
-                }
-
+                // The backend now sends fully processed data, but it's still inside the Gemini API response structure.
+                const result = await response.json();
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
 
-                console.log('Gemini Smart Scene Response:', data);
+                console.log('Final Processed Response from Backend:', data);
 
                 addExpenseForm.reset();
                 await populateExpenseModal();
@@ -2398,7 +2383,6 @@
                 const currencySelect = document.getElementById('expense-currency');
                 const occurredAtInput = document.getElementById('expense-occurred-at');
 
-                // A. Populate Description and add reasoning tooltip if available
                 let finalDescription = data.description || data.merchantName || '';
                 aiReasoningTooltip.innerHTML = '';
                 aiReasoningTooltip.classList.add('hidden');
@@ -2413,27 +2397,23 @@
                     aiReasoningTooltip.classList.remove('hidden');
                 }
 
-                // B. Populate Amount
                 if (data.total !== null) {
                     amountInput.value = data.total;
                 } else {
                     amountInput.placeholder = "Enter amount manually";
                 }
                 
-                // C. Populate Currency
                 if (data.currency && [...currencySelect.options].some(opt => opt.value === data.currency)) {
                     currencySelect.value = data.currency;
                 } else {
                     currencySelect.value = currentTrip.baseCurrency;
                 }
 
-                // D. Populate Date & Time
                 const formattedDateTime = formatDateTimeForInput(data.transactionDate, data.transactionTime);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
 
-                // E. Set up for Itemized Split
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
                 if (selectedCurrency && selectedCurrency !== currentTrip.baseCurrency) {
