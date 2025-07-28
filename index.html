@@ -454,6 +454,20 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
+        // *** FIX STARTS HERE: Added modal helper functions ***
+        function openModal(modalElement) {
+            if (!modalElement) return;
+            document.body.classList.add('modal-open');
+            modalElement.classList.remove('hidden-view');
+        }
+
+        function closeModal(modalElement) {
+            if (!modalElement) return;
+            document.body.classList.remove('modal-open');
+            modalElement.classList.add('hidden-view');
+        }
+        // *** FIX ENDS HERE ***
+
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
@@ -1114,6 +1128,10 @@
                 showMessage("Failed to record payment.");
             }
         };
+        
+        // *** FIX STARTS HERE: Added event listener for the button ***
+        createTripBtn.addEventListener('click', () => openModal(createTripModal));
+        // *** FIX ENDS HERE ***
 
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
@@ -1135,6 +1153,9 @@
             archiveTripNameSpan.textContent = tripToArchive.name;
             openModal(archiveTripModal);
         });
+        
+        // This button now works because `closeModal` is defined
+        cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
         
         confirmArchiveTripBtn.addEventListener('click', async () => {
             if (!tripToArchive) return;
@@ -2044,6 +2065,26 @@
             if (aiReportTypeSelect.value === 'custom_question') customQuestionArea.classList.remove('hidden');
             else customQuestionArea.classList.add('hidden');
         });
+
+        // Add event listeners for all other modal cancel/close buttons
+        cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
+        cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
+        cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
+        cancelInviteBtn.addEventListener('click', () => closeModal(inviteMemberModal));
+        cancelArchiveTripBtn.addEventListener('click', () => closeModal(archiveTripModal));
+        cancelDeleteExpenseBtn.addEventListener('click', () => closeModal(deleteExpenseModal));
+        cancelDeletePaymentBtn.addEventListener('click', () => closeModal(deletePaymentModal));
+        closeSettleUpBtn.addEventListener('click', () => closeModal(settleUpModal));
+        closeSettleUpBtnX.addEventListener('click', () => closeModal(settleUpModal));
+        closeVisualisationBtn.addEventListener('click', () => closeModal(settlementVisualisationModal));
+        cancelAiReportBtn.addEventListener('click', () => closeModal(aiReportModal));
+        closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
+        closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
+        inviteMemberBtn.addEventListener('click', () => openModal(inviteMemberModal));
+        settleUpBtn.addEventListener('click', calculateAndShowSettlement);
+        visualiseSettlementBtn.addEventListener('click', async () => { await initializeVisualisation(); openModal(settlementVisualisationModal); });
+        aiReportBtn.addEventListener('click', () => openModal(aiReportModal));
+
     </script>
 </body>
 </html>
