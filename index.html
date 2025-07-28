@@ -1810,7 +1810,7 @@
             await batch.commit();
         }
 
-        // --- DIAGNOSTIC VERSION OF handleRegister ---
+        // --- DIAGNOSTIC VERSION 2.0 OF handleRegister ---
         const handleRegister = async () => {
             hideAuthMessage();
             const displayName = document.getElementById('register-name').value;
@@ -1823,58 +1823,70 @@
             }
 
             let tempUser = null;
+            let invitationData = null; // Variable to store invitation data
+
+            // --- ENHANCED DIAGNOSTIC LOGGING ---
+            console.log("--- Starting Enhanced Diagnostic Registration ---");
+            console.log(`[DIAGNOSTIC] User intends to register with email: ${email}`);
 
             try {
-                console.log("--- Starting Registration Process ---");
-                
-                // Step 1: Check for invitation (as unauthenticated user)
-                console.log("Step 1: Checking for invitation for email:", email);
+                // Step 1: Check for invitation
                 const invitationsRef = collection(db, "invitations");
                 const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
                 const invitationSnapshot = await getDocs(q);
-                console.log("Step 1: Invitation check successful.");
 
                 if (invitationSnapshot.empty) {
                     throw new Error("INVITE_REQUIRED");
+                } else {
+                    // Store the invitation data for logging
+                    invitationData = invitationSnapshot.docs[0].data();
+                    console.log("[DIAGNOSTIC] Found a pending invitation:", invitationData);
                 }
                 
                 // Step 2: Create user in Firebase Authentication
-                console.log("Step 2: Creating user in Firebase Auth...");
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
-                console.log("Step 2: User created successfully in Auth. UID:", tempUser.uid);
+                console.log(`[DIAGNOSTIC] User created in Auth. UID: ${tempUser.uid}, Email from Auth Object: ${tempUser.email}`);
                 
                 // Step 3: Update Auth profile
                 await updateProfile(tempUser, { displayName: displayName });
-                console.log("Step 3: Auth profile updated.");
+                console.log("[DIAGNOSTIC] Auth profile updated.");
 
                 // Step 4: Create user document in Firestore
-                console.log("Step 4: Creating user document in Firestore...");
-                await setDoc(doc(db, "users", tempUser.uid), {
+                const userDataForFirestore = {
                     uid: tempUser.uid,
                     displayName: displayName,
-                    email: tempUser.email,
+                    email: tempUser.email, // Using the email from the auth object
                     photoURL: null,
                     paymentInfo: { bank: '', username: '' }
-                });
-                console.log("Step 4: User document created successfully in Firestore.");
+                };
+                await setDoc(doc(db, "users", tempUser.uid), userDataForFirestore);
+                console.log("[DIAGNOSTIC] User document created in Firestore with this data:", userDataForFirestore);
                 
-                // Step 5: Accept pending invitations (as newly authenticated user)
-                console.log("Step 5: Accepting pending invitations...");
+                // --- PRE-FAILURE DATA DUMP ---
+                // This is the most critical log. It shows us the exact values the rule will compare.
+                console.log("--- [CRITICAL] Data snapshot before the failing operation ---");
+                console.log(`[CRITICAL] Authenticated User UID: ${auth.currentUser.uid}`);
+                console.log(`[CRITICAL] Invitation's stored email: '${invitationData.invitedEmail}'`);
+                console.log(`[CRITICAL] User document's stored email: '${userDataForFirestore.email}'`);
+                console.log(`[CRITICAL] Is comparison successful? --> ${invitationData.invitedEmail === userDataForFirestore.email}`);
+                console.log("----------------------------------------------------------");
+
+                // Step 5: Accept pending invitations (This is the step that fails)
+                console.log("[DIAGNOSTIC] Attempting to accept pending invitations...");
                 await acceptPendingInvitations(tempUser);
-                console.log("Step 5: Invitations accepted successfully.");
+                console.log("[DIAGNOSTIC] Invitations accepted successfully.");
 
                 // Step 6: Send verification email and sign out
-                console.log("Step 6: Sending verification email...");
+                console.log("[DIAGNOSTIC] Sending verification email and signing out.");
                 await sendEmailVerification(tempUser);
-                console.log("Step 6: Signing out temporary user.");
                 await signOut(auth);
                 
                 showAuthMessage("Success! A verification email has been sent. You will be added to the trip the next time a member views it.");
                 console.log("--- Registration Process Finished Successfully ---");
 
             } catch (error) {
-                // THIS IS THE MOST IMPORTANT PART - IT WILL SHOW THE REAL ERROR
+                // The error will be caught here. The logs above will give us the reason.
                 console.error("--- REGISTRATION FAILED ---");
                 console.error("The error occurred at the last logged step. See details below.");
                 console.error("Raw Error Object:", error);
@@ -1893,8 +1905,7 @@
                 } else if (error.code === 'auth/email-already-in-use') {
                     showAuthMessage("This email is already registered. Please log in instead.");
                 } else {
-                    // This is the message you are seeing.
-                    showMessage("An error occurred during registration. Please contact support.");
+                    showMessage("An error occurred during registration. Please check the console for details.");
                 }
             }
         };
