@@ -212,7 +212,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.5 (Hybrid Remainder Implemented)
+              Version 9.0.6 (Live Remainder UX Finalized)
             </p>
         </footer>
     </div>
@@ -1697,8 +1697,8 @@
             if (!avatarContainer) return;
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
-            const row = avatar.closest('.item-row, #remainder-row');
-            if (row && row.id === 'remainder-row') {
+            const row = avatar.closest('.item-row, #live-remainder-row');
+            if (row && row.id === 'live-remainder-row') {
                 const identifier = avatarContainer.dataset.uid;
                 if (remainderAssignments.has(identifier)) remainderAssignments.delete(identifier);
                 else remainderAssignments.add(identifier);
@@ -1711,16 +1711,22 @@
             const memberSharesInCents = {};
             currentTrip.memberUids.forEach(uid => memberSharesInCents[uid] = 0);
             
+            let assignedItemSharesTotal = 0;
+
+            // Pass 1: Calculate shares for explicitly assigned line items
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
                 const itemPriceInBaseCents = item.priceInBaseCents; 
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
 
                 if (assignedAvatars.length > 0) {
+                    assignedItemSharesTotal += itemPriceInBaseCents;
                     const baseShare = Math.floor(itemPriceInBaseCents / assignedAvatars.length);
                     let remainder = itemPriceInBaseCents % assignedAvatars.length;
+
                     const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
                     shuffleArray(assignedUids);
+
                     assignedUids.forEach(uid => {
                         let userShare = baseShare;
                         if (remainder > 0) {
@@ -1732,24 +1738,23 @@
                 }
             });
             
-            const remainderRow = document.getElementById('remainder-row');
-            if (remainderRow && remainderAssignments.size > 0) {
-                const remainderInBaseCents = parseInt(remainderRow.dataset.remainderAmountCents, 10);
-                const sharePerPerson = Math.floor(remainderInBaseCents / remainderAssignments.size);
-                let remainder = remainderInBaseCents % remainderAssignments.size;
+            // Pass 2: Calculate the total unassigned pool and distribute it
+            const totalUnassignedCents = currentItemization.totalInBaseCents - assignedItemSharesTotal;
+
+            if (totalUnassignedCents > 0 && remainderAssignments.size > 0) {
+                const sharePerPerson = Math.floor(totalUnassignedCents / remainderAssignments.size);
+                let remainder = totalUnassignedCents % remainderAssignments.size;
                 
                 const remainderUids = Array.from(remainderAssignments);
                 shuffleArray(remainderUids);
 
                 remainderUids.forEach(uid => {
-                    if (memberSharesInCents.hasOwnProperty(uid)) {
-                        let userShare = sharePerPerson;
-                        if(remainder > 0){
-                            userShare++;
-                            remainder--;
-                        }
-                        memberSharesInCents[uid] += userShare;
+                    let userShare = sharePerPerson;
+                    if(remainder > 0){
+                        userShare++;
+                        remainder--;
                     }
+                    memberSharesInCents[uid] += userShare;
                 });
             }
 
@@ -1761,69 +1766,63 @@
         }
         
         function updateItemizationSummary() {
-            const structuralRemainderInCents = currentItemization.remainderInCents || 0;
-
-            let unassignedItemsTotalInCents = 0;
-            currentItemization.lineItems.forEach((item, index) => {
-                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
-                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
-                    unassignedItemsTotalInCents += item.priceInBaseCents;
+            let assignedItemsTotalInCents = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
+                if (assignedAvatars.length > 0) {
+                    const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
+                    assignedItemsTotalInCents += item.priceInBaseCents;
                 }
             });
 
-            const liveRemainderInCents = unassignedItemsTotalInCents + structuralRemainderInCents;
+            const liveRemainderInCents = currentItemization.totalInBaseCents - assignedItemsTotalInCents;
 
-            document.getElementById('remainder-row')?.remove(); 
+            document.getElementById('live-remainder-row')?.remove(); 
             
             if (liveRemainderInCents > 0) {
                 const remainderEl = document.createElement('div');
-                remainderEl.id = 'remainder-row';
+                remainderEl.id = 'live-remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
                 const remainderForDisplay = (liveRemainderInCents / 100 / currentItemization.exchangeRate).toFixed(2);
                 
-                let avatarsHTML = '';
-                if (unassignedItemsTotalInCents === 0 && structuralRemainderInCents > 0) {
-                     remainderEl.dataset.remainderAmountCents = structuralRemainderInCents; 
-                     avatarsHTML = currentTrip.members.map(member => {
-                        const profile = userProfilesCache.get(member.uid);
-                        if (!profile) return '';
-                        const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
-                        const avatar = profile.photoURL 
-                            ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`
-                            : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
-                        return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
-                    }).join('');
-                }
+                const avatarsHTML = currentTrip.members.map(member => {
+                    const profile = userProfilesCache.get(member.uid);
+                    if (!profile) return '';
+                    const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
+                    const avatar = profile.photoURL 
+                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`
+                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
+                }).join('');
                 
-                const titleText = (unassignedItemsTotalInCents === 0 && structuralRemainderInCents > 0)
-                    ? "Allocate Remainder (Tip/Tax)"
-                    : "Total Unassigned";
-                    
-                const instructionText = (avatarsHTML !== '') 
-                    ? `<p class="text-xs text-green-600 mb-2">Select who should split this amount:</p>` 
-                    : `<p class="text-xs text-green-600 mb-2">Assign all items above to allocate this amount.</p>`;
-
-                remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">${titleText}</p><p class="text-sm font-bold text-green-700">${remainderForDisplay} ${currentItemization.currency}</p></div>${instructionText}<div class="w-full flex space-x-1 mt-1">${avatarsHTML}</div>`;
+                remainderEl.innerHTML = `
+                    <div class="w-full flex justify-between items-center">
+                        <p class="font-medium text-green-800">Total Unassigned</p>
+                        <p class="text-sm font-bold text-green-700">${remainderForDisplay} ${currentItemization.currency}</p>
+                    </div>
+                    <p class="text-xs text-green-600 mb-2">Select who should split this remaining amount:</p>
+                    <div class="w-full flex space-x-1 mt-1">${avatarsHTML}</div>`;
                 itemizedListDiv.appendChild(remainderEl);
             }
 
             const { memberSharesInCents } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
-            let totalAssignedInBaseCents = 0;
+            let totalAssignedInCents = 0;
             for (const uid in memberSharesInCents) {
                 if (memberSharesInCents[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
                     const shareInOriginal = (memberSharesInCents[uid] / 100 / currentItemization.exchangeRate).toFixed(2);
                     summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${currentItemization.currency}</span></div>`;
-                    totalAssignedInBaseCents += memberSharesInCents[uid];
+                    totalAssignedInCents += memberSharesInCents[uid];
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
             
-            const differenceCents = currentItemization.totalInBaseCents - totalAssignedInBaseCents;
+            const differenceCents = currentItemization.totalInBaseCents - totalAssignedInCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
+
             if (Math.abs(differenceCents) < 1) {
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
