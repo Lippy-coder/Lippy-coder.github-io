@@ -304,7 +304,6 @@
                         </div>
                         <div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50">
                         </div>
-                        <div id="split-total-validation" class="text-xs text-right mt-1 min-h-[1rem]"></div>
                     </div>
                      <div class="flex justify-end space-x-4">
                         <button type="button" id="cancel-add-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
@@ -572,7 +571,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 8.2.0 (Simplified Auth Model)
+              Version 9.0.0 (Integer-Based Currency)
             </p>
         </footer>
     </div>
@@ -603,7 +602,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
-        setLogLevel('error'); // Set to 'debug' for detailed logs
+        setLogLevel('error');
 
         // --- State ---
         let currentTrip = null;
@@ -748,37 +747,43 @@
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
+        /**
+         * Calculates all balances using integer math (cents/pence) for perfect accuracy.
+         * The result is a Map of UID -> balance in cents.
+         */
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
-            // Since all members are now active, we can simplify this
             trip.memberUids.forEach(uid => balances.set(uid, 0));
-            
+
             const activeExpenses = allExpenses.filter(e => !e.isDeleted);
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
-                const splitBetween = expense.splitBetween;
-                // Credit the payer
-                if(balances.has(paidBy)) {
-                    balances.set(paidBy, balances.get(paidBy) + Math.round(expense.amountDetails.baseAmount * 100));
+                const baseAmountInCents = expense.amountDetails.baseAmountInCents || 0;
+                const splitBetweenInCents = expense.splitBetweenInCents || {};
+
+                if (balances.has(paidBy)) {
+                    balances.set(paidBy, balances.get(paidBy) + baseAmountInCents);
                 }
-                // Debit the sharers
-                for (const memberId in splitBetween) {
-                    const share = splitBetween[memberId];
-                    if(balances.has(memberId)) { // Ensure member is still active in the trip
-                        balances.set(memberId, balances.get(memberId) - Math.round(share * 100));
+
+                for (const memberId in splitBetweenInCents) {
+                    const shareInCents = splitBetweenInCents[memberId];
+                    if (balances.has(memberId)) {
+                        balances.set(memberId, balances.get(memberId) - shareInCents);
                     }
                 }
             });
 
             const activePayments = (trip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
-                if(balances.has(payment.from)) {
-                    balances.set(payment.from, balances.get(payment.from) + Math.round(payment.amount * 100));
+                const paymentAmountInCents = payment.amountInCents || 0;
+                if (balances.has(payment.from)) {
+                    balances.set(payment.from, balances.get(payment.from) + paymentAmountInCents);
                 }
-                if(balances.has(payment.to)) {
-                    balances.set(payment.to, balances.get(payment.to) - Math.round(payment.amount * 100));
+                if (balances.has(payment.to)) {
+                    balances.set(payment.to, balances.get(payment.to) - paymentAmountInCents);
                 }
             });
+            
             return balances;
         }
 
@@ -851,7 +856,7 @@
                     } else {
                         supremoMenuContainer.classList.add('hidden');
                     }
-                    await renderTripMembers(currentTrip.members); // `members` is still useful for rendering
+                    await renderTripMembers(currentTrip.members);
                     if(allTripExpenses.length > 0 || currentTrip.settledPayments?.length > 0) {
                          renderTripItems();
                     }
@@ -1018,7 +1023,6 @@
 
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
-            // *** FIX: Query the simple 'memberUids' array ***
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
             
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
@@ -1029,7 +1033,6 @@
                 if (!showArchivedTrips) {
                     trips = trips.filter(trip => !trip.isArchived);
                 }
-                // Fetch profiles for all members across all trips
                 const allMemberUids = [...new Set(trips.flatMap(trip => trip.memberUids || []))];
                 if (allMemberUids.length > 0) await fetchUserProfiles(allMemberUids);
                 await renderTrips(trips);
@@ -1058,7 +1061,6 @@
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
                 
-                // *** SIMPLIFIED: Use the clean 'memberUids' array to get profiles ***
                 const memberAvatars = (trip.memberUids || []).slice(0, 4).map(uid => {
                     const profile = userProfilesCache.get(uid);
                     if (profile && profile.photoURL) {
@@ -1114,12 +1116,11 @@
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
-            // *** SIMPLIFIED: No need to check for status, all members are active users ***
             for (const member of members) {
                 const memberEl = document.createElement('div');
                 memberEl.className = 'flex flex-col items-center text-center';
                 const profile = userProfilesCache.get(member.uid);
-                if (!profile) continue; // Skip if profile not loaded yet
+                if (!profile) continue; 
 
                 let avatarHTML = '';
                 if (profile.photoURL) {
@@ -1163,20 +1164,26 @@
             }
             noItemsMessage.classList.add('hidden');
             allItems.sort((a, b) => b.date - a.date);
-            let totalSpent = allTripExpenses.filter(e => !e.isDeleted).reduce((sum, e) => sum + e.amountDetails.baseAmount, 0);
-            tripTotalSpent.textContent = `Total Spent: ${totalSpent.toFixed(2)} ${currentTrip.baseCurrency}`;
+
+            let totalSpentInCents = allTripExpenses
+                .filter(e => !e.isDeleted)
+                .reduce((sum, e) => sum + (e.amountDetails.baseAmountInCents || 0), 0);
+            tripTotalSpent.textContent = `Total Spent: ${(totalSpentInCents / 100).toFixed(2)} ${currentTrip.baseCurrency}`;
+            
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
             const myBalanceInCents = balances.get(auth.currentUser.uid) || 0;
-            if (myBalanceInCents > 1) {
+
+            if (myBalanceInCents > 0) {
                 tripOutstandingBalance.textContent = `I am owed: ${(myBalanceInCents / 100).toFixed(2)} ${currentTrip.baseCurrency}`;
                 tripOutstandingBalance.className = 'font-semibold text-green-600';
-            } else if (myBalanceInCents < -1) {
+            } else if (myBalanceInCents < 0) {
                 tripOutstandingBalance.textContent = `I owe: ${(Math.abs(myBalanceInCents) / 100).toFixed(2)} ${currentTrip.baseCurrency}`;
                 tripOutstandingBalance.className = 'font-semibold text-red-600';
             } else {
                 tripOutstandingBalance.textContent = 'All settled for me';
                 tripOutstandingBalance.className = 'font-semibold text-gray-500';
             }
+
             allItems.forEach(item => {
                 if (item.type === 'expense') { renderExpenseItem(item.data); } 
                 else if (item.type === 'payment') { renderPaymentItem(item.data); }
@@ -1191,16 +1198,22 @@
             const paidByProfile = userProfilesCache.get(expense.paidBy);
             const paidByName = paidByProfile ? paidByProfile.displayName : 'Unknown';
             const ad = expense.amountDetails;
+            
+            const baseAmountForDisplay = ((ad.baseAmountInCents || 0) / 100).toFixed(2);
+            const originalAmountForDisplay = ((ad.originalAmountInCents || 0) / 100).toFixed(2);
+            
             const amountDisplay = (ad.originalCurrency === ad.baseCurrency) 
-                ? `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span></div>` 
-                : `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${ad.originalAmount.toFixed(2)} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
+                ? `<div class="text-right"><span class="font-bold text-lg">${baseAmountForDisplay} ${ad.baseCurrency}</span></div>` 
+                : `<div class="text-right"><span class="font-bold text-lg">${baseAmountForDisplay} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${originalAmountForDisplay} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
+            
             const formattedDate = expense.occurredAt.toDate().toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
-            // *** SIMPLIFIED: No more 'pendingSplitLines', only active members ***
-            const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
+            const splitBetweenData = expense.splitBetweenInCents || {};
+            const activeSplitLines = Object.keys(splitBetweenData).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
                 const memberName = memberProfile ? memberProfile.displayName : 'A User';
-                return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${expense.splitBetween[uid].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
+                const shareForDisplay = ((splitBetweenData[uid] || 0) / 100).toFixed(2);
+                return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${shareForDisplay} ${currentTrip.baseCurrency}</span></div>`;
             }).join('');
 
             const canModify = paidByMe || (auth.currentUser.uid === currentTrip.ownerId && isTripSupremoEnabled);
@@ -1230,7 +1243,12 @@
         }
 
         function renderPaymentItem(payment) {
-            const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>`;
+            const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; 
+            
+            const paymentAmountForDisplay = ((payment.amountInCents || 0) / 100).toFixed(2);
+            
+            const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${paymentAmountForDisplay} ${currentTrip.baseCurrency}</span>`;
+            
             if (isDeleted) { paymentWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer payment-header"><p class="italic text-gray-500">Deleted Payment</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden payment-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60 flex items-center justify-between">${paymentDetailsHTML}</div></div>`; } 
             else { const deleteBtn = (canDelete) ? `<button data-payment-id="${payment.paidAt.toMillis()}" class="delete-payment-btn absolute top-2 right-2 p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>` : ''; paymentWrapper.innerHTML = `<div class="p-3 flex items-center justify-between">${paymentDetailsHTML}${deleteBtn}</div>`; }
             if (paymentWrapper.querySelector('.payment-header')) { paymentWrapper.querySelector('.payment-header').addEventListener('click', (e) => { const details = paymentWrapper.querySelector('.payment-details'); const icon = paymentWrapper.querySelector('.chevron-icon'); details.classList.toggle('hidden'); icon.classList.toggle('rotate-180'); }); }
@@ -1265,17 +1283,11 @@
             const tripName = document.getElementById('trip-name').value;
             const baseCurrency = document.getElementById('base-currency').value;
             try {
-                // *** SIMPLIFIED: Create the new structure from the start ***
                 const newTrip = {
-                    name: tripName,
-                    baseCurrency: baseCurrency,
-                    ownerId: user.uid,
-                    createdAt: serverTimestamp(),
-                    members: [{ uid: user.uid, status: 'active' }], // Keep for easy rendering
-                    memberUids: [user.uid], // The important field for queries
-                    isSettled: false,
-                    isArchived: false,
-                    settledPayments: []
+                    name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
+                    members: [{ uid: user.uid, status: 'active' }],
+                    memberUids: [user.uid],
+                    isSettled: false, isArchived: false, settledPayments: []
                 };
                 await addDoc(collection(db, "trips"), newTrip);
                 createTripForm.reset();
@@ -1284,36 +1296,25 @@
             } catch (error) { showMessage(error.message); }
         };
 
-        // *** SIMPLIFIED: Add existing users directly, no pending state ***
         const handleInviteMember = async () => {
             const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToAdd || !currentTrip) return;
 
             submitInviteBtn.disabled = true;
             try {
-                // Check if user is already in the trip by UID
-                if (currentTrip.memberUids.includes(auth.currentUser.uid)) {
-                     const existingProfile = userProfilesCache.get(auth.currentUser.uid);
-                     if(existingProfile && existingProfile.email === emailToAdd) {
-                        throw new Error("You can't add yourself to the trip.");
-                     }
-                }
                 const existingProfiles = await fetchUserProfiles(currentTrip.memberUids);
                 const isAlreadyMember = Object.values(existingProfiles).some(p => p && p.email === emailToAdd);
                 if (isAlreadyMember) {
                     throw new Error("This user is already a member of the trip.");
                 }
 
-                // Find the user in the /users collection by their email
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToAdd));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    // User does not exist, throw an error
                     throw new Error("User not found. Please ask them to register first before adding them to a trip.");
                 } else {
-                    // User exists, add them to the trip
                     const userToAdd = querySnapshot.docs[0].data();
                     const tripRef = doc(db, "trips", currentTrip.id);
                     await updateDoc(tripRef, {
@@ -1348,57 +1349,33 @@
             }
         };
 
-        // *** SIMPLIFIED: Standard Firebase registration. No more invitation logic. ***
         const handleRegister = async () => {
             hideAuthMessage();
             const displayName = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
-
-            if (!displayName || !email || !password) {
-                return showMessage("Please fill out all fields.");
-            }
-
+            if (!displayName || !email || !password) return showMessage("Please fill out all fields.");
             let tempUser = null;
             try {
-                // Step 1: Create user in Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
-                
-                // Step 2: Update their Auth profile with display name
                 await updateProfile(tempUser, { displayName: displayName });
-
-                // Step 3: Create a corresponding user document in Firestore
                 const userDataForFirestore = {
-                    uid: tempUser.uid,
-                    displayName: displayName,
-                    email: tempUser.email,
-                    photoURL: null,
-                    paymentInfo: { bank: '', username: '' }
+                    uid: tempUser.uid, displayName: displayName, email: tempUser.email,
+                    photoURL: null, paymentInfo: { bank: '', username: '' }
                 };
                 await setDoc(doc(db, "users", tempUser.uid), userDataForFirestore);
-                
-                // Step 4: Send verification email and sign the user out until they verify
                 await sendEmailVerification(tempUser);
                 await signOut(auth);
-                
                 showAuthMessage("Success! A verification email has been sent. Please verify your email then log in.");
-                
             } catch (error) {
                 console.error("Registration failed:", error);
-                
-                if (tempUser) { // Clean up failed registration
-                    await deleteUser(tempUser).catch(delErr => console.error("Critical: Failed to delete temporary user.", delErr));
-                }
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    showAuthMessage("This email is already registered. Please log in instead.");
-                } else {
-                    showMessage("An error occurred during registration. Please try again.");
-                }
+                if (tempUser) { await deleteUser(tempUser).catch(delErr => console.error("Critical: Failed to delete temp user.", delErr)); }
+                if (error.code === 'auth/email-already-in-use') { showAuthMessage("This email is already registered. Please log in instead."); } 
+                else { showMessage("An error occurred during registration. Please try again."); }
             }
         };
-
+        
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1406,51 +1383,74 @@
             submitBtnText.classList.add('hidden');
             spinner.classList.remove('hidden');
             submitExpenseBtn.disabled = true;
+
             try {
                 const description = document.getElementById('expense-description').value;
-                const originalAmount = parseFloat(document.getElementById('expense-amount').value);
+                const originalAmountFloat = parseFloat(document.getElementById('expense-amount').value);
                 const originalCurrency = document.getElementById('expense-currency').value;
                 const baseCurrency = currentTrip.baseCurrency;
                 const occurredAt = Timestamp.fromDate(new Date(document.getElementById('expense-occurred-at').value));
                 const category = document.getElementById('expense-category').value;
                 const paidBy = document.getElementById('expense-paid-by').value;
-                let finalBaseSplits = {};
+                
+                let finalBaseSplitsInCents = {};
                 let exchangeRate = 1;
+
                 if (originalCurrency !== baseCurrency) {
                     const rateData = await getExchangeRate(originalCurrency, baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
+
+                const totalBaseAmountInCents = Math.round((originalAmountFloat * exchangeRate) * 100);
+                const originalAmountInCents = Math.round(originalAmountFloat * 100);
+
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
                 if (isItemizedMode) {
-                    const { memberShares } = calculateItemizedShares();
-                    finalBaseSplits = memberShares;
+                    const { memberSharesInCents } = calculateItemizedShares(); 
+                    finalBaseSplitsInCents = memberSharesInCents;
                 } else {
-                    expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
-                        const group = cb.closest('.split-input-group');
-                        const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
-                        const baseShare = parseFloat((share * exchangeRate).toFixed(2));
-                        finalBaseSplits[group.dataset.uid] = baseShare;
-                    });
+                    const checkedSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked'));
+                    if (checkedSharers.length > 0) {
+                        const baseShareCents = Math.floor(totalBaseAmountInCents / checkedSharers.length);
+                        let remainderCents = totalBaseAmountInCents % checkedSharers.length;
+                        
+                        const sharerGroups = checkedSharers.map(cb => cb.closest('.split-input-group'));
+                        shuffleArray(sharerGroups);
+
+                        sharerGroups.forEach((group) => {
+                            let shareForThisUser = baseShareCents;
+                            if (remainderCents > 0) {
+                                shareForThisUser++;
+                                remainderCents--;
+                            }
+                            finalBaseSplitsInCents[group.dataset.uid] = shareForThisUser;
+                        });
+                    }
                 }
-                const totalBaseAmount = originalAmount * exchangeRate;
                 
-                // *** SIMPLIFIED: No more 'pendingShares' to add. ***
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
-                    amountDetails: { originalAmount, originalCurrency, baseAmount: totalBaseAmount, baseCurrency, exchangeRate },
-                    splitBetween: finalBaseSplits,
+                    amountDetails: {
+                        originalAmount: originalAmountFloat,
+                        originalCurrency, baseCurrency, exchangeRate,
+                        originalAmountInCents,
+                        baseAmountInCents: totalBaseAmountInCents,
+                    },
+                    splitBetweenInCents: finalBaseSplitsInCents,
                     isDeleted: false
                 };
-                
+
                 const batch = writeBatch(db);
                 const newExpenseRef = doc(collection(db, 'trips', currentTrip.id, 'expenses'));
                 batch.set(newExpenseRef, newExpense);
                 const tripRef = doc(db, "trips", currentTrip.id);
                 batch.update(tripRef, { isSettled: false });
                 await batch.commit();
+
                 addExpenseForm.reset();
                 closeModal(addExpenseModal);
                 showMessage("Expense added successfully!", false);
+
             } catch (error) {
                 console.error("Error adding expense:", error);
                 showMessage(error.message);
@@ -1500,9 +1500,16 @@
             }
         };
 
-        const handleRecordPayment = async (fromUid, toUid, amount) => {
+        const handleRecordPayment = async (fromUid, toUid, amountFloat) => {
             if (!currentTrip) return showMessage("Error: No active trip selected.");
-            const newPayment = { from: fromUid, to: toUid, amount: amount, paidAt: Timestamp.now(), isDeleted: false };
+            const amountInCents = Math.round(amountFloat * 100);
+            const newPayment = { 
+                from: fromUid, 
+                to: toUid, 
+                amountInCents: amountInCents, 
+                paidAt: Timestamp.now(), 
+                isDeleted: false 
+            };
             try {
                 await updateDoc(doc(db, 'trips', currentTrip.id), { settledPayments: arrayUnion(newPayment) });
                 closeModal(settleUpModal);
@@ -1705,22 +1712,24 @@
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
             const debtors = [];
             const creditors = [];
-            balances.forEach((amount, uid) => {
-                if (amount < -1) debtors.push({ uid, amount: -amount });
-                else if (amount > 1) creditors.push({ uid, amount });
+            balances.forEach((amountInCents, uid) => {
+                if (amountInCents < 0) debtors.push({ uid, amountInCents: -amountInCents });
+                else if (amountInCents > 0) creditors.push({ uid, amountInCents });
             });
-            debtors.sort((a, b) => a.amount - b.amount);
-            creditors.sort((a, b) => a.amount - b.amount);
+            debtors.sort((a, b) => a.amountInCents - b.amountInCents);
+            creditors.sort((a, b) => a.amountInCents - b.amountInCents);
             const transactions = [];
             while (debtors.length > 0 && creditors.length > 0) {
                 const debtor = debtors[0];
                 const creditor = creditors[0];
-                const amountInCents = Math.min(debtor.amount, creditor.amount);
-                transactions.push({ from: debtor.uid, to: creditor.uid, amount: amountInCents / 100 });
-                debtor.amount -= amountInCents;
-                creditor.amount -= amountInCents;
-                if (debtor.amount < 1) debtors.shift();
-                if (creditor.amount < 1) creditors.shift();
+                const amountToSettleInCents = Math.min(debtor.amountInCents, creditor.amountInCents);
+                if (amountToSettleInCents > 0) {
+                    transactions.push({ from: debtor.uid, to: creditor.uid, amountInCents: amountToSettleInCents });
+                }
+                debtor.amountInCents -= amountToSettleInCents;
+                creditor.amountInCents -= amountToSettleInCents;
+                if (debtor.amountInCents < 1) debtors.shift();
+                if (creditor.amountInCents < 1) creditors.shift();
             }
             return transactions;
         }
@@ -1743,10 +1752,13 @@
                     const toUser = userProfilesCache.get(tx.to);
                     if (!fromUser || !toUser) return;
                     const toPaymentInfo = toUser.paymentInfo || {};
+                    
+                    const amountForDisplay = (tx.amountInCents / 100).toFixed(2);
+                    
                     let paymentLink = '';
                     if (toPaymentInfo.bank && toPaymentInfo.username) {
-                        if (toPaymentInfo.bank === 'Monzo') paymentLink = `https://monzo.me/${toPaymentInfo.username}/${tx.amount.toFixed(2)}`;
-                        else if (toPaymentInfo.bank === 'Revolut') paymentLink = `https://revolut.me/${toPaymentInfo.username}/${tx.amount.toFixed(2)}`;
+                        if (toPaymentInfo.bank === 'Monzo') paymentLink = `https://monzo.me/${toPaymentInfo.username}/${amountForDisplay}`;
+                        else if (toPaymentInfo.bank === 'Revolut') paymentLink = `https://revolut.me/${toPaymentInfo.username}/${amountForDisplay}`;
                     }
                     const amPayer = currentUser.uid === tx.from;
                     const canRecordPayment = amPayer || currentUser.uid === tx.to || isSupremo;
@@ -1759,10 +1771,10 @@
                                 <svg class="w-5 h-5 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 <div class="font-semibold">${toUser.displayName}</div>
                             </div>
-                            <div class="font-bold text-lg">${tx.amount.toFixed(2)} ${currentTrip.baseCurrency}</div>
+                            <div class="font-bold text-lg">${amountForDisplay} ${currentTrip.baseCurrency}</div>
                         </div>
                         ${paymentLink && amPayer ? `<a href="${paymentLink}" target="_blank" class="block mt-2 text-center bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-${toPaymentInfo.bank.toLowerCase() === 'monzo' ? 'yellow' : 'blue'}-600">Pay with ${toPaymentInfo.bank}</a>` : ''}
-                        ${canRecordPayment ? `<button class="record-payment-btn w-full mt-2 bg-green-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-green-600" data-from-uid="${tx.from}" data-to-uid="${tx.to}" data-amount="${tx.amount.toFixed(2)}">Record as Paid</button>` : ''}
+                        ${canRecordPayment ? `<button class="record-payment-btn w-full mt-2 bg-green-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-green-600" data-from-uid="${tx.from}" data-to-uid="${tx.to}" data-amount="${amountForDisplay}">Record as Paid</button>` : ''}
                     `;
                     settlementList.appendChild(paymentEl);
                 });
@@ -1781,20 +1793,21 @@
             balances.forEach((amountInCents, uid) => {
                 const user = profiles[uid];
                 if (!user) return;
-                if (amountInCents > 1) creditors.push({ name: user.displayName, amount: amountInCents / 100 });
-                else if (amountInCents < -1) debtors.push({ name: user.displayName, amount: -amountInCents / 100 });
+                if (amountInCents > 0) creditors.push({ name: user.displayName, amount: (amountInCents / 100).toFixed(2) });
+                else if (amountInCents < 0) debtors.push({ name: user.displayName, amount: (Math.abs(amountInCents) / 100).toFixed(2) });
             });
             const transactions = calculateSettlement();
-            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
-            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${currencySymbol}${c.amount.toFixed(2)}</span></div>`).join('') : '<p>None</p>';
+            vizDebtorsList.innerHTML = debtors.length > 0 ? debtors.map(d => `<div class="break-words">${d.name} owes <span class="font-bold">${currencySymbol}${d.amount}</span></div>`).join('') : '<p>None</p>';
+            vizCreditorsList.innerHTML = creditors.length > 0 ? creditors.map(c => `<div class="break-words">${c.name} is owed <span class="font-bold">${currencySymbol}${c.amount}</span></div>`).join('') : '<p>None</p>';
             vizPaymentsList.innerHTML = transactions.length > 0 ? transactions.map(tx => {
                 const from = profiles[tx.from].displayName;
                 const to = profiles[tx.to].displayName;
+                const amountForDisplay = (tx.amountInCents / 100).toFixed(2);
                 return `<div class="grid grid-cols-[1fr_auto_1fr_auto] gap-x-2 items-center">
                     <span class="break-words text-left">${from}</span>
                     <svg class="w-4 h-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
                     <span class="break-words text-left">${to}</span>
-                    <span class="font-bold text-right">${currencySymbol}${tx.amount.toFixed(2)}</span>
+                    <span class="font-bold text-right">${currencySymbol}${amountForDisplay}</span>
                 </div>`;
             }).join('') : '<p>All settled!</p>';
         }
@@ -2058,49 +2071,79 @@
         });
         
         function calculateItemizedShares() {
-            const memberShares = {};
-            currentTrip.memberUids.forEach(uid => memberShares[uid] = 0);
+            const memberSharesInCents = {};
+            currentTrip.memberUids.forEach(uid => memberSharesInCents[uid] = 0);
             
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
-                const itemPriceInBase = item.price * currentItemization.exchangeRate;
+                const itemPriceInBaseCents = Math.round(item.price * currentItemization.exchangeRate * 100);
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
+
                 if (assignedAvatars.length > 0) {
-                    const sharePerPerson = itemPriceInBase / assignedAvatars.length;
-                    assignedAvatars.forEach(avatarWrapper => {
-                        const uid = avatarWrapper.closest('[data-uid]').dataset.uid;
-                        if (uid) memberShares[uid] += sharePerPerson;
+                    const baseShare = Math.floor(itemPriceInBaseCents / assignedAvatars.length);
+                    let remainder = itemPriceInBaseCents % assignedAvatars.length;
+
+                    const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
+                    shuffleArray(assignedUids);
+
+                    assignedUids.forEach(uid => {
+                        let userShare = baseShare;
+                        if (remainder > 0) {
+                            userShare++;
+                            remainder--;
+                        }
+                        memberSharesInCents[uid] += userShare;
                     });
                 }
             });
+            
             const remainderRow = document.getElementById('remainder-row');
             if (remainderRow && remainderAssignments.size > 0) {
-                const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
-                const sharePerPerson = remainderInBase / remainderAssignments.size;
-                remainderAssignments.forEach(uid => {
-                    if (memberShares.hasOwnProperty(uid)) memberShares[uid] += sharePerPerson;
+                const remainderInBaseCents = Math.round(parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate * 100);
+                const sharePerPerson = Math.floor(remainderInBaseCents / remainderAssignments.size);
+                let remainder = remainderInBaseCents % remainderAssignments.size;
+                
+                const remainderUids = Array.from(remainderAssignments);
+                shuffleArray(remainderUids);
+
+                remainderUids.forEach(uid => {
+                    if (memberSharesInCents.hasOwnProperty(uid)) {
+                        let userShare = sharePerPerson;
+                        if(remainder > 0){
+                            userShare++;
+                            remainder--;
+                        }
+                        memberSharesInCents[uid] += userShare;
+                    }
                 });
             }
+
             const finalMemberShares = {};
-            for (const uid in memberShares) {
-                if (memberShares[uid] > 0.001) finalMemberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
+            for (const uid in memberSharesInCents) {
+                if (memberSharesInCents[uid] > 0) finalMemberShares[uid] = memberSharesInCents[uid];
             }
-            return { memberShares: finalMemberShares };
+            return { memberSharesInCents: finalMemberShares };
         }
         
         function updateItemizationSummary() {
             document.getElementById('remainder-row')?.remove();
-            let assignedItemsTotal = 0;
+            let assignedItemsTotalInCents = 0;
             currentItemization.lineItems.forEach((item, index) => {
                 const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
-                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length > 0) assignedItemsTotal += item.price;
+                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length > 0) {
+                    assignedItemsTotalInCents += Math.round(item.price * 100);
+                }
             });
-            const totalRemainderToAllocate = currentItemization.total - assignedItemsTotal;
-            if (totalRemainderToAllocate > 0.01) {
+            const totalInCents = Math.round(currentItemization.total * 100);
+            const totalRemainderToAllocateInCents = totalInCents - assignedItemsTotalInCents;
+
+            if (totalRemainderToAllocateInCents > 0) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
-                remainderEl.dataset.remainderAmount = totalRemainderToAllocate.toFixed(2);
+                const remainderForDisplay = (totalRemainderToAllocateInCents / 100).toFixed(2);
+                remainderEl.dataset.remainderAmount = remainderForDisplay;
+
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) return '';
@@ -2110,46 +2153,38 @@
                         : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
                     return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
                 }).join('');
-                remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p><p class="text-sm font-bold text-green-700">${totalRemainderToAllocate.toFixed(2)} ${currentItemization.currency}</p></div><p class="text-xs text-green-600 mb-2">Select who should split this amount:</p><div class="w-full flex space-x-1 mt-1">${memberAvatarsHTML}</div>`;
+                remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p><p class="text-sm font-bold text-green-700">${remainderForDisplay} ${currentItemization.currency}</p></div><p class="text-xs text-green-600 mb-2">Select who should split this amount:</p><div class="w-full flex space-x-1 mt-1">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(remainderEl);
             }
-            const { memberShares } = calculateItemizedShares();
+            const { memberSharesInCents } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
-            let totalAssignedInBase = 0;
+            let totalAssignedInBaseCents = 0;
             const originalCurrency = currentItemization.currency;
-            for (const uid in memberShares) {
-                if (memberShares[uid] > 0) {
+            for (const uid in memberSharesInCents) {
+                if (memberSharesInCents[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    const shareInOriginal = memberShares[uid] / currentItemization.exchangeRate;
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal.toFixed(2)} ${originalCurrency}</span></div>`;
-                    totalAssignedInBase += memberShares[uid];
+                    const shareInOriginal = ((memberSharesInCents[uid] / currentItemization.exchangeRate) / 100).toFixed(2);
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${originalCurrency}</span></div>`;
+                    totalAssignedInBaseCents += memberSharesInCents[uid];
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
-            const totalInBase = currentItemization.total * currentItemization.exchangeRate;
-            const difference = totalInBase - totalAssignedInBase;
+            const totalInBaseCents = Math.round(currentItemization.total * currentItemization.exchangeRate * 100);
+            const differenceCents = totalInBaseCents - totalAssignedInBaseCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
-            if (Math.abs(difference) < 0.02) {
+            if (Math.abs(differenceCents) <= 1) { // Allow for a 1 cent rounding diff
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                const diffInOriginal = difference / currentItemization.exchangeRate;
-                validationEl.textContent = `Unassigned: ${diffInOriginal.toFixed(2)} ${originalCurrency}`;
+                const diffInOriginal = ((differenceCents / currentItemization.exchangeRate) / 100).toFixed(2);
+                validationEl.textContent = `Unassigned: ${diffInOriginal} ${originalCurrency}`;
                 validationEl.className += ' text-red-600';
                 submitExpenseBtn.disabled = true;
             }
             itemizedSummaryDiv.appendChild(validationEl);
-        }
-
-        function updateSplitInputCurrency() {
-            const selectedCurrency = expenseCurrencySelect.value;
-            const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
-            expenseSplitBetweenDiv.querySelectorAll('.currency-symbol').forEach(span => {
-                span.textContent = symbol;
-            });
         }
 
         function populateExpenseModal() {
@@ -2170,7 +2205,6 @@
             }
             expenseCurrencySelect.value = currentTrip.baseCurrency;
             expensePaidBySelect.innerHTML = '';
-            // *** SIMPLIFIED: Iterate over members, all are active ***
             currentTrip.members.forEach(member => {
                 const profile = userProfilesCache.get(member.uid);
                 if (profile) {
@@ -2189,7 +2223,7 @@
                 if (profile) {
                     const memberId = `split-member-${member.uid}`;
                     group.dataset.uid = member.uid;
-                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm truncate">${profile.displayName}</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm truncate">${profile.displayName}</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right bg-gray-100" placeholder="0.00" disabled></div>`;
                     expenseSplitBetweenDiv.appendChild(group);
                 }
             });
@@ -2205,55 +2239,40 @@
         }
 
         function autoDistributeAmount() {
-            const totalAmount = parseFloat(expenseAmountInput.value) || 0;
+            const totalAmountFloat = parseFloat(expenseAmountInput.value) || 0;
             const allSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group'));
             const checkedSharers = allSharers.filter(group => group.querySelector('input[type="checkbox"]:checked'));
+            
             allSharers.forEach(group => { group.querySelector('input[type="number"]').value = '0.00'; });
-            if (checkedSharers.length === 0 || totalAmount === 0) return validateSplitTotal();
-            const totalCents = Math.round(totalAmount * 100);
+            if (checkedSharers.length === 0 || totalAmountFloat === 0) return;
+
+            const totalCents = Math.round(totalAmountFloat * 100);
             const numSharers = checkedSharers.length;
             const baseShareCents = Math.floor(totalCents / numSharers);
             let remainderCents = totalCents % numSharers;
-            const shares = Array(numSharers).fill(baseShareCents);
-            let sharerIndices = Array.from(Array(numSharers).keys());
-            shuffleArray(sharerIndices);
-            for(let i = 0; i < remainderCents; i++) shares[sharerIndices[i]]++;
-            checkedSharers.forEach((group, index) => {
-                group.querySelector('input[type="number"]').value = (shares[index] / 100).toFixed(2);
+
+            const sharerGroups = checkedSharers;
+            shuffleArray(sharerGroups);
+
+            sharerGroups.forEach((group) => {
+                let shareForThisUser = baseShareCents;
+                if (remainderCents > 0) {
+                    shareForThisUser++;
+                    remainderCents--;
+                }
+                group.querySelector('input[type="number"]').value = (shareForThisUser / 100).toFixed(2);
             });
-            validateSplitTotal();
         }
 
         function addSplitInputListeners() {
-            expenseSplitBetweenDiv.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', () => {
-                    if (input.type === 'checkbox') autoDistributeAmount();
-                    else validateSplitTotal();
-                });
+            expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                input.addEventListener('input', autoDistributeAmount);
             });
             expenseAmountInput.addEventListener('input', autoDistributeAmount);
             document.getElementById('deselect-all-btn').addEventListener('click', () => {
                 expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 autoDistributeAmount();
             });
-        }
-
-        function validateSplitTotal() {
-            const totalAmount = parseFloat(expenseAmountInput.value) || 0;
-            let splitSum = 0;
-            expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                splitSum += parseFloat(cb.closest('.split-input-group').querySelector('input[type="number"]').value) || 0;
-            });
-            const difference = totalAmount - splitSum;
-            if (Math.abs(difference) < 0.015 || totalAmount === 0) {
-                splitTotalValidation.textContent = totalAmount > 0 ? 'Total matches!' : '';
-                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-green-600';
-                submitExpenseBtn.disabled = false;
-            } else {
-                splitTotalValidation.textContent = `Remaining: ${difference.toFixed(2)}`;
-                splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-red-600';
-                submitExpenseBtn.disabled = true;
-            }
         }
         
         async function handleCurrencyChange() {
@@ -2288,10 +2307,10 @@
                 const date = expense.occurredAt.toDate().toISOString().split('T')[0];
                 const description = `"${expense.description.replace(/"/g, '""')}"`; 
                 const category = expense.category || 'N/A';
-                const amount = expense.amountDetails.baseAmount.toFixed(2);
+                const amount = ((expense.amountDetails.baseAmountInCents || 0) / 100).toFixed(2);
                 const currency = expense.amountDetails.baseCurrency;
                 const paidBy = userProfilesCache.get(expense.paidBy)?.displayName || expense.paidBy;
-                const splitWith = Object.keys(expense.splitBetween).map(uid => userProfilesCache.get(uid)?.displayName || uid).join('; ');
+                const splitWith = Object.keys(expense.splitBetweenInCents).map(uid => userProfilesCache.get(uid)?.displayName || uid).join('; ');
                 const isDeleted = expense.isDeleted ? "Yes" : "No";
                 return [date, description, category, amount, currency, `"${paidBy}"`, `"${splitWith}"`, isDeleted].join(',');
             });
@@ -2323,7 +2342,7 @@
                     .map(exp => ({
                         description: exp.description,
                         category: exp.category,
-                        amount: exp.amountDetails.baseAmount,
+                        amount: ((exp.amountDetails.baseAmountInCents || 0) / 100),
                         paidBy: userProfilesCache.get(exp.paidBy)?.displayName || 'Unknown',
                         date: exp.occurredAt.toDate().toISOString().split('T')[0]
                     })),
@@ -2343,7 +2362,7 @@
                     break;
             }
 
-            const payload = { prompt: userPrompt }; // Assuming system prompt is handled in cloud function
+            const payload = { prompt: userPrompt };
 
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -2371,20 +2390,16 @@
         aiReportForm.addEventListener('submit', handleGenerateAiReport);
         copyAiReportBtn.addEventListener('click', () => { navigator.clipboard.writeText(lastAiReportMarkdown).then(() => showMessage("Report copied to clipboard!", false), () => showMessage("Failed to copy report.")); });
         loginTabBtn.addEventListener('click', () => {
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
             loginTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
             registerTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-            registerTabBtn.classList.add('text-gray-500');
-            hideAuthMessage();
+            registerTabBtn.classList.add('text-gray-500'); hideAuthMessage();
         });
         registerTabBtn.addEventListener('click', () => {
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
             registerTabBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
             loginTabBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-            loginTabBtn.classList.add('text-gray-500');
-            hideAuthMessage();
+            loginTabBtn.classList.add('text-gray-500'); hideAuthMessage();
         });
         expenseCurrencySelect.addEventListener('change', handleCurrencyChange);
         expenseAmountInput.addEventListener('input', debounce(handleCurrencyChange, 500));
