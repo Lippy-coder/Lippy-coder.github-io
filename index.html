@@ -212,10 +212,11 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.4 (Integer Math Finalized)
+              Version 9.0.5 (Hybrid Remainder Implemented)
             </p>
         </footer>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -1718,10 +1719,8 @@
                 if (assignedAvatars.length > 0) {
                     const baseShare = Math.floor(itemPriceInBaseCents / assignedAvatars.length);
                     let remainder = itemPriceInBaseCents % assignedAvatars.length;
-
                     const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
                     shuffleArray(assignedUids);
-
                     assignedUids.forEach(uid => {
                         let userShare = baseShare;
                         if (remainder > 0) {
@@ -1762,33 +1761,56 @@
         }
         
         function updateItemizationSummary() {
-            document.getElementById('remainder-row')?.remove();
-            const remainderToAllocateInCents = currentItemization.remainderInCents || 0;
+            const structuralRemainderInCents = currentItemization.remainderInCents || 0;
 
-            if (remainderToAllocateInCents > 0) {
+            let unassignedItemsTotalInCents = 0;
+            currentItemization.lineItems.forEach((item, index) => {
+                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
+                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length === 0) {
+                    unassignedItemsTotalInCents += item.priceInBaseCents;
+                }
+            });
+
+            const liveRemainderInCents = unassignedItemsTotalInCents + structuralRemainderInCents;
+
+            document.getElementById('remainder-row')?.remove(); 
+            
+            if (liveRemainderInCents > 0) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
-                const remainderForDisplay = (remainderToAllocateInCents / 100 / currentItemization.exchangeRate).toFixed(2);
-                remainderEl.dataset.remainderAmountCents = remainderToAllocateInCents;
+                const remainderForDisplay = (liveRemainderInCents / 100 / currentItemization.exchangeRate).toFixed(2);
+                
+                let avatarsHTML = '';
+                if (unassignedItemsTotalInCents === 0 && structuralRemainderInCents > 0) {
+                     remainderEl.dataset.remainderAmountCents = structuralRemainderInCents; 
+                     avatarsHTML = currentTrip.members.map(member => {
+                        const profile = userProfilesCache.get(member.uid);
+                        if (!profile) return '';
+                        const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
+                        const avatar = profile.photoURL 
+                            ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`
+                            : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                        return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
+                    }).join('');
+                }
+                
+                const titleText = (unassignedItemsTotalInCents === 0 && structuralRemainderInCents > 0)
+                    ? "Allocate Remainder (Tip/Tax)"
+                    : "Total Unassigned";
+                    
+                const instructionText = (avatarsHTML !== '') 
+                    ? `<p class="text-xs text-green-600 mb-2">Select who should split this amount:</p>` 
+                    : `<p class="text-xs text-green-600 mb-2">Assign all items above to allocate this amount.</p>`;
 
-                const memberAvatarsHTML = currentTrip.members.map(member => {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) return '';
-                    const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
-                    const avatar = profile.photoURL 
-                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`
-                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
-                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
-                }).join('');
-                remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p><p class="text-sm font-bold text-green-700">${remainderForDisplay} ${currentItemization.currency}</p></div><p class="text-xs text-green-600 mb-2">Select who should split this amount:</p><div class="w-full flex space-x-1 mt-1">${memberAvatarsHTML}</div>`;
+                remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">${titleText}</p><p class="text-sm font-bold text-green-700">${remainderForDisplay} ${currentItemization.currency}</p></div>${instructionText}<div class="w-full flex space-x-1 mt-1">${avatarsHTML}</div>`;
                 itemizedListDiv.appendChild(remainderEl);
             }
+
             const { memberSharesInCents } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBaseCents = 0;
-
             for (const uid in memberSharesInCents) {
                 if (memberSharesInCents[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
@@ -1798,6 +1820,7 @@
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
+            
             const differenceCents = currentItemization.totalInBaseCents - totalAssignedInBaseCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
