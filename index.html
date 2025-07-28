@@ -212,11 +212,18 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.2 (Integer Math Finalized)
+              Version 9.0.4 (Integer Math Finalized)
             </p>
         </footer>
     </div>
+```
+---
 
+### **Part 2 of 2: The JavaScript**
+
+Copy all of the code in the block below and paste it **immediately after** the code from Part 1.
+
+```html
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -381,7 +388,7 @@
         const copyAiReportBtn = document.getElementById('copy-ai-report-btn');
         const aiReportTypeSelect = document.getElementById('ai-report-type');
         const customQuestionArea = document.getElementById('custom-question-area');
-
+        
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
         
@@ -454,7 +461,6 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
-        // *** FIX STARTS HERE: Added modal helper functions ***
         function openModal(modalElement) {
             if (!modalElement) return;
             document.body.classList.add('modal-open');
@@ -466,7 +472,6 @@
             document.body.classList.remove('modal-open');
             modalElement.classList.add('hidden-view');
         }
-        // *** FIX ENDS HERE ***
 
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
@@ -1011,13 +1016,17 @@
                     const rateData = await getExchangeRate(originalCurrency, baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
-                const totalBaseAmountInCents = Math.round((originalAmountFloat * exchangeRate) * 100);
                 const originalAmountInCents = Math.round(originalAmountFloat * 100);
+                
+                let totalBaseAmountInCents;
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
+                
                 if (isItemizedMode) {
                     const { memberSharesInCents } = calculateItemizedShares();
                     finalBaseSplitsInCents = memberSharesInCents;
+                    totalBaseAmountInCents = Object.values(finalBaseSplitsInCents).reduce((sum, val) => sum + val, 0);
                 } else {
+                    totalBaseAmountInCents = Math.round((originalAmountFloat * exchangeRate) * 100);
                     const checkedSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked'));
                     const sharerUids = checkedSharers.map(cb => cb.closest('.split-input-group').dataset.uid);
                     if (sharerUids.length > 0) {
@@ -1129,9 +1138,7 @@
             }
         };
         
-        // *** FIX STARTS HERE: Added event listener for the button ***
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
-        // *** FIX ENDS HERE ***
 
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
@@ -1140,9 +1147,7 @@
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
-        submitExpenseBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddExpense(); });
         inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMember(); });
-        submitInviteBtn.addEventListener('click', (e) => { e.preventDefault(); handleInviteMember(); });
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
@@ -1154,7 +1159,6 @@
             openModal(archiveTripModal);
         });
         
-        // This button now works because `closeModal` is defined
         cancelCreateTripBtn.addEventListener('click', () => closeModal(createTripModal));
         
         confirmArchiveTripBtn.addEventListener('click', async () => {
@@ -1480,13 +1484,16 @@
                 const result = await response.json();
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
+
                 addExpenseForm.reset();
                 await populateExpenseModal();
-                openModal(addExpenseModal); 
+                openModal(addExpenseModal);
+                
                 const descInput = document.getElementById('expense-description');
                 const amountInput = document.getElementById('expense-amount');
                 const currencySelect = document.getElementById('expense-currency');
                 const occurredAtInput = document.getElementById('expense-occurred-at');
+                
                 let finalDescription = data.description || data.merchantName || '';
                 aiReasoningTooltip.innerHTML = '';
                 aiReasoningTooltip.classList.add('hidden');
@@ -1500,6 +1507,7 @@
                 }
                 if (data.total !== null) amountInput.value = data.total;
                 else amountInput.placeholder = "Enter amount manually";
+                
                 const detectedCurrency = data.currency;
                 if (detectedCurrency) {
                     if (!currencySelect.querySelector(`option[value="${detectedCurrency}"]`)) {
@@ -1512,23 +1520,45 @@
                 } else {
                     currencySelect.value = currentTrip.baseCurrency;
                 }
+                
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) occurredAtInput.value = formattedDateTime;
+                
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
                 if (selectedCurrency && selectedCurrency !== currentTrip.baseCurrency) {
                     const rateData = await getExchangeRate(selectedCurrency, currentTrip.baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
+
                 if (data.lineItems && data.lineItems.length > 0 && data.confidence === 'high') {
                     const itemizationCurrency = data.currency || currentTrip.baseCurrency;
-                    currentItemization = { ...data, currency: itemizationCurrency, exchangeRate };
+
+                    const lineItemsInCents = data.lineItems.map(item => ({
+                        ...item,
+                        priceInBaseCents: Math.round(item.price * exchangeRate * 100)
+                    }));
+                    
+                    const totalFromItemsInCents = lineItemsInCents.reduce((sum, item) => sum + item.priceInBaseCents, 0);
+                    const totalFromAiInCents = data.total ? Math.round(data.total * exchangeRate * 100) : totalFromItemsInCents;
+                    const remainderInCents = totalFromAiInCents - totalFromItemsInCents;
+
+                    currentItemization = {
+                        currency: itemizationCurrency,
+                        exchangeRate: exchangeRate,
+                        lineItems: lineItemsInCents,
+                        remainderInCents: remainderInCents > 0 ? remainderInCents : 0,
+                        totalInBaseCents: totalFromItemsInCents + (remainderInCents > 0 ? remainderInCents : 0)
+                    };
+
                     splitModeToggleContainer.classList.remove('hidden');
                     toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 }
+                
                 await handleCurrencyChange();
                 autoDistributeAmount();
                 triggerAiCategorySuggestion();
+
             } catch (error) {
                 console.error('Gemini Scan failed:', error);
                 showMessage(`Gemini analysis failed: ${error.message}. Please enter the expense manually.`);
@@ -1690,7 +1720,7 @@
             
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
-                const itemPriceInBaseCents = Math.round(item.price * currentItemization.exchangeRate * 100);
+                const itemPriceInBaseCents = item.priceInBaseCents; 
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
 
                 if (assignedAvatars.length > 0) {
@@ -1713,7 +1743,7 @@
             
             const remainderRow = document.getElementById('remainder-row');
             if (remainderRow && remainderAssignments.size > 0) {
-                const remainderInBaseCents = Math.round(parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate * 100);
+                const remainderInBaseCents = parseInt(remainderRow.dataset.remainderAmountCents, 10);
                 const sharePerPerson = Math.floor(remainderInBaseCents / remainderAssignments.size);
                 let remainder = remainderInBaseCents % remainderAssignments.size;
                 
@@ -1741,22 +1771,14 @@
         
         function updateItemizationSummary() {
             document.getElementById('remainder-row')?.remove();
-            let assignedItemsTotalInCents = 0;
-            currentItemization.lineItems.forEach((item, index) => {
-                const row = itemizedListDiv.querySelector(`.item-row[data-index="${index}"]`);
-                if (row && row.querySelectorAll('.item-assignment-avatar.assigned').length > 0) {
-                    assignedItemsTotalInCents += Math.round(item.price * 100);
-                }
-            });
-            const totalInCents = Math.round(currentItemization.total * 100);
-            const totalRemainderToAllocateInCents = totalInCents - assignedItemsTotalInCents;
+            const remainderToAllocateInCents = currentItemization.remainderInCents || 0;
 
-            if (totalRemainderToAllocateInCents > 0) {
+            if (remainderToAllocateInCents > 0) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
-                const remainderForDisplay = (totalRemainderToAllocateInCents / 100).toFixed(2);
-                remainderEl.dataset.remainderAmount = remainderForDisplay;
+                const remainderForDisplay = (remainderToAllocateInCents / 100 / currentItemization.exchangeRate).toFixed(2);
+                remainderEl.dataset.remainderAmountCents = remainderToAllocateInCents;
 
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     const profile = userProfilesCache.get(member.uid);
@@ -1774,27 +1796,26 @@
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBaseCents = 0;
-            const originalCurrency = currentItemization.currency;
+
             for (const uid in memberSharesInCents) {
                 if (memberSharesInCents[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    const shareInOriginal = ((memberSharesInCents[uid] / currentItemization.exchangeRate) / 100).toFixed(2);
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${originalCurrency}</span></div>`;
+                    const shareInOriginal = (memberSharesInCents[uid] / 100 / currentItemization.exchangeRate).toFixed(2);
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${currentItemization.currency}</span></div>`;
                     totalAssignedInBaseCents += memberSharesInCents[uid];
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
-            const totalInBaseCents = Math.round(currentItemization.total * currentItemization.exchangeRate * 100);
-            const differenceCents = totalInBaseCents - totalAssignedInBaseCents;
+            const differenceCents = currentItemization.totalInBaseCents - totalAssignedInBaseCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
-            if (Math.abs(differenceCents) <= 1) { // Allow for a 1 cent rounding diff
+            if (Math.abs(differenceCents) < 1) {
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                const diffInOriginal = ((differenceCents / currentItemization.exchangeRate) / 100).toFixed(2);
-                validationEl.textContent = `Unassigned: ${diffInOriginal} ${originalCurrency}`;
+                const diffInOriginal = (differenceCents / 100 / currentItemization.exchangeRate).toFixed(2);
+                validationEl.textContent = `Unassigned: ${diffInOriginal} ${currentItemization.currency}`;
                 validationEl.className += ' text-red-600';
                 submitExpenseBtn.disabled = true;
             }
@@ -2065,8 +2086,6 @@
             if (aiReportTypeSelect.value === 'custom_question') customQuestionArea.classList.remove('hidden');
             else customQuestionArea.classList.add('hidden');
         });
-
-        // Add event listeners for all other modal cancel/close buttons
         cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
@@ -2084,7 +2103,6 @@
         settleUpBtn.addEventListener('click', calculateAndShowSettlement);
         visualiseSettlementBtn.addEventListener('click', async () => { await initializeVisualisation(); openModal(settlementVisualisationModal); });
         aiReportBtn.addEventListener('click', () => openModal(aiReportModal));
-
     </script>
 </body>
 </html>
