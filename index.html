@@ -54,7 +54,6 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
-        <!-- All HTML sections are identical to the previous version... -->
         <!-- Authentication View -->
         <div id="auth-view" class="view">
             <div class="text-center mb-8 mt-16">
@@ -87,9 +86,14 @@
                         <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email" id="register-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com" autocomplete="email">
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <input type="password" id="register-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Minimum 6 characters" autocomplete="new-password">
+                    </div>
+                    <div class="mb-6">
+                        <label for="register-referrer-email" class="block text-sm font-medium text-gray-700 mb-1">Referrer's Email</label>
+                        <input type="email" id="register-referrer-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com" autocomplete="off">
+                        <p class="text-xs text-gray-500 mt-1">The email address of an existing Splitify user who invited you.</p>
                     </div>
                     <button type="submit" id="register-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Create Account</button>
                 </form>
@@ -318,7 +322,12 @@
             </div>
         </div>
 
-        <!-- Edit Profile Modal -->
+        <!-- All other modals from the original file go here... -->
+        <!-- Edit Profile, Edit Expense, Invite Member, Archive, Delete Modals etc. -->
+        <!-- Settle Up, Visualisation, AI Scan, Action Sheet, AI Report Modals etc. -->
+        
+        <!-- ... (Ensuring all modals are included as they were) ... -->
+
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3>
@@ -348,7 +357,6 @@
             </div>
         </div>
 
-        <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3>
@@ -366,7 +374,6 @@
             </div>
         </div>
 
-        <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Add a Friend to the Trip</h3>
@@ -384,7 +391,6 @@
             </div>
         </div>
 
-        <!-- Archive Trip Modal -->
         <div id="archive-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Archive Trip</h3>
@@ -396,7 +402,6 @@
             </div>
         </div>
         
-        <!-- Delete Expense Modal -->
         <div id="delete-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Expense</h3>
@@ -408,7 +413,6 @@
             </div>
         </div>
 
-        <!-- Delete Payment Modal -->
         <div id="delete-payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Delete Payment</h3>
@@ -420,7 +424,6 @@
             </div>
         </div>
         
-        <!-- Settle Up Modal -->
         <div id="settle-up-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
@@ -439,7 +442,6 @@
             </div>
         </div>
 
-        <!-- Settlement Visualisation Modal -->
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-6 flex flex-col">
                 <div class="flex-shrink-0">
@@ -476,7 +478,6 @@
             </div>
         </div>
         
-        <!-- AI Camera Scan Modal -->
         <div id="ai-scan-modal" class="modal-overlay fixed inset-0 bg-black flex items-center justify-center z-40 hidden-view">
             <div class="relative w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
                 <video id="camera-feed" playsinline class="rounded-lg"></video>
@@ -490,7 +491,6 @@
             </div>
         </div>
 
-        <!-- Action Sheet Modal -->
         <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end z-50 hidden-view">
             <div class="action-sheet-panel w-full bg-gray-100 rounded-t-2xl p-4">
                 <div class="bg-white rounded-xl">
@@ -511,7 +511,6 @@
             </div>
         </div>
         
-        <!-- AI Report Configuration Modal -->
         <div id="ai-report-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3>
@@ -537,7 +536,6 @@
             </div>
         </div>
 
-        <!-- AI Report Display Modal -->
         <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -556,18 +554,15 @@
             </div>
         </div>
 
-        <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p id="loading-text" class="text-white mt-4">Analysing Scene...</p>
         </div>
 
-        <!-- Message Box -->
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
             <p id="message-text"></p>
         </div>
         
-        <!-- Hidden File Inputs -->
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
@@ -583,6 +578,9 @@
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        // === START: NEW IMPORT ===
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+        // === END: NEW IMPORT ===
 
         // --- Firebase Config Keys (Provided by your environment) ---
         const firebaseConfig = {
@@ -604,6 +602,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
+        // === START: NEW INITIALIZATION ===
+        const functions = getFunctions(app);
+        // === END: NEW INITIALIZATION ===
         setLogLevel('error');
 
         // --- State ---
@@ -627,6 +628,7 @@
         let lastAiReportMarkdown = '';
 
         // --- DOM Element References ---
+        // (All DOM references are identical and included here)
         const allViews = document.querySelectorAll('.view');
         const allModals = document.querySelectorAll('.modal-overlay');
         const authView = document.getElementById('auth-view');
@@ -749,10 +751,7 @@
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
 
-        /**
-         * Calculates all balances using integer math (cents/pence) for perfect accuracy.
-         * The result is a Map of UID -> balance in cents.
-         */
+        // --- All other functions (calculateAllBalances, renderTrips, etc.) are identical and included here ---
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
             trip.memberUids.forEach(uid => balances.set(uid, 0));
@@ -1351,32 +1350,51 @@
             }
         };
 
+        // === START: NEW HANDLE REGISTER FUNCTION ===
         const handleRegister = async () => {
             hideAuthMessage();
             const displayName = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value.trim().toLowerCase();
+            const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            if (!displayName || !email || !password) return showMessage("Please fill out all fields.");
-            let tempUser = null;
+            const referrerEmail = document.getElementById('register-referrer-email').value;
+
+            if (!displayName || !email || !password || !referrerEmail) {
+                return showMessage("Please fill out all fields.");
+            }
+            if (email.trim().toLowerCase() === referrerEmail.trim().toLowerCase()) {
+                showAuthMessage("You cannot refer yourself.");
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating Account...';
+
+            // Get a reference to the Cloud Function we deployed
+            const registerUserFunction = httpsCallable(functions, 'registerNewUser');
+
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                tempUser = userCredential.user;
-                await updateProfile(tempUser, { displayName: displayName });
-                const userDataForFirestore = {
-                    uid: tempUser.uid, displayName: displayName, email: tempUser.email,
-                    photoURL: null, paymentInfo: { bank: '', username: '' }
-                };
-                await setDoc(doc(db, "users", tempUser.uid), userDataForFirestore);
-                await sendEmailVerification(tempUser);
-                await signOut(auth);
+                // Call the function with the user's data
+                await registerUserFunction({
+                    displayName, email, password, referrerEmail
+                });
+                
+                // The function was successful
                 showAuthMessage("Success! A verification email has been sent. Please verify your email then log in.");
+                registerForm.reset();
+                // Sign out to ensure user must log in after verifying
+                await signOut(auth).catch(() => {});
+
             } catch (error) {
-                console.error("Registration failed:", error);
-                if (tempUser) { await deleteUser(tempUser).catch(delErr => console.error("Critical: Failed to delete temp user.", delErr)); }
-                if (error.code === 'auth/email-already-in-use') { showAuthMessage("This email is already registered. Please log in instead."); } 
-                else { showMessage("An error occurred during registration. Please try again."); }
+                // The function threw an HttpsError, which we can display to the user
+                console.error("Registration function call failed:", error);
+                showAuthMessage(error.message);
+            } finally {
+                // Always re-enable the button
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
             }
         };
+        // === END: NEW HANDLE REGISTER FUNCTION ===
         
         const handleAddExpense = async () => {
             if (!currentTrip) return;
@@ -1408,13 +1426,10 @@
 
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
                 
-                // --- FIX STARTS HERE: Corrected logic for handling expense splits --- //
                 if (isItemizedMode) {
-                    // This itemized logic is more robust because it returns final integer shares.
                     const { memberSharesInCents } = calculateItemizedShares();
                     finalBaseSplitsInCents = memberSharesInCents;
                 } else {
-                    // THIS IS THE CORRECTED LOGIC FOR EQUAL SPLITS
                     const checkedSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked'));
                     const sharerUids = checkedSharers.map(cb => cb.closest('.split-input-group').dataset.uid);
 
@@ -1423,7 +1438,6 @@
                         const baseShareCents = Math.floor(totalBaseAmountInCents / numSharers);
                         let remainderCents = totalBaseAmountInCents % numSharers;
 
-                        // Shuffle to distribute the remainder randomly, preventing the same person from always paying the extra cent.
                         shuffleArray(sharerUids);
 
                         sharerUids.forEach(uid => {
@@ -1435,7 +1449,6 @@
                             finalBaseSplitsInCents[uid] = shareForThisUser;
                         });
 
-                        // Final check: Ensure the sum of parts exactly equals the total, correcting any final micro-discrepancies.
                         const sumOfSplits = Object.values(finalBaseSplitsInCents).reduce((a, b) => a + b, 0);
                         const diff = totalBaseAmountInCents - sumOfSplits;
                         if (diff !== 0 && sharerUids.length > 0) {
@@ -1443,7 +1456,6 @@
                         }
                     }
                 }
-                // --- FIX ENDS HERE --- //
                 
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
@@ -1746,10 +1758,8 @@
                 debtor.amountInCents -= amountToSettleInCents;
                 creditor.amountInCents -= amountToSettleInCents;
                 
-                // --- FIX STARTS HERE: More robust check for integers --- //
                 if (debtor.amountInCents <= 0) debtors.shift();
                 if (creditor.amountInCents <= 0) creditors.shift();
-                // --- FIX ENDS HERE --- //
             }
             return transactions;
         }
@@ -2313,7 +2323,6 @@
             });
         }
         
-        // --- FIX STARTS HERE: Hardened validation function using integer math --- //
         function validateSplitTotal() {
             const totalAmountFloat = parseFloat(expenseAmountInput.value) || 0;
             const totalCents = Math.round(totalAmountFloat * 100);
@@ -2327,19 +2336,17 @@
             
             const differenceCents = totalCents - splitSumCents;
 
-            if (differenceCents === 0) { // Must be an exact match
+            if (differenceCents === 0) {
                 splitTotalValidation.textContent = 'Total matches!';
                 splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                // Display the difference in float format for user-friendliness
                 const differenceFloat = (differenceCents / 100).toFixed(2);
                 splitTotalValidation.textContent = `Remaining: ${differenceFloat}`;
                 splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-red-600';
                 submitExpenseBtn.disabled = true;
             }
         }
-        // --- FIX ENDS HERE --- //
         
         async function handleCurrencyChange() {
             const selectedCurrency = expenseCurrencySelect.value;
