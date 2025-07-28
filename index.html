@@ -4,228 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Splitify - Bill Splitting Made Easy</title>
-    
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.appspot.com/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
     <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/splitify-2ec5e.appspot.com/o/splitifylogo.jpeg?alt=media&token=72378b49-0e42-4fc2-bd35-4d4264701419">
-
-
-
-
-
-
-
-
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
-    
     <style>
         /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .view { transition: opacity 0.3s ease-in-out; }
         .hidden-view { display: none !important; opacity: 0; }
         .modal-overlay { transition: opacity 0.3s ease-in-out; z-index: 40; }
-        .spinner, .mini-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-left-color: #ffffff;
-            animation: spin 1s ease infinite;
-        }
+        .spinner, .mini-spinner { border: 4px solid rgba(0, 0, 0, 0.1); border-radius: 50%; border-left-color: #ffffff; animation: spin 1s ease infinite; }
         .spinner { width: 24px; height: 24px; }
         .mini-spinner { width: 16px; height: 16px; border-width: 2px; border-left-color: #4f46e5; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .chevron-icon {
-            transition: transform 0.2s ease-in-out;
-        }
-        .profile-pic-wrapper {
-            position: relative;
-            cursor: pointer;
-        }
-        .profile-pic-overlay {
-            position: absolute;
-            inset: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            border-radius: 9999px;
-        }
-        .profile-pic-wrapper:hover .profile-pic-overlay {
-            opacity: 1;
-        }
-        .modal-open {
-            overflow: hidden;
-        }
-        /* AI Camera View Styles */
-        #camera-view video {
-            width: 100%;
-            height: auto;
-            max-height: 70vh;
-            border-radius: 0.5rem;
-        }
-        /* Toggle Switch Styles */
-        .toggle-switch:checked ~ .dot {
-          transform: translateX(100%);
-          background-color: #4f46e5; /* Tailwind indigo-600 */
-        }
-        .toggle-switch:checked ~ .block {
-            background-color: #a5b4fc; /* Tailwind indigo-300 */
-        }
-
-
-
-
-
-
-
-
-        /* FAB Menu Styles */
-        #fab-container.open #fab-icon-plus {
-            transform: rotate(45deg);
-        }
-        #fab-container.open #fab-manual-add {
-            transform: translateY(-95px);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #fab-container.open #fab-camera-scan {
-            transform: translate(-67px, -67px);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #fab-container.open #fab-gallery-upload {
-            transform: translateX(-95px);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .manual-payment-area {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out;
-        }
-        .manual-payment-area.open {
-            max-height: 100px; /* Adjust as needed */
-            margin-top: 0.75rem; /* 12px */
-        }
-        /* Profile & Supremo Dropdown */
-        .dropdown-menu {
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        /* Trip Supremo Button Style */
-        #trip-supremo-btn.active {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #4338ca; /* indigo-800 */
-        }
-        
-        /* Action Sheet Styles */
-        .action-sheet-panel {
-            transition: transform 0.3s ease-in-out;
-            transform: translateY(100%);
-        }
-        #action-sheet-modal:not(.hidden-view) .action-sheet-panel {
-            transform: translateY(0);
-        }
-
-
-
-
-
-
-
-
-        /* Itemization Styles */
-        .item-assignment-avatar {
-            transition: all 0.2s ease-in-out;
-            border: 2px solid transparent;
-        }
-        .item-assignment-avatar.assigned {
-            border-color: #4f46e5; /* indigo-600 */
-            transform: scale(1.1);
-        }
-        /* AI Report Display Styles */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .chevron-icon { transition: transform 0.2s ease-in-out; }
+        .profile-pic-wrapper { position: relative; cursor: pointer; }
+        .profile-pic-overlay { position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease-in-out; border-radius: 9999px; }
+        .profile-pic-wrapper:hover .profile-pic-overlay { opacity: 1; }
+        .modal-open { overflow: hidden; }
+        #camera-view video { width: 100%; height: auto; max-height: 70vh; border-radius: 0.5rem; }
+        .toggle-switch:checked ~ .dot { transform: translateX(100%); background-color: #4f46e5; }
+        .toggle-switch:checked ~ .block { background-color: #a5b4fc; }
+        #fab-container.open #fab-icon-plus { transform: rotate(45deg); }
+        #fab-container.open #fab-manual-add { transform: translateY(-95px); opacity: 1; pointer-events: auto; }
+        #fab-container.open #fab-camera-scan { transform: translate(-67px, -67px); opacity: 1; pointer-events: auto; }
+        #fab-container.open #fab-gallery-upload { transform: translateX(-95px); opacity: 1; pointer-events: auto; }
+        .manual-payment-area { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out; }
+        .manual-payment-area.open { max-height: 100px; margin-top: 0.75rem; }
+        .dropdown-menu { transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; }
+        #trip-supremo-btn.active { background-color: #e0e7ff; color: #4338ca; }
+        .action-sheet-panel { transition: transform 0.3s ease-in-out; transform: translateY(100%); }
+        #action-sheet-modal:not(.hidden-view) .action-sheet-panel { transform: translateY(0); }
+        .item-assignment-avatar { transition: all 0.2s ease-in-out; border: 2px solid transparent; }
+        .item-assignment-avatar.assigned { border-color: #4f46e5; transform: scale(1.1); }
         #ai-report-content h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
         #ai-report-content h3 { font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.25rem; }
         #ai-report-content ul { list-style-type: disc; margin-left: 1.5rem; }
         #ai-report-content li { margin-bottom: 0.25rem; }
         #ai-report-content strong { font-weight: 700; }
-        #ai-report-content pre {
-            background-color: #f3f4f6;
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        /* AI Reasoning Tooltip */
-        .info-icon {
-            cursor: help;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 8px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: #e0e7ff; /* indigo-200 */
-            color: #4338ca; /* indigo-800 */
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .info-icon .tooltip-text {
-            visibility: hidden;
-            width: 220px;
-            background-color: #374151; /* gray-700 */
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 8px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -110px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            font-weight: normal;
-        }
-        .info-icon:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
+        #ai-report-content pre { background-color: #f3f4f6; padding: 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; white-space: pre-wrap; word-break: break-all; }
+        .info-icon { cursor: help; position: relative; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px; width: 16px; height: 16px; border-radius: 50%; background-color: #e0e7ff; color: #4338ca; font-size: 10px; font-weight: bold; }
+        .info-icon .tooltip-text { visibility: hidden; width: 220px; background-color: #374151; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; }
+        .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-
-
-
-
-
-
-
-
     <div class="w-full max-w-4xl mx-auto p-4 sm:p-6">
-
-
-
-
-
-
-
-
         <!-- Authentication View -->
         <div id="auth-view" class="view">
             <div class="text-center mb-8 mt-16">
@@ -267,13 +95,6 @@
             </div>
         </div>
 
-
-
-
-
-
-
-
         <!-- Dashboard View -->
         <div id="dashboard-view" class="view hidden-view py-8">
             <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -288,14 +109,6 @@
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
                 </div>
-
-
-
-
-
-
-
-
                 <div id="trips-list" class="space-y-4">
                     <p id="no-trips-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">You have no trips yet. Create one to get started!</p>
                 </div>
@@ -334,7 +147,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </button>
-                        
                         <div id="supremo-menu-container" class="relative hidden">
                             <button id="supremo-menu-btn" title="Trip Supremo Controls" class="h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-110">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -349,30 +161,15 @@
                 <div class="mb-8 p-4 bg-white rounded-xl shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-bold text-lg">Trip Members</h3>
-                        <button id="invite-member-btn" class="text-sm text-green-600 hover:underline font-semibold">Invite Friend</button>
+                        <button id="invite-member-btn" class="text-sm text-green-600 hover:underline font-semibold">Add Friend</button>
                     </div>
                     <div id="trip-members-list" class="flex flex-wrap gap-4">
                     </div>
                 </div>
-
-
-
-
-
-
-
-
                 <div id="trip-items-list" class="space-y-1">
                     <p id="no-items-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">No expenses or payments logged for this trip yet.</p>
                 </div>
             </main>
-
-
-
-
-
-
-
 
             <!-- FAB Menu Container -->
             <div id="fab-container" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-30">
@@ -395,14 +192,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </button>
-
-
-
-
-
-
-
-
                 <!-- Main FAB Toggle Button -->
                 <button id="fab-toggle" title="Add Item" class="relative h-16 w-16 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-110 z-10">
                     <div id="fab-icon-plus" class="transition-transform duration-300">
@@ -413,13 +202,6 @@
                 </button>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Create Trip Modal -->
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -448,13 +230,6 @@
                 </form>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Add Expense Modal -->
         <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -502,19 +277,11 @@
                         <label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label>
                         <select id="expense-paid-by" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select>
                     </div>
-                    
                     <div id="split-mode-toggle-container" class="my-4 hidden">
                         <button type="button" id="toggle-split-mode-btn" class="w-full text-center bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-200">
                             Switch to Split by Item
                         </button>
                     </div>
-
-
-
-
-
-
-
 
                     <!-- Itemized Split Section -->
                     <div id="itemized-split-section" class="hidden">
@@ -526,13 +293,6 @@
                         <div id="itemized-summary" class="mt-2 text-sm">
                         </div>
                     </div>
-
-
-
-
-
-
-
 
                     <!-- Equal Split Section -->
                     <div id="equal-split-section" class="mb-6">
@@ -556,13 +316,6 @@
                 </form>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Edit Profile Modal -->
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -594,13 +347,6 @@
             </div>
         </div>
 
-
-
-
-
-
-
-
         <!-- Edit Expense Modal -->
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
@@ -619,36 +365,23 @@
             </div>
         </div>
 
-
-
-
-
-
-
-
         <!-- Invite Member Modal -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
-                <h3 class="text-2xl font-bold mb-6">Invite a Friend</h3>
+                <h3 class="text-2xl font-bold mb-6">Add a Friend to the Trip</h3>
                 <form id="invite-member-form">
                     <div class="mb-4">
                         <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Friend's Email Address</label>
                         <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
+                        <p class="text-xs text-gray-500 mt-1">They must have a Splitify account to be added.</p>
                     </div>
                     <div class="flex justify-end space-x-4">
                         <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
-                        <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Send Invite</button>
+                        <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button>
                     </div>
                 </form>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Archive Trip Modal -->
         <div id="archive-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -673,13 +406,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Delete Payment Modal -->
         <div id="delete-payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -711,13 +437,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Settlement Visualisation Modal -->
         <div id="settlement-visualisation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
@@ -761,7 +480,6 @@
             <div class="relative w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
                 <video id="camera-feed" playsinline class="rounded-lg"></video>
                 <canvas id="camera-canvas" class="hidden"></canvas>
-                
                 <div class="absolute bottom-8 left-0 right-0 flex justify-center items-center space-x-8">
                     <button id="ai-cancel-btn" class="w-16 h-16 bg-white bg-opacity-30 text-white rounded-full flex items-center justify-center text-xl">
                         &times;
@@ -770,13 +488,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
 
         <!-- Action Sheet Modal -->
         <div id="action-sheet-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-end z-50 hidden-view">
@@ -825,9 +536,6 @@
             </div>
         </div>
 
-
-
-
         <!-- AI Report Display Modal -->
         <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]">
@@ -847,25 +555,11 @@
             </div>
         </div>
 
-
-
-
-
-
-
-
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view">
             <div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
             <p id="loading-text" class="text-white mt-4">Analysing Scene...</p>
         </div>
-
-
-
-
-
-
-
 
         <!-- Message Box -->
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
@@ -876,39 +570,18 @@
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
-
-
-
-
-
-
-
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 8.1.0 (Single-Call AI Logic)
+              Version 8.2.0 (Simplified Auth Model)
             </p>
         </footer>
     </div>
-
-
-
-
-
-
-
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-
-
-
-
-
-
 
         // --- Firebase Config Keys (Provided by your environment) ---
         const firebaseConfig = {
@@ -925,26 +598,12 @@
         const CLOUD_FUNCTION_URL = 'https://us-central1-splitify-2ec5e.cloudfunctions.net/callgemini';
         const FX_API_KEY = '9dedf9a9f74ab256717d8f4f';
 
-
-
-
-
-
-
-
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
-        setLogLevel('debug');
-
-
-
-
-
-
-
+        setLogLevel('error'); // Set to 'debug' for detailed logs
 
         // --- State ---
         let currentTrip = null;
@@ -962,16 +621,9 @@
         let showDeletedItems = false;
         let showArchivedTrips = false;
         let isTripSupremoEnabled = false;
-        let currentItemization = null; // To hold AI-extracted line items
-        let remainderAssignments = new Set(); // To hold UIDs for the remainder
-        let lastAiReportMarkdown = ''; // To store the raw markdown for copying
-
-
-
-
-
-
-
+        let currentItemization = null;
+        let remainderAssignments = new Set();
+        let lastAiReportMarkdown = '';
 
         // --- DOM Element References ---
         const allViews = document.querySelectorAll('.view');
@@ -1093,23 +745,13 @@
         const aiReportTypeSelect = document.getElementById('ai-report-type');
         const customQuestionArea = document.getElementById('custom-question-area');
 
-
-
-
-
-
-
-
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
-
-
-
 
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
             trip.members.forEach(member => {
-                if (member.status === 'active') {
+                if (member.status === 'active') { // Only active members are calculated
                     balances.set(member.uid, 0);
                 }
             });
@@ -1117,10 +759,12 @@
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
+                // Credit the payer
                 balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
+                // Debit the sharers
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
-                    if(balances.has(memberId)) {
+                    if(balances.has(memberId)) { // Ensure member is still active in the trip
                         balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
                     }
                 }
@@ -1132,7 +776,6 @@
             });
             return balances;
         }
-
 
         async function getExchangeRate(fromCurrency, toCurrency) {
             const url = `https://v6.exchangerate-api.com/v6/${FX_API_KEY}/pair/${fromCurrency}/${toCurrency}`;
@@ -1148,7 +791,6 @@
             }
         }
 
-
         function formatDateTimeForInput(timestampString) {
             if (!timestampString || timestampString.length < 16) return null;
             return timestampString.slice(0, 16);
@@ -1160,17 +802,11 @@
             return now.toISOString().slice(0, 16);
         }
 
-
-
-
         function showView(viewId) {
             allViews.forEach(view => view.classList.add('hidden-view'));
             allModals.forEach(modal => modal.classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
         }
-
-
-
 
         function showMessage(message, isError = true) {
             messageText.textContent = message;
@@ -1179,16 +815,10 @@
             setTimeout(() => messageBox.classList.add('opacity-0'), 3000);
         }
 
-
-
-
         function showAuthMessage(message) {
             authMessageArea.textContent = message;
             authMessageArea.classList.remove('hidden');
         }
-
-
-
 
         function hideAuthMessage() {
             authMessageArea.classList.add('hidden');
@@ -1202,52 +832,12 @@
             }
         }
 
-        async function processAcceptedInvitations(tripId) {
-            const user = auth.currentUser;
-            if (!user || !currentTrip || !currentTrip.memberUids.includes(user.uid)) {
-                return;
-            }
-
-            const invitationsRef = collection(db, "invitations");
-            const q = query(invitationsRef, where("tripId", "==", tripId), where("status", "==", "accepted"));
-            const acceptedSnapshot = await getDocs(q);
-
-            if (acceptedSnapshot.empty) return;
-
-            console.log(`Found ${acceptedSnapshot.size} accepted invitation(s) to process.`);
-            const batch = writeBatch(db);
-            const tripRef = doc(db, "trips", tripId);
-
-            acceptedSnapshot.forEach(invDoc => {
-                const invitation = invDoc.data();
-                const newUserUid = invitation.acceptedByUid;
-
-                if (newUserUid) {
-                    const updatedMembers = currentTrip.members
-                        .filter(member => member.email !== invitation.invitedEmail)
-                        .concat([{ uid: newUserUid, status: 'active' }]);
-                    
-                    batch.update(tripRef, {
-                        members: updatedMembers,
-                        memberUids: arrayUnion(newUserUid)
-                    });
-                    batch.delete(invDoc.ref);
-                }
-            });
-
-            try {
-                await batch.commit();
-                showMessage("New members have been added to the trip!", false);
-            } catch (error) {
-                console.error("Error processing accepted invitations:", error);
-                showMessage("Could not add new members from accepted invites.");
-            }
-        }
-
+        // --- SIMPLIFIED --- This function is no longer needed and can be removed.
+        // async function processAcceptedInvitations(tripId) { ... }
 
         async function selectTrip(trip) {
             if (singleTripUnsubscribe) singleTripUnsubscribe();
-            await processAcceptedInvitations(trip.id);
+            // --- SIMPLIFIED --- Call to processAcceptedInvitations removed.
             const tripRef = doc(db, 'trips', trip.id);
             singleTripUnsubscribe = onSnapshot(tripRef, async (doc) => {
                 if (doc.exists()) {
@@ -1276,18 +866,12 @@
             showView('trip-detail-view');
         }
 
-
-
-
         backToDashboardBtn.addEventListener('click', () => {
             if (expensesUnsubscribe) expensesUnsubscribe();
             if (singleTripUnsubscribe) singleTripUnsubscribe();
             currentTrip = null;
             showView('dashboard-view');
         });
-
-
-
 
         async function fetchUserProfiles(uids) {
             const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
@@ -1305,9 +889,6 @@
             });
             return profiles;
         }
-
-
-
 
         async function loadUserPreferences(userId) {
             try {
@@ -1332,9 +913,6 @@
             }
         }
 
-
-
-
         async function saveUserPreferences(userId, prefs) {
             try {
                 const userDocRef = doc(db, "users", userId);
@@ -1344,9 +922,6 @@
                 showMessage("Could not save your preference.");
             }
         }
-
-
-
 
         function renderProfile(user) {
             welcomeMessage.textContent = `Hi ${user.displayName || user.email}`;
@@ -1417,9 +992,6 @@
             });
         }
 
-
-
-
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -1439,9 +1011,6 @@
             }
         });
 
-
-
-
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
@@ -1453,7 +1022,8 @@
                 if (!showArchivedTrips) {
                     trips = trips.filter(trip => !trip.isArchived);
                 }
-                const allMemberUids = [...new Set(trips.flatMap(trip => (trip.members || []).filter(m => m.status === 'active').map(m => m.uid)))];
+                // --- SIMPLIFIED --- No longer needs to check for pending users, only active.
+                const allMemberUids = [...new Set(trips.flatMap(trip => (trip.members || []).map(m => m.uid)))];
                 if (allMemberUids.length > 0) await fetchUserProfiles(allMemberUids);
                 await renderTrips(trips);
             }, (error) => {
@@ -1461,9 +1031,6 @@
                 showMessage("Could not fetch trips.");
             });
         }
-
-
-
 
         async function renderTrips(trips) {
             tripsList.innerHTML = '';
@@ -1483,17 +1050,14 @@
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
+                // --- SIMPLIFIED --- Logic no longer needs to handle pending members.
                 const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
-                    if (member.status === 'active') {
-                        const profile = userProfilesCache.get(member.uid);
-                        if (profile && profile.photoURL) {
-                            return `<img src="${profile.photoURL}" class="inline-block h-8 w-8 rounded-full object-cover ring-2 ring-white">`;
-                        }
-                        const initial = profile ? profile.displayName.charAt(0).toUpperCase() : '?';
-                        return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
-                    } else {
-                        return `<div class="inline-block h-8 w-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold ring-2 ring-white">?</div>`;
+                    const profile = userProfilesCache.get(member.uid);
+                    if (profile && profile.photoURL) {
+                        return `<img src="${profile.photoURL}" class="inline-block h-8 w-8 rounded-full object-cover ring-2 ring-white">`;
                     }
+                    const initial = profile ? (profile.displayName || '?').charAt(0).toUpperCase() : '?';
+                    return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
                 }).join('');
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1531,9 +1095,6 @@
             }
         };
 
-
-
-
         tripsList.addEventListener('click', (e) => {
             const unarchiveBtn = e.target.closest('.unarchive-btn');
             if (unarchiveBtn) {
@@ -1542,9 +1103,6 @@
             }
         });
 
-
-
-
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
             for (const member of members) {
@@ -1552,27 +1110,22 @@
                 memberEl.className = 'flex flex-col items-center text-center';
                 let avatarHTML = '';
                 let nameHTML = '';
-                if (member.status === 'active') {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (!profile) continue;
-                    if (profile.photoURL) {
-                        avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
-                    } else {
-                        const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
-                        avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
-                    }
-                    nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
-                } else if (member.status === 'pending') {
-                    avatarHTML = `<div class="w-12 h-12 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mb-1"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>`;
-                    nameHTML = `<span class="text-xs text-gray-500 w-20 truncate">${member.email}</span><span class="text-xs italic text-gray-400">(pending)</span>`;
+                // --- SIMPLIFIED --- Removed the `else if (member.status === 'pending')` block.
+                // All members are now assumed to be active with a UID.
+                const profile = userProfilesCache.get(member.uid);
+                if (!profile) continue; // Skip if profile not loaded yet
+                if (profile.photoURL) {
+                    avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
+                } else {
+                    const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
+                    avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                 }
+                nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+                
                 memberEl.innerHTML = avatarHTML + nameHTML;
                 tripMembersList.appendChild(memberEl);
             }
         }
-
-
-
 
         function listenForExpenses(tripId) {
             const expensesRef = collection(db, 'trips', tripId, 'expenses');
@@ -1634,13 +1187,14 @@
                 ? `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span></div>` 
                 : `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${ad.originalAmount.toFixed(2)} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
             const formattedDate = expense.occurredAt.toDate().toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            // --- SIMPLIFIED --- Removed `pendingSplitLines`. Only active members are shown.
             const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
-                const memberName = memberProfile ? memberProfile.displayName : 'Invited Member';
+                const memberName = memberProfile ? memberProfile.displayName : 'A User';
                 return `<div class="flex justify-between items-center text-sm text-gray-600 py-0.5"><span>${memberName}</span><span>${expense.splitBetween[uid].toFixed(2)} ${currentTrip.baseCurrency}</span></div>`;
             }).join('');
-            const pendingSplitLines = Object.keys(expense.pendingShares || {}).map(email => `<div class="flex justify-between items-center text-sm text-gray-500 py-0.5"><span class="italic truncate">${email}</span><span class="italic">${(expense.pendingShares[email]).toFixed(2)} ${currentTrip.baseCurrency}</span></div>`).join('');
-            const allSplitLines = activeSplitLines + pendingSplitLines;
+
             const canModify = paidByMe || (auth.currentUser.uid === currentTrip.ownerId && isTripSupremoEnabled);
             const actionButtons = (canModify && !isDeleted) ? `<div class="absolute top-2 right-2 flex flex-col space-y-1"><button data-expense-id="${expense.id}" data-expense-description="${expense.description}" class="edit-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-yellow-100 hover:text-yellow-600"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><button data-expense-id="${expense.id}" class="delete-expense-btn p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button></div>` : '';
             let avatarHTML = '';
@@ -1650,7 +1204,7 @@
                 const initial = paidByName.charAt(0).toUpperCase(); 
                 avatarHTML = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">${initial}</div>`; 
             }
-            const detailsContentHTML = `<div class="text-xs text-gray-500 mb-2">${formattedDate}</div><h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4><div>${allSplitLines}</div>`;
+            const detailsContentHTML = `<div class="text-xs text-gray-500 mb-2">${formattedDate}</div><h4 class="font-semibold text-sm mb-1 text-gray-700">Shared Between:</h4><div>${activeSplitLines}</div>`;
             if (isDeleted) { 
                 const deletedDetailsContentHTML = `<div class="flex items-center mb-2">${avatarHTML}<div><p class="font-semibold">${expense.description}</p><p class="text-sm text-gray-600">${paidByMe ? 'You' : paidByName}</p></div></div>${amountDisplay}${detailsContentHTML}`;
                 expenseWrapper.innerHTML = `<div class="p-3 flex justify-between items-center cursor-pointer expense-header"><p class="italic text-gray-500">Deleted Item</p><svg class="w-5 h-5 ml-3 text-gray-400 chevron-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div><div class="px-3 pb-3 pt-2 border-t border-gray-200 hidden expense-details bg-gray-50/50 rounded-b-xl"><div class="opacity-60">${deletedDetailsContentHTML}</div></div>`; 
@@ -1666,9 +1220,6 @@
             });
             tripItemsList.appendChild(expenseWrapper);
         }
-
-
-
 
         function renderPaymentItem(payment) {
             const isDeleted = payment.isDeleted || false; const fromUser = userProfilesCache.get(payment.from)?.displayName || 'Unknown'; const toUser = userProfilesCache.get(payment.to)?.displayName || 'Unknown'; const date = payment.paidAt.toDate(); const formattedDate = date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric' }); const isTripOwner = auth.currentUser.uid === currentTrip.ownerId; const amPayerOrPayee = auth.currentUser.uid === payment.from || auth.currentUser.uid === payment.to; const canDelete = amPayerOrPayee || (isTripOwner && isTripSupremoEnabled); const paymentWrapper = document.createElement('div'); paymentWrapper.className = 'rounded-xl shadow-sm bg-green-50 relative'; const paymentDetailsHTML = `<div class="flex items-center"><div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div class="ml-4"><p class="font-semibold">${fromUser} paid ${toUser}</p><p class="text-sm text-gray-600">Settlement on ${formattedDate}</p></div></div><span class="font-bold text-lg text-green-800">${payment.amount.toFixed(2)} ${currentTrip.baseCurrency}</span>`;
@@ -1700,13 +1251,6 @@
         closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
         closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
 
-
-
-
-
-
-
-
         const handleCreateTrip = async () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -1715,7 +1259,7 @@
             try {
                 const newTrip = {
                     name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
-                    members: [{ uid: user.uid, status: 'active' }],
+                    members: [{ uid: user.uid, status: 'active' }], // creator is the first active member
                     memberUids: [user.uid],
                     isSettled: false,
                     isArchived: false,
@@ -1728,49 +1272,43 @@
             } catch (error) { showMessage(error.message); }
         };
 
-
-
-
+        // --- SIMPLIFIED --- This function now adds an existing user, or fails if they don't exist.
         const handleInviteMember = async () => {
-            const emailToInvite = document.getElementById('invite-email').value.trim().toLowerCase();
-            if (!emailToInvite || !currentTrip) return;
+            const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
+            if (!emailToAdd || !currentTrip) return;
+
             submitInviteBtn.disabled = true;
             try {
-                const alreadyInTrip = currentTrip.members.some(member => 
-                    (member.status === 'active' && userProfilesCache.get(member.uid)?.email === emailToInvite) ||
-                    (member.status === 'pending' && member.email === emailToInvite)
-                );
-                if (alreadyInTrip) throw new Error("This person is already part of the trip or has a pending invitation.");
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", emailToInvite));
-                const querySnapshot = await getDocs(q);
-                const tripRef = doc(db, "trips", currentTrip.id);
-                if (!querySnapshot.empty) {
-                    const existingUser = querySnapshot.docs[0].data();
-                    await updateDoc(tripRef, {
-                        members: arrayUnion({ uid: existingUser.uid, status: 'active' }),
-                        memberUids: arrayUnion(existingUser.uid)
-                    });
-                    showMessage("Existing user added to the trip!", false);
-                } else {
-                    const invitationId = `${emailToInvite}_${currentTrip.id}`;
-                    await setDoc(doc(db, "invitations", invitationId), {
-                        invitedEmail: emailToInvite,
-                        tripId: currentTrip.id,
-                        tripName: currentTrip.name,
-                        invitedBy: auth.currentUser.uid,
-                        status: 'pending',
-                        createdAt: serverTimestamp()
-                    });
-                    await updateDoc(tripRef, {
-                        members: arrayUnion({ email: emailToInvite, status: 'pending' })
-                    });
-                    showMessage("Invitation sent successfully!", false);
+                // Check if user is already in the trip by email
+                const existingProfiles = await fetchUserProfiles(currentTrip.memberUids);
+                const isAlreadyMember = Object.values(existingProfiles).some(p => p && p.email === emailToAdd);
+                if (isAlreadyMember) {
+                    throw new Error("This user is already a member of the trip.");
                 }
+
+                // Find the user in the /users collection by their email
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", emailToAdd));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // User does not exist, throw an error
+                    throw new Error("User not found. Please ask them to register first before adding them to a trip.");
+                } else {
+                    // User exists, add them to the trip
+                    const userToAdd = querySnapshot.docs[0].data();
+                    const tripRef = doc(db, "trips", currentTrip.id);
+                    await updateDoc(tripRef, {
+                        members: arrayUnion({ uid: userToAdd.uid, status: 'active' }),
+                        memberUids: arrayUnion(userToAdd.uid)
+                    });
+                    showMessage(`${userToAdd.displayName} was added to the trip!`, false);
+                }
+                
                 inviteMemberForm.reset();
                 closeModal(inviteMemberModal);
             } catch (error) {
-                console.error("Error inviting member:", error);
+                console.error("Error adding member:", error);
                 showMessage(error.message);
             } finally {
                 submitInviteBtn.disabled = false;
@@ -1792,25 +1330,10 @@
             }
         };
 
-        async function acceptPendingInvitations(newUser) {
-            if (!newUser || !newUser.email) return;
-            const invitationsRef = collection(db, "invitations");
-            const q = query(invitationsRef, where("invitedEmail", "==", newUser.email), where("status", "==", "pending"));
-            const invitationsSnapshot = await getDocs(q);
-            if (invitationsSnapshot.empty) return;
-            const batch = writeBatch(db);
-            invitationsSnapshot.forEach(invDoc => {
-                const invRef = doc(db, "invitations", invDoc.id);
-                batch.update(invRef, {
-                    status: 'accepted',
-                    acceptedByUid: newUser.uid,
-                    acceptedAt: serverTimestamp()
-                });
-            });
-            await batch.commit();
-        }
-
-        // --- DIAGNOSTIC VERSION 2.0 OF handleRegister ---
+        // --- SIMPLIFIED --- This function is no longer needed as invitations are gone.
+        // async function acceptPendingInvitations(newUser) { ... }
+        
+        // --- SIMPLIFIED --- Standard Firebase registration. No more invitation checks.
         const handleRegister = async () => {
             hideAuthMessage();
             const displayName = document.getElementById('register-name').value;
@@ -1818,98 +1341,51 @@
             const password = document.getElementById('register-password').value;
 
             if (!displayName || !email || !password) {
-                showMessage("Please fill out all fields.");
-                return;
+                return showMessage("Please fill out all fields.");
             }
 
             let tempUser = null;
-            let invitationData = null; // Variable to store invitation data
-
-            // --- ENHANCED DIAGNOSTIC LOGGING ---
-            console.log("--- Starting Enhanced Diagnostic Registration ---");
-            console.log(`[DIAGNOSTIC] User intends to register with email: ${email}`);
-
             try {
-                // Step 1: Check for invitation
-                const invitationsRef = collection(db, "invitations");
-                const q = query(invitationsRef, where("invitedEmail", "==", email), where("status", "==", "pending"));
-                const invitationSnapshot = await getDocs(q);
-
-                if (invitationSnapshot.empty) {
-                    throw new Error("INVITE_REQUIRED");
-                } else {
-                    // Store the invitation data for logging
-                    invitationData = invitationSnapshot.docs[0].data();
-                    console.log("[DIAGNOSTIC] Found a pending invitation:", invitationData);
-                }
-                
-                // Step 2: Create user in Firebase Authentication
+                // Step 1: Create user in Firebase Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 tempUser = userCredential.user;
-                console.log(`[DIAGNOSTIC] User created in Auth. UID: ${tempUser.uid}, Email from Auth Object: ${tempUser.email}`);
                 
-                // Step 3: Update Auth profile
+                // Step 2: Update their Auth profile with display name
                 await updateProfile(tempUser, { displayName: displayName });
-                console.log("[DIAGNOSTIC] Auth profile updated.");
 
-                // Step 4: Create user document in Firestore
+                // Step 3: Create a corresponding user document in Firestore
                 const userDataForFirestore = {
                     uid: tempUser.uid,
                     displayName: displayName,
-                    email: tempUser.email, // Using the email from the auth object
+                    email: tempUser.email,
                     photoURL: null,
                     paymentInfo: { bank: '', username: '' }
                 };
                 await setDoc(doc(db, "users", tempUser.uid), userDataForFirestore);
-                console.log("[DIAGNOSTIC] User document created in Firestore with this data:", userDataForFirestore);
                 
-                // --- PRE-FAILURE DATA DUMP ---
-                // This is the most critical log. It shows us the exact values the rule will compare.
-                console.log("--- [CRITICAL] Data snapshot before the failing operation ---");
-                console.log(`[CRITICAL] Authenticated User UID: ${auth.currentUser.uid}`);
-                console.log(`[CRITICAL] Invitation's stored email: '${invitationData.invitedEmail}'`);
-                console.log(`[CRITICAL] User document's stored email: '${userDataForFirestore.email}'`);
-                console.log(`[CRITICAL] Is comparison successful? --> ${invitationData.invitedEmail === userDataForFirestore.email}`);
-                console.log("----------------------------------------------------------");
-
-                // Step 5: Accept pending invitations (This is the step that fails)
-                console.log("[DIAGNOSTIC] Attempting to accept pending invitations...");
-                await acceptPendingInvitations(tempUser);
-                console.log("[DIAGNOSTIC] Invitations accepted successfully.");
-
-                // Step 6: Send verification email and sign out
-                console.log("[DIAGNOSTIC] Sending verification email and signing out.");
+                // Step 4: Send verification email and sign the user out until they verify
                 await sendEmailVerification(tempUser);
                 await signOut(auth);
                 
-                showAuthMessage("Success! A verification email has been sent. You will be added to the trip the next time a member views it.");
-                console.log("--- Registration Process Finished Successfully ---");
-
+                showAuthMessage("Success! A verification email has been sent. Please verify your email then log in.");
+                
             } catch (error) {
-                // The error will be caught here. The logs above will give us the reason.
-                console.error("--- REGISTRATION FAILED ---");
-                console.error("The error occurred at the last logged step. See details below.");
-                console.error("Raw Error Object:", error);
-                console.error("Error Code:", error.code);
-                console.error("Error Message:", error.message);
-                console.error("--- END OF ERROR REPORT ---");
+                console.error("Registration failed:", error);
 
+                // Clean up the created user in Auth if Firestore creation fails or another error occurs
                 if (tempUser) {
                     await deleteUser(tempUser).catch(delErr => {
                         console.error("Critical: Failed to delete temporary user after registration failure.", delErr);
                     });
                 }
                 
-                if (error.message === "INVITE_REQUIRED") {
-                    showAuthMessage("Registration failed. You must be invited by an existing user to create an account.");
-                } else if (error.code === 'auth/email-already-in-use') {
+                if (error.code === 'auth/email-already-in-use') {
                     showAuthMessage("This email is already registered. Please log in instead.");
                 } else {
-                    showMessage("An error occurred during registration. Please check the console for details.");
+                    showMessage("An error occurred during registration. Please try again.");
                 }
             }
         };
-
 
         const handleAddExpense = async () => {
             if (!currentTrip) return;
@@ -1927,7 +1403,6 @@
                 const category = document.getElementById('expense-category').value;
                 const paidBy = document.getElementById('expense-paid-by').value;
                 let finalBaseSplits = {};
-                let finalPendingSplits = {};
                 let exchangeRate = 1;
                 if (originalCurrency !== baseCurrency) {
                     const rateData = await getExchangeRate(originalCurrency, baseCurrency);
@@ -1935,20 +1410,16 @@
                 }
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
                 if (isItemizedMode) {
-                    const { memberShares, pendingShares } = calculateItemizedShares();
+                    // --- SIMPLIFIED --- `calculateItemizedShares` now only returns memberShares
+                    const { memberShares } = calculateItemizedShares();
                     finalBaseSplits = memberShares;
-                    finalPendingSplits = pendingShares;
                 } else {
                     expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
                         const group = cb.closest('.split-input-group');
-                        const status = group.dataset.status;
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                         const baseShare = parseFloat((share * exchangeRate).toFixed(2));
-                        if (status === 'active') {
-                            finalBaseSplits[group.dataset.uid] = baseShare;
-                        } else if (status === 'pending') {
-                            finalPendingSplits[group.dataset.email] = baseShare;
-                        }
+                        // --- SIMPLIFIED --- Only active members with UIDs exist now.
+                        finalBaseSplits[group.dataset.uid] = baseShare;
                     });
                 }
                 const totalBaseAmount = originalAmount * exchangeRate;
@@ -1958,9 +1429,9 @@
                     splitBetween: finalBaseSplits,
                     isDeleted: false
                 };
-                if (Object.keys(finalPendingSplits).length > 0) {
-                    newExpense.pendingShares = finalPendingSplits;
-                }
+                
+                // --- SIMPLIFIED --- No more `pendingShares` to add.
+                
                 const batch = writeBatch(db);
                 const newExpenseRef = doc(collection(db, 'trips', currentTrip.id, 'expenses'));
                 batch.set(newExpenseRef, newExpense);
@@ -2019,9 +1490,6 @@
             }
         };
 
-
-
-
         const handleRecordPayment = async (fromUid, toUid, amount) => {
             if (!currentTrip) return showMessage("Error: No active trip selected.");
             const newPayment = { from: fromUid, to: toUid, amount: amount, paidAt: Timestamp.now(), isDeleted: false };
@@ -2034,9 +1502,6 @@
                 showMessage("Failed to record payment.");
             }
         };
-
-
-
 
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
         loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
@@ -2074,16 +1539,10 @@
             }
         });
 
-
-
-
         actionSheetEmailBtn.addEventListener('click', () => {
             closeModal(actionSheetModal);
             showMessage("Email function coming soon!", false);
         });
-
-
-
 
         supremoToggleActionSheet.addEventListener('change', async (e) => {
             isTripSupremoEnabled = e.target.checked;
@@ -2093,9 +1552,6 @@
             }
             if (currentTrip) renderTripItems();
         });
-
-
-
 
         profileArea.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
@@ -2128,18 +1584,12 @@
             }
         });
 
-
-
-
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('profile-dropdown');
             if (dropdown && !e.target.closest('#profile-area')) {
                  dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             }
         });
-
-
-
 
         tripItemsList.addEventListener('click', (e) => {
             const editExpenseBtn = e.target.closest('.edit-expense-btn');
@@ -2161,18 +1611,12 @@
             }
         });
 
-
-
-
         settlementList.addEventListener('click', (e) => {
             const recordBtn = e.target.closest('.record-payment-btn');
             if (recordBtn) {
                 handleRecordPayment(recordBtn.dataset.fromUid, recordBtn.dataset.toUid, parseFloat(recordBtn.dataset.amount));
             }
         });
-
-
-
 
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -2195,9 +1639,6 @@
             }
         });
 
-
-
-
         editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newDescription = editExpenseDescriptionInput.value;
@@ -2215,9 +1656,6 @@
             }
         });
 
-
-
-
         confirmDeleteExpenseBtn.addEventListener('click', async () => {
             if (!expenseToDelete || !currentTrip) return;
             try {
@@ -2234,9 +1672,6 @@
                 closeModal(deleteExpenseModal);
             }
         });
-
-
-
 
         confirmDeletePaymentBtn.addEventListener('click', async () => {
             if (paymentToDeleteId === null || !currentTrip) return;
@@ -2279,9 +1714,6 @@
             }
             return transactions;
         }
-
-
-
 
         async function calculateAndShowSettlement() {
             const transactions = calculateSettlement();
@@ -2328,9 +1760,6 @@
             openModal(settleUpModal);
         }
 
-
-
-
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
@@ -2369,18 +1798,12 @@
             };
         }
 
-
-
-
         function getUserLocation() {
             navigator.geolocation.getCurrentPosition(
                 (position) => { userLocation = { lat: position.coords.latitude, lon: position.coords.longitude }; },
                 () => { console.warn("Could not get user location."); userLocation = null; }
             );
         }
-
-
-
 
         async function openCameraView() {
             openModal(aiScanModal);
@@ -2396,17 +1819,11 @@
             }
         }
 
-
-
-
         function closeCameraView() {
             if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
             videoElement.srcObject = null;
             closeModal(aiScanModal);
         }
-
-
-
 
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analysing Scene...";
@@ -2486,9 +1903,6 @@
             }
         }
 
-
-
-
         async function handleAiCapture() {
             try {
                 const context = canvasElement.getContext('2d');
@@ -2505,9 +1919,6 @@
                  loadingOverlay.classList.add('hidden-view');
             }
         }
-
-
-
 
         async function handleReceiptFileUpload(event) {
             const file = event.target.files[0];
@@ -2563,9 +1974,6 @@
         
         const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000);
 
-
-
-
         fabToggle.addEventListener('click', () => { fabContainer.classList.toggle('open'); });
         fabManualAdd.addEventListener('click', () => {
             fabContainer.classList.remove('open');
@@ -2588,9 +1996,6 @@
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
-
-
-
         toggleSplitModeBtn.addEventListener('click', () => {
             const isItemMode = !itemizedSplitSection.classList.contains('hidden');
             if (isItemMode) {
@@ -2606,9 +2011,6 @@
             }
         });
 
-
-
-
         function renderItemizationUI(itemizationData) {
             itemizedListDiv.innerHTML = '';
             itemizationData.lineItems.forEach((item, index) => {
@@ -2616,20 +2018,14 @@
                 itemEl.className = 'item-row bg-white rounded-md p-2 flex flex-col';
                 itemEl.dataset.index = index;
                 const detailsHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-gray-800">${item.description}</p><p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p></div>`;
+                // --- SIMPLIFIED --- Only renders active members.
                 const memberAvatarsHTML = currentTrip.members.map(member => {
-                    let avatarContainer = '';
-                    if (member.status === 'active') {
-                        const profile = userProfilesCache.get(member.uid);
-                        if (!profile) return '';
-                        let avatar;
-                         if (profile.photoURL) avatar = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar">`;
-                         else avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">${profile.displayName.charAt(0).toUpperCase()}</div>`;
-                        avatarContainer = `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
-                    } else if (member.status === 'pending') {
-                        const avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">?</div>`;
-                        avatarContainer = `<div data-email="${member.email}" title="${member.email}">${avatar}</div>`;
-                    }
-                    return avatarContainer;
+                    const profile = userProfilesCache.get(member.uid);
+                    if (!profile) return '';
+                    let avatar = profile.photoURL 
+                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar">`
+                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
                 }).join('');
                 itemEl.innerHTML = `${detailsHTML}<div class="w-full flex space-x-1 mt-2">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(itemEl);
@@ -2638,13 +2034,14 @@
         }
         
         itemizedListDiv.addEventListener('click', (e) => {
-            const avatarContainer = e.target.closest('[data-uid], [data-email]');
+            // --- SIMPLIFIED --- Removed `data-email` logic.
+            const avatarContainer = e.target.closest('[data-uid]');
             if (!avatarContainer) return;
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
             if (!avatar) return;
             const row = avatar.closest('.item-row, #remainder-row');
             if (row && row.id === 'remainder-row') {
-                const identifier = avatarContainer.dataset.uid || avatarContainer.dataset.email;
+                const identifier = avatarContainer.dataset.uid;
                 if (remainderAssignments.has(identifier)) remainderAssignments.delete(identifier);
                 else remainderAssignments.add(identifier);
             }
@@ -2652,11 +2049,11 @@
             updateItemizationSummary();
         });
         
+        // --- SIMPLIFIED --- This function no longer deals with `pendingShares`.
         function calculateItemizedShares() {
             const memberShares = {};
             currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
-            const pendingShares = {};
-            currentTrip.members.filter(m => m.status === 'pending').forEach(m => pendingShares[m.email] = 0);
+            
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
                 const itemPriceInBase = item.price * currentItemization.exchangeRate;
@@ -2664,11 +2061,9 @@
                 if (assignedAvatars.length > 0) {
                     const sharePerPerson = itemPriceInBase / assignedAvatars.length;
                     assignedAvatars.forEach(avatarWrapper => {
-                        const container = avatarWrapper.closest('[data-uid], [data-email]');
+                        const container = avatarWrapper.closest('[data-uid]');
                         const uid = container.dataset.uid;
-                        const email = container.dataset.email;
                         if (uid) memberShares[uid] += sharePerPerson;
-                        else if (email) pendingShares[email] = (pendingShares[email] || 0) + sharePerPerson;
                     });
                 }
             });
@@ -2678,14 +2073,13 @@
                 const sharePerPerson = remainderInBase / remainderAssignments.size;
                 remainderAssignments.forEach(id => {
                     if (userProfilesCache.has(id)) memberShares[id] += sharePerPerson;
-                    else pendingShares[id] = (pendingShares[id] || 0) + sharePerPerson;
                 });
             }
             const finalMemberShares = {};
-            for (const uid in memberShares) if (memberShares[uid] > 0.001) finalMemberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
-            const finalPendingShares = {};
-            for (const email in pendingShares) if (pendingShares[email] > 0.001) finalPendingShares[email] = parseFloat(pendingShares[email].toFixed(2));
-            return { memberShares: finalMemberShares, pendingShares: finalPendingShares };
+            for (const uid in memberShares) {
+                if (memberShares[uid] > 0.001) finalMemberShares[uid] = parseFloat(memberShares[uid].toFixed(2));
+            }
+            return { memberShares: finalMemberShares };
         }
         
         function updateItemizationSummary() {
@@ -2701,30 +2095,20 @@
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
                 remainderEl.dataset.remainderAmount = totalRemainderToAllocate.toFixed(2);
+                // --- SIMPLIFIED --- Only renders active members.
                 const memberAvatarsHTML = currentTrip.members.map(member => {
-                    let identifier, title, avatar, container;
-                    if (member.status === 'active') {
-                        const profile = userProfilesCache.get(member.uid);
-                        if (!profile) return '';
-                        identifier = member.uid;
-                        title = profile.displayName;
-                        const isAssigned = remainderAssignments.has(identifier) ? 'assigned' : '';
-                        if (profile.photoURL) avatar = `<img src="${profile.photoURL}" alt="${title}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`;
-                        else avatar = `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${title.charAt(0).toUpperCase()}</div>`;
-                        container = `<div data-uid="${identifier}" title="${title}">${avatar}</div>`;
-                    } else { // Pending
-                        identifier = member.email;
-                        title = member.email;
-                        const isAssigned = remainderAssignments.has(identifier) ? 'assigned' : '';
-                        avatar = `<div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">?</div>`;
-                        container = `<div data-email="${identifier}" title="${title}">${avatar}</div>`;
-                    }
-                    return container;
+                    const profile = userProfilesCache.get(member.uid);
+                    if (!profile) return '';
+                    const isAssigned = remainderAssignments.has(member.uid) ? 'assigned' : '';
+                    const avatar = profile.photoURL 
+                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover cursor-pointer item-assignment-avatar ${isAssigned}">`
+                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold cursor-pointer item-assignment-avatar ${isAssigned}">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                    return `<div data-uid="${member.uid}" title="${profile.displayName}">${avatar}</div>`;
                 }).join('');
                 remainderEl.innerHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-green-800">Allocate Remainder (Tip, Tax, etc.)</p><p class="text-sm font-bold text-green-700">${totalRemainderToAllocate.toFixed(2)} ${currentItemization.currency}</p></div><p class="text-xs text-green-600 mb-2">Select who should split this amount:</p><div class="w-full flex space-x-1 mt-1">${memberAvatarsHTML}</div>`;
                 itemizedListDiv.appendChild(remainderEl);
             }
-            const { memberShares, pendingShares } = calculateItemizedShares();
+            const { memberShares } = calculateItemizedShares();
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalAssignedInBase = 0;
@@ -2735,13 +2119,6 @@
                     const shareInOriginal = memberShares[uid] / currentItemization.exchangeRate;
                     summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal.toFixed(2)} ${originalCurrency}</span></div>`;
                     totalAssignedInBase += memberShares[uid];
-                }
-            }
-            for (const email in pendingShares) {
-                if (pendingShares[email] > 0) {
-                    const shareInOriginal = pendingShares[email] / currentItemization.exchangeRate;
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-500"><span class="italic truncate">${email}</span><span class="font-medium italic">${shareInOriginal.toFixed(2)} ${originalCurrency}</span></div>`;
-                    totalAssignedInBase += pendingShares[email];
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
@@ -2762,9 +2139,6 @@
             itemizedSummaryDiv.appendChild(validationEl);
         }
 
-
-
-
         function updateSplitInputCurrency() {
             const selectedCurrency = expenseCurrencySelect.value;
             const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
@@ -2772,9 +2146,6 @@
                 span.textContent = symbol;
             });
         }
-
-
-
 
         function populateExpenseModal() {
             if (!currentTrip) return;
@@ -2794,36 +2165,27 @@
             }
             expenseCurrencySelect.value = currentTrip.baseCurrency;
             expensePaidBySelect.innerHTML = '';
+            // --- SIMPLIFIED --- Only active members are added.
             currentTrip.members.forEach(member => {
-                if (member.status === 'active') {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (profile) {
-                        const option = document.createElement('option');
-                        option.value = member.uid;
-                        option.textContent = profile.displayName;
-                        expensePaidBySelect.appendChild(option);
-                    }
+                const profile = userProfilesCache.get(member.uid);
+                if (profile) {
+                    const option = document.createElement('option');
+                    option.value = member.uid;
+                    option.textContent = profile.displayName;
+                    expensePaidBySelect.appendChild(option);
                 }
             });
             expensePaidBySelect.value = auth.currentUser.uid;
             expenseSplitBetweenDiv.innerHTML = '';
+            // --- SIMPLIFIED --- Only active members are added to split list.
             currentTrip.members.forEach(member => {
                 const group = document.createElement('div');
                 group.className = 'split-input-group flex items-center justify-between p-2 bg-white rounded-md';
-                if (member.status === 'active') {
-                    const profile = userProfilesCache.get(member.uid);
-                    if (profile) {
-                        const memberId = `split-member-${member.uid}`;
-                        group.dataset.uid = member.uid;
-                        group.dataset.status = 'active';
-                        group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm truncate">${profile.displayName}</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
-                        expenseSplitBetweenDiv.appendChild(group);
-                    }
-                } else if (member.status === 'pending') {
-                    const memberId = `split-member-${member.email.replace(/[^a-zA-Z0-9]/g, "")}`;
-                    group.dataset.email = member.email;
-                    group.dataset.status = 'pending';
-                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm text-gray-500 italic truncate">${member.email} (Pending)</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
+                const profile = userProfilesCache.get(member.uid);
+                if (profile) {
+                    const memberId = `split-member-${member.uid}`;
+                    group.dataset.uid = member.uid;
+                    group.innerHTML = `<label for="${memberId}" class="flex items-center cursor-pointer flex-grow min-w-0"><input type="checkbox" id="${memberId}" checked class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3 flex-shrink-0"><span class="text-sm truncate">${profile.displayName}</span></label><div class="relative flex-shrink-0"><span class="currency-symbol absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm"></span><input type="number" step="0.01" class="w-24 pl-7 pr-2 py-1 border border-gray-300 rounded-md text-right" placeholder="0.00"></div>`;
                     expenseSplitBetweenDiv.appendChild(group);
                 }
             });
@@ -2831,18 +2193,12 @@
             addSplitInputListeners();
         }
 
-
-
-
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-
-
-
 
         function autoDistributeAmount() {
             const totalAmount = parseFloat(expenseAmountInput.value) || 0;
@@ -2864,9 +2220,6 @@
             validateSplitTotal();
         }
 
-
-
-
         function addSplitInputListeners() {
             expenseSplitBetweenDiv.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', () => {
@@ -2880,9 +2233,6 @@
                 autoDistributeAmount();
             });
         }
-
-
-
 
         function validateSplitTotal() {
             const totalAmount = parseFloat(expenseAmountInput.value) || 0;
@@ -2922,15 +2272,9 @@
             }
         }
 
-
-
-
         function simpleMarkdownToHtml(md) {
             return md.replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>').replace(/<\/ul>\n<ul>/gim, '').replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
         }
-
-
-
 
         function generateTripCsv() {
             const headers = ["Date", "Description", "Category", "Amount", "Currency", "Paid By", "Split Between", "Is Deleted"];
@@ -2949,9 +2293,6 @@
             });
             return [headers.join(','), ...rows].join('\n');
         }
-
-
-
 
         async function handleGenerateAiReport() {
             const reportType = document.getElementById('ai-report-type').value;
@@ -2977,9 +2318,6 @@
             let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripData, null, 2)}\n\n...`; // Abridged
             // ... (rest of the function is unchanged and correct)
         }
-
-
-
 
         aiReportForm.addEventListener('submit', (e) => { e.preventDefault(); handleGenerateAiReport(); });
         copyAiReportBtn.addEventListener('click', () => { navigator.clipboard.writeText(lastAiReportMarkdown).then(() => showMessage("Report copied to clipboard!", false), () => showMessage("Failed to copy report.")); });
