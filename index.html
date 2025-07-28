@@ -750,29 +750,34 @@
 
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
-            trip.members.forEach(member => {
-                if (member.status === 'active') { // Only active members are calculated
-                    balances.set(member.uid, 0);
-                }
-            });
+            // Since all members are now active, we can simplify this
+            trip.memberUids.forEach(uid => balances.set(uid, 0));
+            
             const activeExpenses = allExpenses.filter(e => !e.isDeleted);
             activeExpenses.forEach(expense => {
                 const paidBy = expense.paidBy;
                 const splitBetween = expense.splitBetween;
                 // Credit the payer
-                balances.set(paidBy, (balances.get(paidBy) || 0) + Math.round(expense.amountDetails.baseAmount * 100));
+                if(balances.has(paidBy)) {
+                    balances.set(paidBy, balances.get(paidBy) + Math.round(expense.amountDetails.baseAmount * 100));
+                }
                 // Debit the sharers
                 for (const memberId in splitBetween) {
                     const share = splitBetween[memberId];
                     if(balances.has(memberId)) { // Ensure member is still active in the trip
-                        balances.set(memberId, (balances.get(memberId) || 0) - Math.round(share * 100));
+                        balances.set(memberId, balances.get(memberId) - Math.round(share * 100));
                     }
                 }
             });
+
             const activePayments = (trip.settledPayments || []).filter(p => !p.isDeleted);
             activePayments.forEach(payment => {
-                balances.set(payment.from, (balances.get(payment.from) || 0) + Math.round(payment.amount * 100));
-                balances.set(payment.to, (balances.get(payment.to) || 0) - Math.round(payment.amount * 100));
+                if(balances.has(payment.from)) {
+                    balances.set(payment.from, balances.get(payment.from) + Math.round(payment.amount * 100));
+                }
+                if(balances.has(payment.to)) {
+                    balances.set(payment.to, balances.get(payment.to) - Math.round(payment.amount * 100));
+                }
             });
             return balances;
         }
@@ -832,12 +837,9 @@
             }
         }
 
-        // --- SIMPLIFIED --- This function is no longer needed and can be removed.
-        // async function processAcceptedInvitations(tripId) { ... }
-
         async function selectTrip(trip) {
             if (singleTripUnsubscribe) singleTripUnsubscribe();
-            // --- SIMPLIFIED --- Call to processAcceptedInvitations removed.
+            
             const tripRef = doc(db, 'trips', trip.id);
             singleTripUnsubscribe = onSnapshot(tripRef, async (doc) => {
                 if (doc.exists()) {
@@ -849,7 +851,7 @@
                     } else {
                         supremoMenuContainer.classList.add('hidden');
                     }
-                    await renderTripMembers(currentTrip.members);
+                    await renderTripMembers(currentTrip.members); // `members` is still useful for rendering
                     if(allTripExpenses.length > 0 || currentTrip.settledPayments?.length > 0) {
                          renderTripItems();
                     }
@@ -874,7 +876,7 @@
         });
 
         async function fetchUserProfiles(uids) {
-            const profilesToFetch = uids.filter(uid => !userProfilesCache.has(uid));
+            const profilesToFetch = uids.filter(uid => uid && !userProfilesCache.has(uid));
             if (profilesToFetch.length > 0) {
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("uid", "in", profilesToFetch));
@@ -885,7 +887,7 @@
             }
             const profiles = {};
             uids.forEach(uid => {
-                profiles[uid] = userProfilesCache.get(uid);
+                if(uid) profiles[uid] = userProfilesCache.get(uid);
             });
             return profiles;
         }
@@ -1002,6 +1004,9 @@
                 listenForTrips(user.uid);
                 showView('dashboard-view');
             } else {
+                if (user && !user.emailVerified) {
+                     showAuthMessage("Your email is not verified. Please check your inbox for the verification link.");
+                }
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 if (expensesUnsubscribe) expensesUnsubscribe();
                 if (singleTripUnsubscribe) singleTripUnsubscribe();
@@ -1013,7 +1018,9 @@
 
         function listenForTrips(userId) {
             const tripsRef = collection(db, 'trips');
+            // *** FIX: Query the simple 'memberUids' array ***
             const q = query(tripsRef, where("memberUids", "array-contains", userId));
+            
             tripsUnsubscribe = onSnapshot(q, async (snapshot) => {
                 let trips = [];
                 snapshot.forEach((doc) => {
@@ -1022,8 +1029,8 @@
                 if (!showArchivedTrips) {
                     trips = trips.filter(trip => !trip.isArchived);
                 }
-                // --- SIMPLIFIED --- No longer needs to check for pending users, only active.
-                const allMemberUids = [...new Set(trips.flatMap(trip => (trip.members || []).map(m => m.uid)))];
+                // Fetch profiles for all members across all trips
+                const allMemberUids = [...new Set(trips.flatMap(trip => trip.memberUids || []))];
                 if (allMemberUids.length > 0) await fetchUserProfiles(allMemberUids);
                 await renderTrips(trips);
             }, (error) => {
@@ -1050,15 +1057,17 @@
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
-                // --- SIMPLIFIED --- Logic no longer needs to handle pending members.
-                const memberAvatars = (trip.members || []).slice(0, 4).map(member => {
-                    const profile = userProfilesCache.get(member.uid);
+                
+                // *** SIMPLIFIED: Use the clean 'memberUids' array to get profiles ***
+                const memberAvatars = (trip.memberUids || []).slice(0, 4).map(uid => {
+                    const profile = userProfilesCache.get(uid);
                     if (profile && profile.photoURL) {
                         return `<img src="${profile.photoURL}" class="inline-block h-8 w-8 rounded-full object-cover ring-2 ring-white">`;
                     }
                     const initial = profile ? (profile.displayName || '?').charAt(0).toUpperCase() : '?';
                     return `<div class="inline-block h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold ring-2 ring-white">${initial}</div>`;
                 }).join('');
+
                 tripElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="flex-1 min-w-0">
@@ -1070,7 +1079,7 @@
                             ${unarchiveButton || archivedBadge}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
-                                ${trip.members && trip.members.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.members.length - 4}</div>` : ''}
+                                ${trip.memberUids && trip.memberUids.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.memberUids.length - 4}</div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1105,22 +1114,21 @@
 
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
+            // *** SIMPLIFIED: No need to check for status, all members are active users ***
             for (const member of members) {
                 const memberEl = document.createElement('div');
                 memberEl.className = 'flex flex-col items-center text-center';
-                let avatarHTML = '';
-                let nameHTML = '';
-                // --- SIMPLIFIED --- Removed the `else if (member.status === 'pending')` block.
-                // All members are now assumed to be active with a UID.
                 const profile = userProfilesCache.get(member.uid);
                 if (!profile) continue; // Skip if profile not loaded yet
+
+                let avatarHTML = '';
                 if (profile.photoURL) {
                     avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
                 } else {
                     const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
                     avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
                 }
-                nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
+                const nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
                 
                 memberEl.innerHTML = avatarHTML + nameHTML;
                 tripMembersList.appendChild(memberEl);
@@ -1188,7 +1196,7 @@
                 : `<div class="text-right"><span class="font-bold text-lg">${ad.baseAmount.toFixed(2)} ${ad.baseCurrency}</span><p class="text-xs text-gray-500">${ad.originalAmount.toFixed(2)} ${ad.originalCurrency} at ${ad.exchangeRate.toFixed(4)}</p></div>`;
             const formattedDate = expense.occurredAt.toDate().toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
-            // --- SIMPLIFIED --- Removed `pendingSplitLines`. Only active members are shown.
+            // *** SIMPLIFIED: No more 'pendingSplitLines', only active members ***
             const activeSplitLines = Object.keys(expense.splitBetween).map(uid => {
                 const memberProfile = userProfilesCache.get(uid);
                 const memberName = memberProfile ? memberProfile.displayName : 'A User';
@@ -1257,10 +1265,14 @@
             const tripName = document.getElementById('trip-name').value;
             const baseCurrency = document.getElementById('base-currency').value;
             try {
+                // *** SIMPLIFIED: Create the new structure from the start ***
                 const newTrip = {
-                    name: tripName, baseCurrency: baseCurrency, ownerId: user.uid, createdAt: serverTimestamp(),
-                    members: [{ uid: user.uid, status: 'active' }], // creator is the first active member
-                    memberUids: [user.uid],
+                    name: tripName,
+                    baseCurrency: baseCurrency,
+                    ownerId: user.uid,
+                    createdAt: serverTimestamp(),
+                    members: [{ uid: user.uid, status: 'active' }], // Keep for easy rendering
+                    memberUids: [user.uid], // The important field for queries
                     isSettled: false,
                     isArchived: false,
                     settledPayments: []
@@ -1272,14 +1284,20 @@
             } catch (error) { showMessage(error.message); }
         };
 
-        // --- SIMPLIFIED --- This function now adds an existing user, or fails if they don't exist.
+        // *** SIMPLIFIED: Add existing users directly, no pending state ***
         const handleInviteMember = async () => {
             const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToAdd || !currentTrip) return;
 
             submitInviteBtn.disabled = true;
             try {
-                // Check if user is already in the trip by email
+                // Check if user is already in the trip by UID
+                if (currentTrip.memberUids.includes(auth.currentUser.uid)) {
+                     const existingProfile = userProfilesCache.get(auth.currentUser.uid);
+                     if(existingProfile && existingProfile.email === emailToAdd) {
+                        throw new Error("You can't add yourself to the trip.");
+                     }
+                }
                 const existingProfiles = await fetchUserProfiles(currentTrip.memberUids);
                 const isAlreadyMember = Object.values(existingProfiles).some(p => p && p.email === emailToAdd);
                 if (isAlreadyMember) {
@@ -1330,10 +1348,7 @@
             }
         };
 
-        // --- SIMPLIFIED --- This function is no longer needed as invitations are gone.
-        // async function acceptPendingInvitations(newUser) { ... }
-        
-        // --- SIMPLIFIED --- Standard Firebase registration. No more invitation checks.
+        // *** SIMPLIFIED: Standard Firebase registration. No more invitation logic. ***
         const handleRegister = async () => {
             hideAuthMessage();
             const displayName = document.getElementById('register-name').value;
@@ -1371,12 +1386,9 @@
                 
             } catch (error) {
                 console.error("Registration failed:", error);
-
-                // Clean up the created user in Auth if Firestore creation fails or another error occurs
-                if (tempUser) {
-                    await deleteUser(tempUser).catch(delErr => {
-                        console.error("Critical: Failed to delete temporary user after registration failure.", delErr);
-                    });
+                
+                if (tempUser) { // Clean up failed registration
+                    await deleteUser(tempUser).catch(delErr => console.error("Critical: Failed to delete temporary user.", delErr));
                 }
                 
                 if (error.code === 'auth/email-already-in-use') {
@@ -1410,7 +1422,6 @@
                 }
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
                 if (isItemizedMode) {
-                    // --- SIMPLIFIED --- `calculateItemizedShares` now only returns memberShares
                     const { memberShares } = calculateItemizedShares();
                     finalBaseSplits = memberShares;
                 } else {
@@ -1418,19 +1429,18 @@
                         const group = cb.closest('.split-input-group');
                         const share = parseFloat(group.querySelector('input[type="number"]').value) || 0;
                         const baseShare = parseFloat((share * exchangeRate).toFixed(2));
-                        // --- SIMPLIFIED --- Only active members with UIDs exist now.
                         finalBaseSplits[group.dataset.uid] = baseShare;
                     });
                 }
                 const totalBaseAmount = originalAmount * exchangeRate;
+                
+                // *** SIMPLIFIED: No more 'pendingShares' to add. ***
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
                     amountDetails: { originalAmount, originalCurrency, baseAmount: totalBaseAmount, baseCurrency, exchangeRate },
                     splitBetween: finalBaseSplits,
                     isDeleted: false
                 };
-                
-                // --- SIMPLIFIED --- No more `pendingShares` to add.
                 
                 const batch = writeBatch(db);
                 const newExpenseRef = doc(collection(db, 'trips', currentTrip.id, 'expenses'));
@@ -1763,7 +1773,7 @@
         async function initializeVisualisation() {
             visualisationCurrency.textContent = `All amounts in: ${currentTrip.baseCurrency}`;
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
-            const allMemberIds = [...new Set(currentTrip.members.filter(m => m.status === 'active').map(m => m.uid))];
+            const allMemberIds = currentTrip.memberUids;
             const profiles = await fetchUserProfiles(allMemberIds);
             const currencySymbol = currencySymbols[currentTrip.baseCurrency] || currentTrip.baseCurrency;
             const creditors = [];
@@ -2018,7 +2028,6 @@
                 itemEl.className = 'item-row bg-white rounded-md p-2 flex flex-col';
                 itemEl.dataset.index = index;
                 const detailsHTML = `<div class="w-full flex justify-between items-center"><p class="font-medium text-gray-800">${item.description}</p><p class="text-sm text-gray-500">${item.price.toFixed(2)} ${itemizationData.currency}</p></div>`;
-                // --- SIMPLIFIED --- Only renders active members.
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) return '';
@@ -2034,7 +2043,6 @@
         }
         
         itemizedListDiv.addEventListener('click', (e) => {
-            // --- SIMPLIFIED --- Removed `data-email` logic.
             const avatarContainer = e.target.closest('[data-uid]');
             if (!avatarContainer) return;
             const avatar = avatarContainer.querySelector('.item-assignment-avatar');
@@ -2049,10 +2057,9 @@
             updateItemizationSummary();
         });
         
-        // --- SIMPLIFIED --- This function no longer deals with `pendingShares`.
         function calculateItemizedShares() {
             const memberShares = {};
-            currentTrip.members.filter(m => m.status === 'active').forEach(m => memberShares[m.uid] = 0);
+            currentTrip.memberUids.forEach(uid => memberShares[uid] = 0);
             
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
@@ -2061,8 +2068,7 @@
                 if (assignedAvatars.length > 0) {
                     const sharePerPerson = itemPriceInBase / assignedAvatars.length;
                     assignedAvatars.forEach(avatarWrapper => {
-                        const container = avatarWrapper.closest('[data-uid]');
-                        const uid = container.dataset.uid;
+                        const uid = avatarWrapper.closest('[data-uid]').dataset.uid;
                         if (uid) memberShares[uid] += sharePerPerson;
                     });
                 }
@@ -2071,8 +2077,8 @@
             if (remainderRow && remainderAssignments.size > 0) {
                 const remainderInBase = parseFloat(remainderRow.dataset.remainderAmount) * currentItemization.exchangeRate;
                 const sharePerPerson = remainderInBase / remainderAssignments.size;
-                remainderAssignments.forEach(id => {
-                    if (userProfilesCache.has(id)) memberShares[id] += sharePerPerson;
+                remainderAssignments.forEach(uid => {
+                    if (memberShares.hasOwnProperty(uid)) memberShares[uid] += sharePerPerson;
                 });
             }
             const finalMemberShares = {};
@@ -2095,7 +2101,6 @@
                 remainderEl.id = 'remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
                 remainderEl.dataset.remainderAmount = totalRemainderToAllocate.toFixed(2);
-                // --- SIMPLIFIED --- Only renders active members.
                 const memberAvatarsHTML = currentTrip.members.map(member => {
                     const profile = userProfilesCache.get(member.uid);
                     if (!profile) return '';
@@ -2165,7 +2170,7 @@
             }
             expenseCurrencySelect.value = currentTrip.baseCurrency;
             expensePaidBySelect.innerHTML = '';
-            // --- SIMPLIFIED --- Only active members are added.
+            // *** SIMPLIFIED: Iterate over members, all are active ***
             currentTrip.members.forEach(member => {
                 const profile = userProfilesCache.get(member.uid);
                 if (profile) {
@@ -2177,7 +2182,6 @@
             });
             expensePaidBySelect.value = auth.currentUser.uid;
             expenseSplitBetweenDiv.innerHTML = '';
-            // --- SIMPLIFIED --- Only active members are added to split list.
             currentTrip.members.forEach(member => {
                 const group = document.createElement('div');
                 group.className = 'split-input-group flex items-center justify-between p-2 bg-white rounded-md';
@@ -2294,7 +2298,8 @@
             return [headers.join(','), ...rows].join('\n');
         }
 
-        async function handleGenerateAiReport() {
+        async function handleGenerateAiReport(e) {
+            e.preventDefault();
             const reportType = document.getElementById('ai-report-type').value;
             if (reportType === 'spreadsheet_data') {
                 const csvData = generateTripCsv();
@@ -2308,18 +2313,62 @@
             const customQuestion = document.getElementById('ai-report-question').value.trim();
             closeModal(aiReportModal);
             loadingOverlay.classList.remove('hidden-view');
-            const tripData = {
+            
+            const tripDataForAI = {
                 name: currentTrip.name,
                 baseCurrency: currentTrip.baseCurrency,
-                members: currentTrip.members.filter(m => m.status === 'active').map(m => userProfilesCache.get(m.uid)?.displayName || 'Unknown User'),
-                expenses: allTripExpenses.filter(e => !e.isDeleted).map(e => ({ description: e.description, category: e.category, amount: e.amountDetails.baseAmount, paidBy: userProfilesCache.get(e.paidBy)?.displayName || 'Unknown', date: e.occurredAt.toDate().toISOString().split('T')[0] })),
+                members: currentTrip.memberUids.map(uid => userProfilesCache.get(uid)?.displayName || 'Unknown User'),
+                expenses: allTripExpenses
+                    .filter(exp => !exp.isDeleted)
+                    .map(exp => ({
+                        description: exp.description,
+                        category: exp.category,
+                        amount: exp.amountDetails.baseAmount,
+                        paidBy: userProfilesCache.get(exp.paidBy)?.displayName || 'Unknown',
+                        date: exp.occurredAt.toDate().toISOString().split('T')[0]
+                    })),
             };
-            const systemPrompt = `You are "Splitify AI," a friendly and insightful travel analyst...`; // Abridged for brevity
-            let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripData, null, 2)}\n\n...`; // Abridged
-            // ... (rest of the function is unchanged and correct)
+
+            let userPrompt = `Here is the trip data for your analysis:\n${JSON.stringify(tripDataForAI, null, 2)}\n\n`;
+            
+            switch (reportType) {
+                case 'spending_analysis':
+                    userPrompt += "Please provide a concise but insightful spending analysis for this trip. Focus on total spending, spending per person, top categories, and any interesting outliers. Present it in markdown format.";
+                    break;
+                case 'fun_awards':
+                    userPrompt += "Based on the trip data, create a list of fun, lighthearted 'awards' for the trip members (e.g., 'The High Roller' for most spent, 'The Social Butterfly' for being in the most group expenses). Be creative and friendly. Present it in markdown format.";
+                    break;
+                case 'custom_question':
+                    userPrompt += `Now, please answer this specific question based on the data: "${customQuestion}"`;
+                    break;
+            }
+
+            const payload = { prompt: userPrompt }; // Assuming system prompt is handled in cloud function
+
+            try {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Cloud Function Error: ${response.status}. ${errorText}`);
+                }
+                const result = await response.json();
+                const markdownContent = result.candidates[0].content.parts[0].text;
+                lastAiReportMarkdown = markdownContent;
+                aiReportContent.innerHTML = simpleMarkdownToHtml(markdownContent);
+                openModal(aiReportDisplayModal);
+            } catch (error) {
+                console.error("Error generating AI report:", error);
+                showMessage(error.message);
+            } finally {
+                loadingOverlay.classList.add('hidden-view');
+            }
         }
 
-        aiReportForm.addEventListener('submit', (e) => { e.preventDefault(); handleGenerateAiReport(); });
+        aiReportForm.addEventListener('submit', handleGenerateAiReport);
         copyAiReportBtn.addEventListener('click', () => { navigator.clipboard.writeText(lastAiReportMarkdown).then(() => showMessage("Report copied to clipboard!", false), () => showMessage("Failed to copy report.")); });
         loginTabBtn.addEventListener('click', () => {
             loginForm.classList.remove('hidden');
