@@ -573,7 +573,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.1 (Integer Currency Fixes)
+              Version 9.0.2 (Integer Math Finalized)
             </p>
         </footer>
     </div>
@@ -1407,19 +1407,43 @@
                 const originalAmountInCents = Math.round(originalAmountFloat * 100);
 
                 const isItemizedMode = currentItemization && !itemizedSplitSection.classList.contains('hidden');
+                
+                // --- FIX STARTS HERE: Corrected logic for handling expense splits --- //
                 if (isItemizedMode) {
-                    const { memberSharesInCents } = calculateItemizedShares(); 
+                    // This itemized logic is more robust because it returns final integer shares.
+                    const { memberSharesInCents } = calculateItemizedShares();
                     finalBaseSplitsInCents = memberSharesInCents;
                 } else {
-                    expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked').forEach(cb => {
-                        const group = cb.closest('.split-input-group');
-                        const shareFloat = parseFloat(group.querySelector('input[type="number"]').value) || 0;
-                        // For equal split, we use the user's (potentially edited) value
-                        const shareInCents = Math.round(shareFloat * 100);
-                        const baseShareInCents = Math.round(shareInCents * exchangeRate);
-                        finalBaseSplitsInCents[group.dataset.uid] = baseShareInCents;
-                    });
+                    // THIS IS THE CORRECTED LOGIC FOR EQUAL SPLITS
+                    const checkedSharers = Array.from(expenseSplitBetweenDiv.querySelectorAll('.split-input-group input[type="checkbox"]:checked'));
+                    const sharerUids = checkedSharers.map(cb => cb.closest('.split-input-group').dataset.uid);
+
+                    if (sharerUids.length > 0) {
+                        const numSharers = sharerUids.length;
+                        const baseShareCents = Math.floor(totalBaseAmountInCents / numSharers);
+                        let remainderCents = totalBaseAmountInCents % numSharers;
+
+                        // Shuffle to distribute the remainder randomly, preventing the same person from always paying the extra cent.
+                        shuffleArray(sharerUids);
+
+                        sharerUids.forEach(uid => {
+                            let shareForThisUser = baseShareCents;
+                            if (remainderCents > 0) {
+                                shareForThisUser++;
+                                remainderCents--;
+                            }
+                            finalBaseSplitsInCents[uid] = shareForThisUser;
+                        });
+
+                        // Final check: Ensure the sum of parts exactly equals the total, correcting any final micro-discrepancies.
+                        const sumOfSplits = Object.values(finalBaseSplitsInCents).reduce((a, b) => a + b, 0);
+                        const diff = totalBaseAmountInCents - sumOfSplits;
+                        if (diff !== 0 && sharerUids.length > 0) {
+                            finalBaseSplitsInCents[sharerUids[0]] += diff;
+                        }
+                    }
                 }
+                // --- FIX ENDS HERE --- //
                 
                 const newExpense = {
                     description, occurredAt, category: category || null, createdAt: serverTimestamp(), paidBy,
@@ -1721,8 +1745,11 @@
                 }
                 debtor.amountInCents -= amountToSettleInCents;
                 creditor.amountInCents -= amountToSettleInCents;
-                if (debtor.amountInCents < 1) debtors.shift();
-                if (creditor.amountInCents < 1) creditors.shift();
+                
+                // --- FIX STARTS HERE: More robust check for integers --- //
+                if (debtor.amountInCents <= 0) debtors.shift();
+                if (creditor.amountInCents <= 0) creditors.shift();
+                // --- FIX ENDS HERE --- //
             }
             return transactions;
         }
@@ -2286,25 +2313,33 @@
             });
         }
         
+        // --- FIX STARTS HERE: Hardened validation function using integer math --- //
         function validateSplitTotal() {
             const totalAmountFloat = parseFloat(expenseAmountInput.value) || 0;
-            let splitSum = 0;
+            const totalCents = Math.round(totalAmountFloat * 100);
+
+            let splitSumCents = 0;
             expenseSplitBetweenDiv.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
                 const group = cb.closest('.split-input-group');
-                splitSum += parseFloat(group.querySelector('input[type="number"]').value) || 0;
+                const splitAmountFloat = parseFloat(group.querySelector('input[type="number"]').value) || 0;
+                splitSumCents += Math.round(splitAmountFloat * 100);
             });
-            const difference = totalAmountFloat - splitSum;
+            
+            const differenceCents = totalCents - splitSumCents;
 
-            if (Math.abs(difference) < 0.015) {
+            if (differenceCents === 0) { // Must be an exact match
                 splitTotalValidation.textContent = 'Total matches!';
                 splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                splitTotalValidation.textContent = `Remaining: ${difference.toFixed(2)}`;
+                // Display the difference in float format for user-friendliness
+                const differenceFloat = (differenceCents / 100).toFixed(2);
+                splitTotalValidation.textContent = `Remaining: ${differenceFloat}`;
                 splitTotalValidation.className = 'text-xs text-right mt-1 min-h-[1rem] text-red-600';
                 submitExpenseBtn.disabled = true;
             }
         }
+        // --- FIX ENDS HERE --- //
         
         async function handleCurrencyChange() {
             const selectedCurrency = expenseCurrencySelect.value;
