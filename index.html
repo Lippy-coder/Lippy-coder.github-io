@@ -195,7 +195,49 @@
         <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto"><h3 class="text-2xl font-bold mb-6">Add an Expense</h3><form id="add-expense-form"><div class="mb-4"><label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><div class="flex items-center"><input type="text" id="expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Dinner, Museum tickets"><span id="ai-reasoning-tooltip" class="hidden"></span></div></div><div class="grid grid-cols-2 gap-4 mb-2"><div><label for="expense-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label><input type="number" id="expense-amount" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div><div><label for="expense-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label><select id="expense-currency" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div></div><div id="fx-conversion-display" class="h-6 mb-4 text-sm text-indigo-600 flex items-center"></div><div class="mb-4"><label for="expense-occurred-at" class="block text-sm font-medium text-gray-700 mb-1">Date & Time of Expense</label><input type="datetime-local" id="expense-occurred-at" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label><div class="flex items-center space-x-2"><select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">-- Select a Category --</option><option value="Food & Drink">Food & Drink</option><option value="Transport">Transport</option><option value="Accommodation">Accommodation</option><option value="Activities">Activities</option><option value="Shopping">Shopping</option><option value="Other">Other</option></select></div><div id="ai-category-spinner" class="mt-2 h-6 flex items-center hidden"></div></div><div class="mb-4"><label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label><select id="expense-paid-by" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div><div id="split-mode-toggle-container" class="my-4 hidden"><button type="button" id="toggle-split-mode-btn" class="w-full text-center bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-200">Switch to Split by Item</button></div><div id="itemized-split-section" class="hidden"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Assign Items to Members</label></div><div id="itemized-list" class="space-y-3 p-3 border rounded-md bg-gray-50 max-h-48 overflow-y-auto"></div><div id="itemized-summary" class="mt-2 text-sm"></div></div><div id="equal-split-section" class="mb-6"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Split Between</label><div class="space-x-4"><button type="button" id="deselect-all-btn" class="text-sm text-red-600 hover:underline font-semibold">Deselect All</button></div></div><div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50"></div><div id="split-total-validation" class="text-xs text-right mt-1 min-h-[1rem]"></div></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-add-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center w-36 h-10"><span class="btn-text">Add Expense</span><div class="spinner hidden"></div></button></div></form></div></div>
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3><form id="edit-profile-form"><div class="mb-4"><label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label><select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">None</option><option value="Monzo">Monzo</option><option value="Revolut">Revolut</option></select></div><div class="mb-6"><label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label><input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith"><p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button></div></form></div></div>
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3><form id="edit-expense-form"><input type="hidden" id="edit-expense-id"><div class="mb-4"><label for="edit-expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="edit-expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save</button></div></form></div></div>
-        <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Add a Friend to the Trip</h3><form id="invite-member-form"><div class="mb-4"><label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Friend's Email Address</label><input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com"><p class="text-xs text-gray-500 mt-1">They must have a Splitify account to be added.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button></div></form></div></div>
+        
+        <!-- NEW/MODIFIED: Invite Member Modal -->
+        <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
+                <h3 class="text-2xl font-bold mb-6">Add a Friend to the Trip</h3>
+                
+                <!-- NEW: Smart Companion Search Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">From Past Trips</h4>
+                    <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Search past companions...">
+                    <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md">
+                        <!-- Companion list will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <div class="relative py-4">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex justify-center">
+                    <span class="bg-white px-2 text-sm text-gray-500">OR</span>
+                  </div>
+                </div>
+
+                <!-- Existing Email Invite Form -->
+                <form id="invite-member-form">
+                    <div class="mb-4">
+                        <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Invite by Email</label>
+                        <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
+                        <p class="text-xs text-gray-500 mt-1">They must have a Splitify account to be added.</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button>
+                    </div>
+                </form>
+
+                <div class="mt-6 flex justify-end">
+                     <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <!-- END NEW/MODIFIED -->
+
         <div id="archive-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-2">Archive Trip</h3><p class="text-gray-600 mb-6">Are you sure you want to archive "<span id="archive-trip-name" class="font-semibold"></span>"? This will hide the trip from your dashboard, but all data will be saved.</p><div class="flex justify-end space-x-4"><button type="button" id="cancel-archive-trip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="button" id="confirm-archive-trip-btn" class="bg-orange-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-700">Archive Trip</button></div></div></div>
         <div id="delete-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-2">Delete Expense</h3><p class="text-gray-600 mb-6">Are you sure you want to delete this expense? It will be removed from calculations but remain visible in the list.</p><div class="flex justify-end space-x-4"><button type="button" id="cancel-delete-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="button" id="confirm-delete-expense-btn" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700">Delete Expense</button></div></div></div>
         <div id="delete-payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-2">Delete Payment</h3><p class="text-gray-600 mb-6">Are you sure you want to delete this payment record? It will be removed from calculations but remain visible in the list.</p><div class="flex justify-end space-x-4"><button type="button" id="cancel-delete-payment-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="button" id="confirm-delete-payment-btn" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700">Delete Payment</button></div></div></div>
@@ -953,17 +995,40 @@
             } catch (error) { showMessage(error.message); }
         };
 
-        const handleInviteMember = async () => {
-            const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
-            if (!emailToAdd || !currentTrip) return;
+        // NEW/MODIFIED: Phase 0 - Reusable core function to add a user
+        async function addUserToCurrentTrip(uidToAdd) {
+            if (!currentTrip || !uidToAdd) return;
 
-            submitInviteBtn.disabled = true;
+            // Prevent adding a user who is already a member
+            if (currentTrip.memberUids.includes(uidToAdd)) {
+                showMessage("This user is already a member of the trip.");
+                return;
+            }
+            
             try {
-                const existingProfiles = await fetchUserProfiles(currentTrip.memberUids);
-                const isAlreadyMember = Object.values(existingProfiles).some(p => p && p.email === emailToAdd);
-                if (isAlreadyMember) {
-                    throw new Error("This user is already a member of the trip.");
-                }
+                const tripRef = doc(db, "trips", currentTrip.id);
+                await updateDoc(tripRef, {
+                    members: arrayUnion({ uid: uidToAdd, status: 'active' }),
+                    memberUids: arrayUnion(uidToAdd)
+                });
+                // Fetch new user's profile to show a personalized message
+                await fetchUserProfiles([uidToAdd]);
+                const newUserProfile = userProfilesCache.get(uidToAdd);
+                showMessage(`${newUserProfile.displayName || 'Friend'} was added to the trip!`, false);
+                closeModal(inviteMemberModal); // Close modal on success
+            } catch (error) {
+                console.error("Error adding member:", error);
+                showMessage(error.message);
+            }
+        }
+
+        // NEW/MODIFIED: Phase 0 - Original email form now uses the new core function
+        const handleInviteMemberByEmail = async () => {
+            const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
+            if (!emailToAdd) return;
+            submitInviteBtn.disabled = true;
+
+            try {
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToAdd));
                 const querySnapshot = await getDocs(q);
@@ -971,23 +1036,85 @@
                     throw new Error("User not found. Please ask them to register first before adding them to a trip.");
                 } else {
                     const userToAdd = querySnapshot.docs[0].data();
-                    const tripRef = doc(db, "trips", currentTrip.id);
-                    await updateDoc(tripRef, {
-                        members: arrayUnion({ uid: userToAdd.uid, status: 'active' }),
-                        memberUids: arrayUnion(userToAdd.uid)
-                    });
-                    showMessage(`${userToAdd.displayName} was added to the trip!`, false);
+                    await addUserToCurrentTrip(userToAdd.uid); // Use the refactored function
+                    inviteMemberForm.reset();
                 }
-                inviteMemberForm.reset();
-                closeModal(inviteMemberModal);
             } catch (error) {
-                console.error("Error adding member:", error);
+                console.error("Error adding member by email:", error);
                 showMessage(error.message);
             } finally {
                 submitInviteBtn.disabled = false;
             }
         };
 
+        // NEW/MODIFIED: Phase 1 - Function to populate the companion list
+        async function populateCompanionList() {
+            const container = document.getElementById('companion-list-container');
+            container.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">Loading past companions...</p>';
+            
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // 1. Get all trips the user is in
+            const tripsRef = collection(db, 'trips');
+            const q = query(tripsRef, where("memberUids", "array-contains", user.uid));
+            const snapshot = await getDocs(q);
+
+            // 2. Compile a unique list of all companion UIDs
+            let allCompanionUids = [];
+            snapshot.forEach(doc => {
+                allCompanionUids.push(...doc.data().memberUids);
+            });
+            const uniqueUids = [...new Set(allCompanionUids)];
+            
+            // 3. Filter out self and existing members of the current trip
+            const companionUidsToDisplay = uniqueUids.filter(uid => 
+                uid !== user.uid && !currentTrip.memberUids.includes(uid)
+            );
+
+            if (companionUidsToDisplay.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">No past companions to show.</p>';
+                return;
+            }
+
+            // 4. Fetch profiles and render the list
+            await fetchUserProfiles(companionUidsToDisplay);
+            container.innerHTML = ''; // Clear loading message
+            
+            companionUidsToDisplay.forEach(uid => {
+                const profile = userProfilesCache.get(uid);
+                if (profile) {
+                    const companionEl = document.createElement('div');
+                    companionEl.className = 'flex items-center justify-between p-2 rounded-md hover:bg-gray-100 companion-item';
+                    companionEl.dataset.name = profile.displayName.toLowerCase(); // For searching
+
+                    const avatarHTML = profile.photoURL 
+                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover">`
+                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                    
+                    companionEl.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            ${avatarHTML}
+                            <span class="text-sm font-medium text-gray-800">${profile.displayName}</span>
+                        </div>
+                        <button data-uid="${uid}" class="add-companion-btn bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-green-200">Add</button>
+                    `;
+                    container.appendChild(companionEl);
+                }
+            });
+
+            // 5. Add event listeners to the new "Add" buttons
+            container.querySelectorAll('.add-companion-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const uidToAdd = e.target.dataset.uid;
+                    button.textContent = 'Adding...';
+                    button.disabled = true;
+                    await addUserToCurrentTrip(uidToAdd);
+                });
+            });
+        }
+        
         const handleAddExpense = async () => {
             if (!currentTrip) return;
             const submitBtnText = submitExpenseBtn.querySelector('.btn-text');
@@ -1140,7 +1267,7 @@
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
-        inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMember(); });
+        inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMemberByEmail(); }); // MODIFIED
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
@@ -2113,7 +2240,28 @@
         cancelAiReportBtn.addEventListener('click', () => closeModal(aiReportModal));
         closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
         closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
-        inviteMemberBtn.addEventListener('click', () => openModal(inviteMemberModal));
+        
+        // NEW/MODIFIED: Phase 1 - Add event listener for the companion search and modal opening
+        inviteMemberBtn.addEventListener('click', () => {
+            openModal(inviteMemberModal);
+            populateCompanionList(); // Populate the list every time the modal is opened
+        });
+
+        const companionSearchInput = document.getElementById('companion-search');
+        companionSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const companions = document.querySelectorAll('#companion-list-container .companion-item');
+            companions.forEach(item => {
+                const name = item.dataset.name;
+                if (name.includes(searchTerm)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        });
+
+
         settleUpBtn.addEventListener('click', calculateAndShowSettlement);
         visualiseSettlementBtn.addEventListener('click', async () => { await initializeVisualisation(); openModal(settlementVisualisationModal); });
         aiReportBtn.addEventListener('click', () => openModal(aiReportModal));
