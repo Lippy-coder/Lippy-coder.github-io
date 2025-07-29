@@ -50,6 +50,7 @@
         .info-icon { cursor: help; position: relative; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px; width: 16px; height: 16px; border-radius: 50%; background-color: #e0e7ff; color: #4338ca; font-size: 10px; font-weight: bold; }
         .info-icon .tooltip-text { visibility: hidden; width: 220px; background-color: #374151; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; }
         .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .companion-item.selected { background-color: #e0e7ff; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -196,43 +197,55 @@
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3><form id="edit-profile-form"><div class="mb-4"><label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label><select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">None</option><option value="Monzo">Monzo</option><option value="Revolut">Revolut</option></select></div><div class="mb-6"><label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label><input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith"><p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button></div></form></div></div>
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3><form id="edit-expense-form"><input type="hidden" id="edit-expense-id"><div class="mb-4"><label for="edit-expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="edit-expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save</button></div></form></div></div>
         
-        <!-- NEW/MODIFIED: Invite Member Modal -->
+        <!-- NEW/MODIFIED: Invite Member Modal with Multi-Select and Frequency Sort -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
-            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
-                <h3 class="text-2xl font-bold mb-6">Add a Friend to the Trip</h3>
-                
-                <!-- NEW: Smart Companion Search Section -->
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-3">From Past Trips</h4>
-                    <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Search past companions...">
-                    <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md">
-                        <!-- Companion list will be dynamically inserted here -->
-                    </div>
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md flex flex-col max-h-[90vh]">
+                <!-- Header -->
+                <div class="p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 relative">
+                    <h3 class="text-2xl font-bold text-center">Add Friends to Trip</h3>
+                    <button id="close-invite-modal-x-btn" type="button" class="absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
                 </div>
 
-                <div class="relative py-4">
-                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div class="relative flex justify-center">
-                    <span class="bg-white px-2 text-sm text-gray-500">OR</span>
-                  </div>
+                <!-- Scrollable Body -->
+                <div class="p-4 sm:p-6 flex-grow overflow-y-auto">
+                    <!-- Smart Companion Search Section -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">From Past Trips</h4>
+                        <p class="text-sm text-gray-500 mb-3">Sorted by friends you travel with most often. Select multiple friends to add them all at once.</p>
+                        <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Search past companions...">
+                        <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md">
+                            <!-- Companion list will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="relative py-4">
+                      <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div class="relative flex justify-center">
+                        <span class="bg-white px-2 text-sm text-gray-500">OR</span>
+                      </div>
+                    </div>
+
+                    <!-- Email Invite Form -->
+                    <form id="invite-member-form">
+                        <div>
+                            <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Invite by Email</label>
+                            <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
+                            <p class="text-xs text-gray-500 mt-1">They must have a Splitify account to be added.</p>
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- Existing Email Invite Form -->
-                <form id="invite-member-form">
-                    <div class="mb-4">
-                        <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Invite by Email</label>
-                        <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
-                        <p class="text-xs text-gray-500 mt-1">They must have a Splitify account to be added.</p>
-                    </div>
-                    <div class="flex justify-end">
-                        <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button>
-                    </div>
-                </form>
-
-                <div class="mt-6 flex justify-end">
+                <!-- Footer -->
+                <div class="p-4 sm:p-6 border-t border-gray-200 flex justify-between items-center flex-shrink-0 bg-gray-50 rounded-b-xl">
                      <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                     <button type="button" id="add-selected-companions-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:bg-gray-400" disabled>Add Selected Friends (0)</button>
                 </div>
             </div>
         </div>
@@ -254,7 +267,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.6 (Live Remainder UX Finalized)
+              Version 9.0.7 (Multi-add UX)
             </p>
         </footer>
     </div>
@@ -304,6 +317,8 @@
         let currentItemization = null;
         let remainderAssignments = new Set();
         let lastAiReportMarkdown = '';
+        // NEW/MODIFIED: State variable for multi-select
+        let selectedCompanions = new Set();
 
         const allViews = document.querySelectorAll('.view');
         const allModals = document.querySelectorAll('.modal-overlay');
@@ -423,6 +438,8 @@
         const copyAiReportBtn = document.getElementById('copy-ai-report-btn');
         const aiReportTypeSelect = document.getElementById('ai-report-type');
         const customQuestionArea = document.getElementById('custom-question-area');
+        const closeInviteModalXBtn = document.getElementById('close-invite-modal-x-btn');
+        const addSelectedCompanionsBtn = document.getElementById('add-selected-companions-btn');
         
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
@@ -995,14 +1012,13 @@
             } catch (error) { showMessage(error.message); }
         };
 
-        // NEW/MODIFIED: Phase 0 - Reusable core function to add a user
+        // NEW/MODIFIED: Core function to add a single user (used by email form)
         async function addUserToCurrentTrip(uidToAdd) {
             if (!currentTrip || !uidToAdd) return;
 
-            // Prevent adding a user who is already a member
             if (currentTrip.memberUids.includes(uidToAdd)) {
                 showMessage("This user is already a member of the trip.");
-                return;
+                return false;
             }
             
             try {
@@ -1011,18 +1027,42 @@
                     members: arrayUnion({ uid: uidToAdd, status: 'active' }),
                     memberUids: arrayUnion(uidToAdd)
                 });
-                // Fetch new user's profile to show a personalized message
                 await fetchUserProfiles([uidToAdd]);
                 const newUserProfile = userProfilesCache.get(uidToAdd);
-                showMessage(`${newUserProfile.displayName || 'Friend'} was added to the trip!`, false);
-                closeModal(inviteMemberModal); // Close modal on success
+                showMessage(`${newUserProfile.displayName || 'Friend'} was added!`, false);
+                return true;
             } catch (error) {
                 console.error("Error adding member:", error);
                 showMessage(error.message);
+                return false;
             }
         }
 
-        // NEW/MODIFIED: Phase 0 - Original email form now uses the new core function
+        // NEW/MODIFIED: Core function to add MULTIPLE users (used by companion list)
+        async function addMultipleUsersToCurrentTrip(uidsToAdd) {
+            if (!currentTrip || uidsToAdd.length === 0) return;
+            
+            const batch = writeBatch(db);
+            const tripRef = doc(db, "trips", currentTrip.id);
+            const newMembers = uidsToAdd.map(uid => ({ uid, status: 'active' }));
+
+            // Firestore's arrayUnion can take multiple arguments
+            batch.update(tripRef, {
+                members: arrayUnion(...newMembers),
+                memberUids: arrayUnion(...uidsToAdd)
+            });
+
+            try {
+                await batch.commit();
+                showMessage(`${uidsToAdd.length} friends added to the trip!`, false);
+                closeModal(inviteMemberModal);
+            } catch (error) {
+                console.error("Error adding multiple members:", error);
+                showMessage("An error occurred while adding friends.");
+            }
+        }
+
+        // NEW/MODIFIED: Email form handler now uses the single-add function
         const handleInviteMemberByEmail = async () => {
             const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToAdd) return;
@@ -1032,22 +1072,25 @@
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToAdd));
                 const querySnapshot = await getDocs(q);
+
                 if (querySnapshot.empty) {
-                    throw new Error("User not found. Please ask them to register first before adding them to a trip.");
+                    throw new Error("User not found. Please ask them to register first.");
                 } else {
                     const userToAdd = querySnapshot.docs[0].data();
-                    await addUserToCurrentTrip(userToAdd.uid); // Use the refactored function
-                    inviteMemberForm.reset();
+                    const success = await addUserToCurrentTrip(userToAdd.uid);
+                    if (success) {
+                       inviteMemberForm.reset();
+                       closeModal(inviteMemberModal);
+                    }
                 }
             } catch (error) {
-                console.error("Error adding member by email:", error);
                 showMessage(error.message);
             } finally {
                 submitInviteBtn.disabled = false;
             }
         };
 
-        // NEW/MODIFIED: Phase 1 - Function to populate the companion list
+        // NEW/MODIFIED: Function to populate and sort the companion list
         async function populateCompanionList() {
             const container = document.getElementById('companion-list-container');
             container.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">Loading past companions...</p>';
@@ -1055,64 +1098,95 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            // 1. Get all trips the user is in
             const tripsRef = collection(db, 'trips');
             const q = query(tripsRef, where("memberUids", "array-contains", user.uid));
             const snapshot = await getDocs(q);
 
-            // 2. Compile a unique list of all companion UIDs
-            let allCompanionUids = [];
+            const frequencyMap = new Map();
             snapshot.forEach(doc => {
-                allCompanionUids.push(...doc.data().memberUids);
+                doc.data().memberUids.forEach(uid => {
+                    if (uid !== user.uid) { // Don't count self
+                        frequencyMap.set(uid, (frequencyMap.get(uid) || 0) + 1);
+                    }
+                });
             });
-            const uniqueUids = [...new Set(allCompanionUids)];
-            
-            // 3. Filter out self and existing members of the current trip
-            const companionUidsToDisplay = uniqueUids.filter(uid => 
-                uid !== user.uid && !currentTrip.memberUids.includes(uid)
+
+            const sortedCompanions = [...frequencyMap.entries()]
+                .sort((a, b) => b[1] - a[1]) // Sort by count descending
+                .map(entry => entry[0]); // Get just the UIDs
+
+            const companionUidsToDisplay = sortedCompanions.filter(uid => 
+                !currentTrip.memberUids.includes(uid)
             );
 
             if (companionUidsToDisplay.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">No past companions to show.</p>';
+                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-2">No past companions to add.</p>';
                 return;
             }
 
-            // 4. Fetch profiles and render the list
             await fetchUserProfiles(companionUidsToDisplay);
-            container.innerHTML = ''; // Clear loading message
+            container.innerHTML = '';
             
             companionUidsToDisplay.forEach(uid => {
                 const profile = userProfilesCache.get(uid);
                 if (profile) {
                     const companionEl = document.createElement('div');
-                    companionEl.className = 'flex items-center justify-between p-2 rounded-md hover:bg-gray-100 companion-item';
-                    companionEl.dataset.name = profile.displayName.toLowerCase(); // For searching
+                    companionEl.className = 'companion-item flex items-center justify-between p-2 rounded-md hover:bg-gray-100 cursor-pointer';
+                    companionEl.dataset.uid = uid;
+                    companionEl.dataset.name = profile.displayName.toLowerCase();
 
                     const avatarHTML = profile.photoURL 
-                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover">`
-                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">${profile.displayName.charAt(0).toUpperCase()}</div>`;
+                        ? `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-8 h-8 rounded-full object-cover pointer-events-none">`
+                        : `<div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold pointer-events-none">${profile.displayName.charAt(0).toUpperCase()}</div>`;
                     
                     companionEl.innerHTML = `
-                        <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-3 pointer-events-none">
                             ${avatarHTML}
                             <span class="text-sm font-medium text-gray-800">${profile.displayName}</span>
                         </div>
-                        <button data-uid="${uid}" class="add-companion-btn bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-green-200">Add</button>
+                        <button class="add-companion-toggle-btn h-8 w-8 rounded-full flex items-center justify-center text-green-600 bg-green-100 hover:bg-green-200">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+                        </button>
                     `;
                     container.appendChild(companionEl);
                 }
             });
 
-            // 5. Add event listeners to the new "Add" buttons
-            container.querySelectorAll('.add-companion-btn').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const uidToAdd = e.target.dataset.uid;
-                    button.textContent = 'Adding...';
-                    button.disabled = true;
-                    await addUserToCurrentTrip(uidToAdd);
-                });
+            container.querySelectorAll('.companion-item').forEach(item => {
+                item.addEventListener('click', () => toggleCompanionSelection(item));
             });
+        }
+        
+        // NEW/MODIFIED: Helper functions for multi-select logic
+        function toggleCompanionSelection(itemElement) {
+            const uid = itemElement.dataset.uid;
+            const toggleButton = itemElement.querySelector('.add-companion-toggle-btn');
+            
+            if (selectedCompanions.has(uid)) {
+                selectedCompanions.delete(uid);
+                itemElement.classList.remove('selected');
+                toggleButton.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>`;
+                toggleButton.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                toggleButton.classList.add('bg-green-100', 'text-green-600', 'hover:bg-green-200');
+            } else {
+                selectedCompanions.add(uid);
+                itemElement.classList.add('selected');
+                toggleButton.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>`;
+                toggleButton.classList.remove('bg-green-100', 'text-green-600', 'hover:bg-green-200');
+                toggleButton.classList.add('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+            }
+            updateAddSelectedButton();
+        }
+
+        function updateAddSelectedButton() {
+            const count = selectedCompanions.size;
+            if (count > 0) {
+                addSelectedCompanionsBtn.disabled = false;
+                addSelectedCompanionsBtn.textContent = `Add Selected Friends (${count})`;
+            } else {
+                addSelectedCompanionsBtn.disabled = true;
+                addSelectedCompanionsBtn.textContent = 'Add Selected Friends (0)';
+            }
         }
         
         const handleAddExpense = async () => {
@@ -1267,7 +1341,7 @@
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
-        inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMemberByEmail(); }); // MODIFIED
+        inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMemberByEmail(); });
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
@@ -2231,6 +2305,7 @@
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
         cancelInviteBtn.addEventListener('click', () => closeModal(inviteMemberModal));
+        closeInviteModalXBtn.addEventListener('click', () => closeModal(inviteMemberModal));
         cancelArchiveTripBtn.addEventListener('click', () => closeModal(archiveTripModal));
         cancelDeleteExpenseBtn.addEventListener('click', () => closeModal(deleteExpenseModal));
         cancelDeletePaymentBtn.addEventListener('click', () => closeModal(deletePaymentModal));
@@ -2241,10 +2316,11 @@
         closeAiDisplayBtn.addEventListener('click', () => closeModal(aiReportDisplayModal));
         closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
         
-        // NEW/MODIFIED: Phase 1 - Add event listener for the companion search and modal opening
         inviteMemberBtn.addEventListener('click', () => {
+            selectedCompanions.clear(); // Clear selections from last time
+            updateAddSelectedButton(); // Reset the button state
             openModal(inviteMemberModal);
-            populateCompanionList(); // Populate the list every time the modal is opened
+            populateCompanionList();
         });
 
         const companionSearchInput = document.getElementById('companion-search');
@@ -2261,6 +2337,13 @@
             });
         });
 
+        // NEW/MODIFIED: Event listener for the main "Add Selected" button
+        addSelectedCompanionsBtn.addEventListener('click', async () => {
+            const uidsToAdd = Array.from(selectedCompanions);
+            if (uidsToAdd.length > 0) {
+                await addMultipleUsersToCurrentTrip(uidsToAdd);
+            }
+        });
 
         settleUpBtn.addEventListener('click', calculateAndShowSettlement);
         visualiseSettlementBtn.addEventListener('click', async () => { await initializeVisualisation(); openModal(settlementVisualisationModal); });
