@@ -35,6 +35,7 @@
         #fab-container.open #fab-manual-add { transform: translateY(-95px); opacity: 1; pointer-events: auto; }
         #fab-container.open #fab-camera-scan { transform: translate(-67px, -67px); opacity: 1; pointer-events: auto; }
         #fab-container.open #fab-gallery-upload { transform: translateX(-95px); opacity: 1; pointer-events: auto; }
+        #fab-container.open #fab-feedback { transform: translate(-95px, -95px); opacity: 1; pointer-events: auto; }
         .manual-payment-area { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out; }
         .manual-payment-area.open { max-height: 100px; margin-top: 0.75rem; }
         .dropdown-menu { transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; }
@@ -120,7 +121,16 @@
             <main>
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">My Trips</h2>
-                    <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
+                    <div class="flex items-center space-x-3">
+                        <!-- NEW: Ideas & Feedback Button -->
+                        <button id="open-feedback-hub-btn" class="bg-purple-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-purple-700 flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15v4a1 1 0 001 1h12a1 1 0 001-1v-4a1 1 0 00-.293-.707L16 11.586V8a6 6 0 00-6-6zM8 18a1 1 0 01-1-1v-1h6v1a1 1 0 01-1 1H8z" />
+                            </svg>
+                            <span>Ideas & Feedback</span>
+                        </button>
+                        <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
+                    </div>
                 </div>
                 <div id="trips-list" class="space-y-4">
                     <p id="no-trips-message" class="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm">You have no trips yet. Create one to get started!</p>
@@ -197,6 +207,24 @@
                     <div id="fab-icon-plus" class="transition-transform duration-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg></div>
                 </button>
             </div>
+        </div>
+
+        <!-- NEW: Feedback Hub View -->
+        <div id="feedback-hub-view" class="view hidden-view py-8">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <button id="back-to-dashboard-from-feedback-btn" class="text-blue-600 hover:underline mb-2">&larr; Back to Dashboard</button>
+                    <h1 class="text-3xl font-bold">Ideas & Feedback Hub</h1>
+                    <p class="text-gray-500 mt-1">Vote on ideas or submit your own. Help us build a better Splitify!</p>
+                </div>
+                <button id="submit-new-idea-btn" class="bg-green-500 text-white px-5 py-3 rounded-md font-semibold hover:bg-green-600">+ Submit an Idea</button>
+            </header>
+            <main>
+                <!-- Feedback items will be rendered here -->
+                <div id="feedback-list" class="space-y-4">
+                    <p class="text-center text-gray-500 py-10">Loading feedback...</p>
+                </div>
+            </main>
         </div>
 
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Create a New Trip</h3><form id="create-trip-form"><div class="mb-4"><label for="trip-name" class="block text-sm font-medium text-gray-700 mb-1">Trip Name</label><input type="text" id="trip-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Summer in Italy"></div><div class="mb-6"><label for="base-currency" class="block text-sm font-medium text-gray-700 mb-1">Base Currency</label><select id="base-currency" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="GBP">GBP (British Pound)</option><option value="USD">USD (US Dollar)</option><option value="EUR">EUR (Euro)</option><option value="JPY">JPY (Japanese Yen)</option><option value="CAD">CAD (Canadian Dollar)</option><option value="AUD">AUD (Australian Dollar)</option></select></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-create-trip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-create-trip-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Create</button></div></form></div></div>
@@ -278,6 +306,35 @@
                 <button type="button" id="cancel-scan-qr-btn" class="mt-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
             </div>
         </div>
+        
+        <!-- NEW: Submit Feedback Modal -->
+        <div id="submit-feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8">
+                <h3 class="text-2xl font-bold mb-6">Submit your Idea or Bug Report</h3>
+                <form id="submit-feedback-form">
+                    <div class="mb-4">
+                        <label for="feedback-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <input type="text" id="feedback-title" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Add trip budgets">
+                    </div>
+                    <div class="mb-4">
+                        <label for="feedback-type-submit" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                        <select id="feedback-type-submit" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+                            <option value="Suggestion">New Requirement / Suggestion</option>
+                            <option value="Bug">Bug Report</option>
+                            <option value="Comment">General Comment</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label for="feedback-description-submit" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="feedback-description-submit" rows="5" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Please describe your idea in detail. If it's a bug, what were you doing when it happened?"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancel-submit-feedback-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Submit Idea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view"><div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div><p id="loading-text" class="text-white mt-4">Analysing Scene...</p></div>
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50"><p id="message-text"></p></div>
@@ -294,7 +351,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // NEW: Import runTransaction and orderBy
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
@@ -327,6 +385,8 @@
         let tripsUnsubscribe = null;
         let singleTripUnsubscribe = null;
         let expensesUnsubscribe = null;
+        // NEW: Feedback Hub variable
+        let feedbackUnsubscribe = null;
         const userProfilesCache = new Map();
         let cameraStream = null;
         let userLocation = null;
@@ -345,6 +405,8 @@
         const authView = document.getElementById('auth-view');
         const dashboardView = document.getElementById('dashboard-view');
         const tripDetailView = document.getElementById('trip-detail-view');
+        // NEW: Feedback Hub element constants
+        const feedbackHubView = document.getElementById('feedback-hub-view');
         const authMessageArea = document.getElementById('auth-message-area');
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
@@ -469,9 +531,20 @@
         const scanQrVideo = document.getElementById('scan-qr-video-feed');
         const scanQrCanvas = document.getElementById('scan-qr-canvas-hidden');
         const cancelScanQrBtn = document.getElementById('cancel-scan-qr-btn');
+        // NEW: Feedback Hub element constants
+        const openFeedbackHubBtn = document.getElementById('open-feedback-hub-btn');
+        const backToDashboardFromFeedbackBtn = document.getElementById('back-to-dashboard-from-feedback-btn');
+        const feedbackList = document.getElementById('feedback-list');
+        const submitNewIdeaBtn = document.getElementById('submit-new-idea-btn');
+        const submitFeedbackModal = document.getElementById('submit-feedback-modal');
+        const submitFeedbackForm = document.getElementById('submit-feedback-form');
+        const cancelSubmitFeedbackBtn = document.getElementById('cancel-submit-feedback-btn');
         
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
+        
+        // --- ALL EXISTING FUNCTIONS (calculateAllBalances, getExchangeRate, etc.) ---
+        // --- The following is the complete set of functions, including new ones ---
         
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
@@ -847,7 +920,6 @@
             }
         });
 
-        // NEW/MODIFIED: This function now calculates and applies the "Golden Halo"
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
 
@@ -943,7 +1015,6 @@
                 if (item.type === 'expense') { renderExpenseItem(item.data); } 
                 else if (item.type === 'payment') { renderPaymentItem(item.data); }
             });
-            // Re-render members list here to ensure halo is updated after expense changes
             if(currentTrip) renderTripMembers(currentTrip.members);
         }
         
@@ -1467,19 +1538,180 @@
                 showMessage("Failed to record payment.");
             }
         };
+
+        // --- NEW: All functions for the Feedback Hub feature ---
+
+        function listenForFeedback() {
+            if (feedbackUnsubscribe) feedbackUnsubscribe(); // Prevent multiple listeners
+
+            const feedbackRef = collection(db, 'feedback');
+            const q = query(feedbackRef, orderBy('upvotes', 'desc'), orderBy('createdAt', 'desc'));
+
+            feedbackUnsubscribe = onSnapshot(q, (snapshot) => {
+                const allFeedback = [];
+                snapshot.forEach(doc => {
+                    allFeedback.push({ id: doc.id, ...doc.data() });
+                });
+                renderFeedbackList(allFeedback);
+            }, (error) => {
+                console.error("Error listening for feedback:", error);
+                feedbackList.innerHTML = '<p class="text-center text-red-500 py-10">Could not load feedback. Check console for index creation link.</p>';
+            });
+        }
+
+        function renderFeedbackList(items) {
+            feedbackList.innerHTML = ''; // Clear current list
+            if (items.length === 0) {
+                feedbackList.innerHTML = '<p class="text-center text-gray-500 py-10">No feedback yet. Be the first to submit an idea!</p>';
+                return;
+            }
+
+            const currentUser = auth.currentUser;
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4';
+
+                const hasVoted = currentUser && item.upvotedBy?.includes(currentUser.uid);
+                const voteButtonClass = hasVoted
+                    ? 'bg-indigo-600 text-white cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+                const voteButtonDisabled = hasVoted ? 'disabled' : '';
+
+                const statusColors = {
+                    'New': 'bg-blue-100 text-blue-800',
+                    'Planned': 'bg-yellow-100 text-yellow-800',
+                    'In-Progress': 'bg-purple-100 text-purple-800',
+                    'Completed': 'bg-green-100 text-green-800'
+                };
+                const statusBadge = `<span class="px-2 py-1 text-xs font-medium rounded-full ${statusColors[item.status] || 'bg-gray-100 text-gray-800'}">${item.status}</span>`;
+
+                card.innerHTML = `
+                    <div class="text-center flex-shrink-0">
+                        <button class="upvote-btn w-12 h-16 flex flex-col items-center justify-center rounded-md transition-colors ${voteButtonClass}" data-feedback-id="${item.id}" ${voteButtonDisabled}>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                            <span class="font-bold text-lg">${item.upvotes || 0}</span>
+                        </button>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center space-x-3 mb-1">
+                            ${statusBadge}
+                            <h3 class="text-lg font-bold text-gray-800">${item.title}</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${item.description}</p>
+                        <p class="text-xs text-gray-400">
+                            Submitted by ${item.userDisplayName || 'a user'} on ${item.createdAt?.toDate().toLocaleDateString() || 'a while ago'}
+                        </p>
+                    </div>
+                `;
+                feedbackList.appendChild(card);
+            });
+        }
+
+        async function handleUpvote(feedbackId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const feedbackRef = doc(db, "feedback", feedbackId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const feedbackDoc = await transaction.get(feedbackRef);
+                    if (!feedbackDoc.exists()) {
+                        throw "Document does not exist!";
+                    }
+
+                    const data = feedbackDoc.data();
+                    const upvotedBy = data.upvotedBy || [];
+
+                    if (upvotedBy.includes(user.uid)) {
+                        return;
+                    }
+
+                    const newUpvoteCount = (data.upvotes || 0) + 1;
+                    const newUpvotedBy = [...upvotedBy, user.uid];
+
+                    transaction.update(feedbackRef, {
+                        upvotes: newUpvoteCount,
+                        upvotedBy: newUpvotedBy
+                    });
+                });
+            } catch (error) {
+                console.error("Upvote transaction failed: ", error);
+                showMessage("Could not register your vote at this time.");
+            }
+        }
         
         createTripBtn.addEventListener('click', () => openModal(createTripModal));
-
         loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
-        loginBtn.addEventListener('click', (e) => { e.preventDefault(); handleLogin(); });
         registerForm.addEventListener('submit', (e) => { e.preventDefault(); handleRegister(); });
-        registerBtn.addEventListener('click', (e) => { e.preventDefault(); handleRegister(); });
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
-        submitCreateTripBtn.addEventListener('click', (e) => { e.preventDefault(); handleCreateTrip(); });
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
         inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMemberByEmail(); });
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
+        
+        // --- ALL EVENT LISTENERS ---
+
+        openFeedbackHubBtn.addEventListener('click', () => {
+            showView('feedback-hub-view');
+            listenForFeedback();
+        });
+
+        backToDashboardFromFeedbackBtn.addEventListener('click', () => {
+            if (feedbackUnsubscribe) {
+                feedbackUnsubscribe();
+                feedbackUnsubscribe = null;
+            }
+            showView('dashboard-view');
+        });
+
+        submitNewIdeaBtn.addEventListener('click', () => openModal(submitFeedbackModal));
+        cancelSubmitFeedbackBtn.addEventListener('click', () => closeModal(submitFeedbackModal));
+
+        feedbackList.addEventListener('click', (e) => {
+            const upvoteBtn = e.target.closest('.upvote-btn');
+            if (upvoteBtn && !upvoteBtn.disabled) {
+                const feedbackId = upvoteBtn.dataset.feedbackId;
+                handleUpvote(feedbackId);
+            }
+        });
+
+        submitFeedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage("You must be logged in to submit feedback.");
+                return;
+            }
+
+            const title = document.getElementById('feedback-title').value;
+            const type = document.getElementById('feedback-type-submit').value;
+            const description = document.getElementById('feedback-description-submit').value;
+
+            const newFeedback = {
+                title,
+                type,
+                description,
+                status: 'New',
+                createdAt: serverTimestamp(),
+                userId: user.uid,
+                userDisplayName: user.displayName,
+                upvotes: 1,
+                upvotedBy: [user.uid]
+            };
+
+            try {
+                await addDoc(collection(db, "feedback"), newFeedback);
+                submitFeedbackForm.reset();
+                closeModal(submitFeedbackModal);
+                showMessage("Your idea has been submitted. Thank you!", false);
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+                showMessage("Could not submit feedback.");
+            }
+        });
+
         actionSheetCancelBtn.addEventListener('click', () => closeModal(actionSheetModal));
         actionSheetModal.addEventListener('click', (e) => { if (e.target === actionSheetModal) closeModal(actionSheetModal); });
         actionSheetArchiveBtn.addEventListener('click', () => {
@@ -1970,7 +2202,6 @@
         }
         
         const debouncedCategorySuggestion = debounce(triggerAiCategorySuggestion, 1000);
-
         fabToggle.addEventListener('click', () => { fabContainer.classList.toggle('open'); });
         fabManualAdd.addEventListener('click', () => {
             fabContainer.classList.remove('open');
