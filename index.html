@@ -122,19 +122,27 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <div class="flex items-center space-x-3">
-                        <!-- CHANGE: Button sizes reduced -->
-                        <button id="create-trip-btn" title="New Trip" class="flex flex-col items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                            <svg viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                        <button id="create-trip-btn" title="New Trip" class="flex flex-col items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                            <svg viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
                                 <path d="M54 16H10c-2.2 0-4 1.8-4 4v8c2.2 0 4 1.8 4 4s-1.8 4-4 4v8c0 2.2 1.8 4 4 4h44c2.2 0 4-1.8 4-4V20c0-2.2-1.8-4-4-4z"></path>
                                 <text x="32" y="36" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="white">NEW</text>
                             </svg>
                             <span class="text-xs mt-1">New Trip</span>
                         </button>
-                        <button id="open-feedback-hub-btn" title="Ideas & Feedback" class="flex flex-col items-center justify-center w-16 h-16 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
-                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                        <button id="open-feedback-hub-btn" title="Ideas & Feedback" class="flex flex-col items-center justify-center w-14 h-14 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                              <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 01-2.53-.388A.75.75 0 008.25 20.25l.438-2.55a.75.75 0 00-.416-.833A9.76 9.76 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                            </svg>
                            <span class="text-xs mt-1">Feedback</span>
+                        </button>
+                        <button id="show-my-qr-code-icon-btn" title="Show My Join Code" class="flex flex-col items-center justify-center w-14 h-14 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                                <path d="M5 5h4v4H5z M15 5h4v4h-4z M5 15h4v4H5z"/>
+                                <path d="M11 5h2v2h-2z M5 11h2v2H5z M11 11h2v2h-2z M17 11h2v2h-2z M11 17h2v2h-2z"/>
+                                <path d="M15 15h4v4h-4z" fill="#4ade80"/>
+                                <path d="M16 16h2v2h-2z" fill="currentColor"/>
+                            </svg>
+                           <span class="text-xs mt-1">Join by QR</span>
                         </button>
                     </div>
                 </div>
@@ -530,6 +538,7 @@
         const myQrCodeCanvas = document.getElementById('my-qr-code-canvas');
         const myQrCodeProfile = document.getElementById('my-qr-code-profile');
         const closeMyQrCodeBtn = document.getElementById('close-my-qr-code-btn');
+        const showMyQrCodeIconBtn = document.getElementById('show-my-qr-code-icon-btn');
         const scanQrCodeBtn = document.getElementById('scan-qr-code-btn');
         const scanQrCodeModal = document.getElementById('scan-qr-code-modal');
         const scanQrVideo = document.getElementById('scan-qr-video-feed');
@@ -746,7 +755,6 @@
             profilePicBtn.type = 'button';
             profilePicBtn.className = 'profile-pic-wrapper block';
             let avatar;
-            // CHANGE: Increased main profile picture size
             if (user.photoURL) {
                 avatar = `<img src="${user.photoURL}" alt="Profile Picture" class="w-12 h-12 rounded-full object-cover">`;
             } else {
@@ -760,7 +768,6 @@
             dropdown.innerHTML = `
                 <a href="#" id="change-pic-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Picture</a>
                 <a href="#" id="edit-profile-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile & Payments</a>
-                <a href="#" id="show-my-qr-code-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Show My Join Code</a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <div class="px-4 py-2 space-y-2">
                     <label for="show-deleted-toggle" class="flex items-center justify-between cursor-pointer">
@@ -804,11 +811,6 @@
                 }
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(auth.currentUser.uid);
-            });
-            document.getElementById('show-my-qr-code-btn').addEventListener('click', (e) => {
-                e.preventDefault();
-                showMyJoinCode();
-                dropdown.classList.add('hidden', 'opacity-0', 'scale-95');
             });
         }
 
@@ -873,7 +875,6 @@
                 const settledBadge = isSettled && !isArchived ? `<span class="text-xs font-bold text-green-800 bg-green-200 px-2 py-1 rounded-full">SETTLED</span>` : '';
                 const archivedBadge = isArchived ? `<span class="text-xs font-bold text-gray-800 bg-gray-300 px-2 py-1 rounded-full">ARCHIVED</span>` : '';
                 const unarchiveButton = isArchived ? `<button data-trip-id="${trip.id}" class="unarchive-btn text-xs font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded-full hover:bg-blue-300">Unarchive</button>` : '';
-                // CHANGE: Reverted trip card avatar sizes
                 const memberAvatars = (trip.memberUids || []).slice(0, 4).map(uid => {
                     const profile = userProfilesCache.get(uid);
                     if (profile && profile.photoURL) {
@@ -2716,6 +2717,7 @@
         });
 
         closeMyQrCodeBtn.addEventListener('click', () => closeModal(showQrCodeModal));
+        showMyQrCodeIconBtn.addEventListener('click', showMyJoinCode);
         scanQrCodeBtn.addEventListener('click', startQrScanner);
         cancelScanQrBtn.addEventListener('click', stopQrScanner);
 
