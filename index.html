@@ -122,14 +122,20 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">My Trips</h2>
                     <div class="flex items-center space-x-3">
-                        <!-- NEW: Ideas & Feedback Button -->
-                        <button id="open-feedback-hub-btn" class="bg-purple-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-purple-700 flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15v4a1 1 0 001 1h12a1 1 0 001-1v-4a1 1 0 00-.293-.707L16 11.586V8a6 6 0 00-6-6zM8 18a1 1 0 01-1-1v-1h6v1a1 1 0 01-1 1H8z" />
+                        <!-- CHANGE: Implemented "Modern Stack" layout (Option 2) -->
+                        <button id="create-trip-btn" title="New Trip" class="flex flex-col items-center justify-center w-20 h-20 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                            <svg viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                                <path d="M54 16H10c-2.2 0-4 1.8-4 4v8c2.2 0 4 1.8 4 4s-1.8 4-4 4v8c0 2.2 1.8 4 4 4h44c2.2 0 4-1.8 4-4V20c0-2.2-1.8-4-4-4z"></path>
+                                <text x="32" y="36" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="white">NEW</text>
                             </svg>
-                            <span>Ideas & Feedback</span>
+                            <span class="text-xs mt-1">New Trip</span>
                         </button>
-                        <button id="create-trip-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">+ New Trip</button>
+                        <button id="open-feedback-hub-btn" title="Ideas & Feedback" class="flex flex-col items-center justify-center w-20 h-20 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 01-2.53-.388A.75.75 0 008.25 20.25l.438-2.55a.75.75 0 00-.416-.833A9.76 9.76 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                           </svg>
+                           <span class="text-xs mt-1">Feedback</span>
+                        </button>
                     </div>
                 </div>
                 <div id="trips-list" class="space-y-4">
