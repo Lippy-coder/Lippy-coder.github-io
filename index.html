@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
-    <!-- NEW: QR Code Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
@@ -55,6 +54,10 @@
         .info-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
         .companion-item.selected { background-color: #e0e7ff; }
         #scan-qr-video-feed { width: 100%; max-height: 70vh; border-radius: 0.5rem; }
+        /* NEW: Style for the top contributor's halo */
+        .golden-halo {
+            box-shadow: 0 0 0 3px #FFD700; /* A classic gold color */
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -203,7 +206,6 @@
         
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md flex flex-col max-h-[90vh]">
-                <!-- Header -->
                 <div class="p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 relative">
                     <h3 class="text-2xl font-bold text-center">Add Friends to Trip</h3>
                     <button id="close-invite-modal-x-btn" type="button" class="absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
@@ -211,32 +213,22 @@
                     </button>
                 </div>
 
-                <!-- Scrollable Body -->
                 <div class="p-4 sm:p-6 flex-grow overflow-y-auto">
-                    <!-- Smart Companion Search Section -->
                     <div class="mb-6">
                         <h4 class="text-lg font-semibold text-gray-800 mb-3">From Past Trips</h4>
                         <p class="text-sm text-gray-500 mb-3">Sorted by friends you travel with most often. Select multiple friends to add them all at once.</p>
                         <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Search past companions...">
-                        <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md">
-                            <!-- Companion list will be dynamically inserted here -->
-                        </div>
+                        <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md"></div>
                     </div>
 
                     <div class="relative py-4">
-                      <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-gray-300"></div>
-                      </div>
-                      <div class="relative flex justify-center">
-                        <span class="bg-white px-2 text-sm text-gray-500">OR</span>
-                      </div>
+                      <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-300"></div></div>
+                      <div class="relative flex justify-center"><span class="bg-white px-2 text-sm text-gray-500">OR</span></div>
                     </div>
 
-                    <!-- Email & Scan Section -->
                     <div>
                          <div class="flex justify-between items-center mb-1">
                             <label for="invite-email" class="block text-sm font-medium text-gray-700">Invite by Email or Scan</label>
-                            <!-- NEW: Scan to Add button -->
                             <button id="scan-qr-code-btn" type="button" class="text-sm text-indigo-600 hover:underline font-semibold flex items-center space-x-1">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                 <span>Scan to Add</span>
@@ -252,7 +244,6 @@
                     </div>
                 </div>
 
-                <!-- Footer -->
                 <div class="p-4 sm:p-6 border-t border-gray-200 flex justify-between items-center flex-shrink-0 bg-gray-50 rounded-b-xl">
                      <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
                      <button type="button" id="add-selected-companions-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:bg-gray-400" disabled>Add Selected Friends (0)</button>
@@ -270,7 +261,6 @@
         <div id="ai-report-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Generate AI Trip Report</h3><form id="ai-report-form"><div class="mb-4"><label for="ai-report-type" class="block text-sm font-medium text-gray-700 mb-1">Choose a Report Type</label><select id="ai-report-type" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="spending_analysis">Spending Analysis</option><option value="spreadsheet_data">Data for Spreadsheet (CSV)</option><option value="fun_awards">Fun Awards</option><option value="custom_question">Your own question...</option></select></div><div id="custom-question-area" class="mb-6 hidden"><label for="ai-report-question" class="block text-sm font-medium text-gray-700 mb-1">Ask a Specific Question</label><textarea id="ai-report-question" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., How much did we spend on just wine?"></textarea></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-ai-report-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-ai-report-btn" class="bg-yellow-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-yellow-600">Generate Report</button></div></form></div></div>
         <div id="ai-report-display-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-2xl p-8 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h3 class="text-2xl font-bold">Your Trip Report ✨</h3><button type="button" id="close-ai-display-btn-x" class="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div id="ai-report-content" class="prose max-w-none overflow-y-auto flex-grow text-gray-700"></div><div class="flex justify-end mt-8 space-x-4 flex-shrink-0"><button type="button" id="copy-ai-report-btn" class="bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-700">Copy to Clipboard</button><button type="button" id="close-ai-display-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Close</button></div></div></div>
         
-        <!-- NEW: Modal for displaying the user's personal QR Code -->
         <div id="show-qr-code-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 p-8 text-center flex flex-col items-center">
                 <div id="my-qr-code-profile" class="flex items-center space-x-4 mb-4"></div>
@@ -280,7 +270,6 @@
             </div>
         </div>
 
-        <!-- NEW: Modal for the QR Code Scanner camera view -->
         <div id="scan-qr-code-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-4 text-center">
                 <h3 class="text-xl font-bold mb-4">Scan a Friend's Join Code</h3>
@@ -348,7 +337,6 @@
         let remainderAssignments = new Set();
         let lastAiReportMarkdown = '';
         let selectedCompanions = new Set();
-        // NEW: State for QR Scanner
         let isScanning = false;
         let qrScannerAnimation;
 
@@ -472,7 +460,6 @@
         const customQuestionArea = document.getElementById('custom-question-area');
         const closeInviteModalXBtn = document.getElementById('close-invite-modal-x-btn');
         const addSelectedCompanionsBtn = document.getElementById('add-selected-companions-btn');
-        // NEW: Element refs for QR features
         const showQrCodeModal = document.getElementById('show-qr-code-modal');
         const myQrCodeCanvas = document.getElementById('my-qr-code-canvas');
         const myQrCodeProfile = document.getElementById('my-qr-code-profile');
@@ -740,7 +727,6 @@
                 if (tripsUnsubscribe) tripsUnsubscribe();
                 listenForTrips(auth.currentUser.uid);
             });
-            // NEW: Add event listener for the new "Show My Join Code" button
             document.getElementById('show-my-qr-code-btn').addEventListener('click', (e) => {
                 e.preventDefault();
                 showMyJoinCode();
@@ -861,19 +847,49 @@
             }
         });
 
+        // NEW/MODIFIED: This function now calculates and applies the "Golden Halo"
         async function renderTripMembers(members) {
             tripMembersList.innerHTML = '';
+
+            const memberContributions = new Map();
+            currentTrip.memberUids.forEach(uid => memberContributions.set(uid, 0));
+
+            allTripExpenses.forEach(expense => {
+                if (!expense.isDeleted) {
+                    const payerId = expense.paidBy;
+                    const amount = expense.amountDetails.baseAmountInCents || 0;
+                    if (memberContributions.has(payerId)) {
+                        memberContributions.set(payerId, memberContributions.get(payerId) + amount);
+                    }
+                }
+            });
+
+            let topContributorUid = null;
+            let maxContribution = 0;
+            if (Array.from(memberContributions.values()).some(val => val > 0)) {
+                for (const [uid, total] of memberContributions.entries()) {
+                    if (total > maxContribution) {
+                        maxContribution = total;
+                        topContributorUid = uid;
+                    }
+                }
+            }
+
             for (const member of members) {
                 const memberEl = document.createElement('div');
                 memberEl.className = 'flex flex-col items-center text-center';
                 const profile = userProfilesCache.get(member.uid);
-                if (!profile) continue; 
+                if (!profile) continue;
+
+                const isTopContributor = member.uid === topContributorUid;
+                const haloClass = isTopContributor ? 'golden-halo' : '';
+
                 let avatarHTML = '';
                 if (profile.photoURL) {
-                    avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1">`;
+                    avatarHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="w-12 h-12 rounded-full object-cover mb-1 ${haloClass}">`;
                 } else {
                     const initial = profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?';
-                    avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1">${initial}</div>`;
+                    avatarHTML = `<div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold mb-1 ${haloClass}">${initial}</div>`;
                 }
                 const nameHTML = `<span class="text-xs text-gray-600 w-20 truncate">${profile.displayName}</span>`;
                 memberEl.innerHTML = avatarHTML + nameHTML;
@@ -927,6 +943,8 @@
                 if (item.type === 'expense') { renderExpenseItem(item.data); } 
                 else if (item.type === 'payment') { renderPaymentItem(item.data); }
             });
+            // Re-render members list here to ensure halo is updated after expense changes
+            if(currentTrip) renderTripMembers(currentTrip.members);
         }
         
         function renderExpenseItem(expense) {
@@ -1232,7 +1250,6 @@
             }
         }
         
-        // NEW: Functions for QR Code generation and scanning
         function showMyJoinCode() {
             const user = auth.currentUser;
             if (!user) return;
@@ -2033,7 +2050,6 @@
             
             let assignedItemSharesTotal = 0;
 
-            // Pass 1: Calculate shares for explicitly assigned line items
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
                 const itemPriceInBaseCents = item.priceInBaseCents; 
@@ -2058,7 +2074,6 @@
                 }
             });
             
-            // Pass 2: Calculate the total unassigned pool and distribute it
             const totalUnassignedCents = currentItemization.totalInBaseCents - assignedItemSharesTotal;
 
             if (totalUnassignedCents > 0 && remainderAssignments.size > 0) {
@@ -2463,7 +2478,6 @@
             }
         });
 
-        // NEW: Event listeners for QR code modals
         closeMyQrCodeBtn.addEventListener('click', () => closeModal(showQrCodeModal));
         scanQrCodeBtn.addEventListener('click', startQrScanner);
         cancelScanQrBtn.addEventListener('click', stopQrScanner);
