@@ -353,6 +353,22 @@
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
+        <!-- NEW MODAL FOR DISPLAYING THE INVITE LINK -->
+        <div id="show-invite-link-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 p-8 text-center flex flex-col items-center max-w-md">
+                <h3 class="text-2xl font-bold mb-2">✅ Success!</h3>
+                <p class="text-gray-600 mb-4">An account has been created for <strong id="invite-link-email"></strong> and they've been added to the trip.</p>
+                <p class="text-gray-800 font-semibold mb-2">Copy this secure link and send it to them so they can set their password:</p>
+                <div class="w-full bg-gray-100 p-2 rounded-md text-xs text-left overflow-x-auto mb-4">
+                    <code id="invite-link-text"></code>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="button" id="copy-invite-link-btn" class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700">Copy Link</button>
+                    <button type="button" id="close-invite-link-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Done</button>
+                </div>
+            </div>
+        </div>
+
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
               Version 9.0.8 (QR Scan to Join)
@@ -363,7 +379,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // NEW: Import runTransaction and orderBy
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
@@ -397,7 +412,6 @@
         let tripsUnsubscribe = null;
         let singleTripUnsubscribe = null;
         let expensesUnsubscribe = null;
-        // NEW: Feedback Hub variable
         let feedbackUnsubscribe = null;
         const userProfilesCache = new Map();
         let cameraStream = null;
@@ -417,7 +431,6 @@
         const authView = document.getElementById('auth-view');
         const dashboardView = document.getElementById('dashboard-view');
         const tripDetailView = document.getElementById('trip-detail-view');
-        // NEW: Feedback Hub element constants
         const feedbackHubView = document.getElementById('feedback-hub-view');
         const authMessageArea = document.getElementById('auth-message-area');
         const loginForm = document.getElementById('login-form');
@@ -544,7 +557,6 @@
         const scanQrVideo = document.getElementById('scan-qr-video-feed');
         const scanQrCanvas = document.getElementById('scan-qr-canvas-hidden');
         const cancelScanQrBtn = document.getElementById('cancel-scan-qr-btn');
-        // NEW: Feedback Hub element constants
         const openFeedbackHubBtn = document.getElementById('open-feedback-hub-btn');
         const backToDashboardFromFeedbackBtn = document.getElementById('back-to-dashboard-from-feedback-btn');
         const feedbackList = document.getElementById('feedback-list');
@@ -557,7 +569,6 @@
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
         
         // --- ALL EXISTING FUNCTIONS (calculateAllBalances, getExchangeRate, etc.) ---
-        // --- The following is the complete set of functions, including new ones ---
         
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
@@ -1208,28 +1219,83 @@
             const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToAdd) return;
             submitInviteBtn.disabled = true;
+            submitInviteBtn.textContent = "Searching...";
 
             try {
+                // Check if user exists in Firestore
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", emailToAdd));
                 const querySnapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
-                    throw new Error("User not found. Please ask them to register first.");
-                } else {
+                if (!querySnapshot.empty) {
+                    // --- SCENARIO 1: USER EXISTS ---
+                    submitInviteBtn.textContent = "Adding...";
                     const userToAdd = querySnapshot.docs[0].data();
                     const success = await addUserToCurrentTrip(userToAdd.uid);
                     if (success) {
-                       inviteMemberForm.reset();
-                       closeModal(inviteMemberModal);
+                        inviteMemberForm.reset();
+                        closeModal(inviteMemberModal);
                     }
+                } else {
+                    // --- SCENARIO 2: USER DOES NOT EXIST ---
+                    // Prompt for the new user's name
+                    const name = prompt(`User with email "${emailToAdd}" not found.\n\nPlease enter their full name to invite them to Splitify and the trip:`);
+
+                    if (name && name.trim() !== "") {
+                        submitInviteBtn.textContent = "Inviting...";
+                        const inviteAndCreateUser = httpsCallable(functions, 'inviteAndCreateUser');
+                        const result = await inviteAndCreateUser({ 
+                            name: name.trim(), 
+                            email: emailToAdd, 
+                            tripId: currentTrip.id 
+                        });
+
+                        const data = result.data;
+                        if (data.success && data.link) {
+                            // Display the link for the trip owner to copy and share
+                            showInviteLinkModal(emailToAdd, data.link);
+                        } else if (data.success && data.message.includes("Existing user")) {
+                             showMessage("User added to trip successfully!", false);
+                             closeModal(inviteMemberModal);
+                        } else {
+                            throw new Error(data.message || "Failed to invite user.");
+                        }
+                    }
+                    // If user cancels the prompt, do nothing
                 }
             } catch (error) {
+                console.error("Error inviting member:", error);
                 showMessage(error.message);
             } finally {
                 submitInviteBtn.disabled = false;
+                submitInviteBtn.textContent = "Add Friend";
             }
         };
+        
+        function showInviteLinkModal(email, link) {
+            // Hide the 'Add Friend' modal
+            closeModal(inviteMemberModal);
+
+            // Populate and show the new 'Show Link' modal
+            document.getElementById('invite-link-email').textContent = email;
+            document.getElementById('invite-link-text').textContent = link;
+            openModal(document.getElementById('show-invite-link-modal'));
+        }
+
+        // Add event listeners for the new modal's buttons
+        document.getElementById('copy-invite-link-btn').addEventListener('click', () => {
+            const linkText = document.getElementById('invite-link-text').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showMessage("Link copied to clipboard!", false);
+            }, () => {
+                showMessage("Failed to copy link.");
+            });
+        });
+        
+        document.getElementById('close-invite-link-btn').addEventListener('click', () => {
+            closeModal(document.getElementById('show-invite-link-modal'));
+            inviteMemberForm.reset();
+        });
 
         async function populateCompanionList() {
             const container = document.getElementById('companion-list-container');
@@ -1546,10 +1612,8 @@
             }
         };
 
-        // --- NEW: All functions for the Feedback Hub feature ---
-
         function listenForFeedback() {
-            if (feedbackUnsubscribe) feedbackUnsubscribe(); // Prevent multiple listeners
+            if (feedbackUnsubscribe) feedbackUnsubscribe();
 
             const feedbackRef = collection(db, 'feedback');
             const q = query(feedbackRef, orderBy('upvotes', 'desc'), orderBy('createdAt', 'desc'));
@@ -1567,7 +1631,7 @@
         }
 
         function renderFeedbackList(items) {
-            feedbackList.innerHTML = ''; // Clear current list
+            feedbackList.innerHTML = '';
             if (items.length === 0) {
                 feedbackList.innerHTML = '<p class="text-center text-gray-500 py-10">No feedback yet. Be the first to submit an idea!</p>';
                 return;
