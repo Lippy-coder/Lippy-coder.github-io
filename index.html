@@ -59,6 +59,30 @@
         .golden-halo {
             box-shadow: 0 0 0 3px #FFD700; /* A classic gold color */
         }
+        .segmented-control {
+            display: flex;
+            background-color: #e5e7eb; /* gray-200 */
+            padding: 4px;
+            border-radius: 0.5rem;
+        }
+        .segmented-control button {
+            flex: 1;
+            padding: 0.5rem 0;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            color: #4b5563; /* gray-600 */
+            transition: background-color 0.2s, color 0.2s;
+            border: none;
+            background: none;
+        }
+        .segmented-control button.active {
+            background-color: white;
+            color: #1f2937; /* gray-800 */
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+        .tab-panel.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -244,59 +268,64 @@
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3><form id="edit-profile-form"><div class="mb-4"><label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label><select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">None</option><option value="Monzo">Monzo</option><option value="Revolut">Revolut</option></select></div><div class="mb-6"><label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label><input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith"><p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button></div></form></div></div>
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3><form id="edit-expense-form"><input type="hidden" id="edit-expense-id"><div class="mb-4"><label for="edit-expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="edit-expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save</button></div></form></div></div>
         
-        <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
-            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md flex flex-col max-h-[90vh]">
-                <div class="p-4 sm:p-6 border-b border-gray-200 flex-shrink-0 relative">
-                    <h3 class="text-2xl font-bold text-center">Add Friends to Trip</h3>
-                    <button id="close-invite-modal-x-btn" type="button" class="absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <!-- NEW "Add Friend" Modal using Segmented Control -->
+        <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden-view">
+            <div class="bg-gray-50 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-300">
+                <!-- Header -->
+                <div class="p-5 border-b border-gray-200 flex-shrink-0 relative">
+                    <h3 class="text-xl font-bold text-center text-gray-900">Add Friends to Trip</h3>
+                    <button id="close-invite-modal-x-btn" type="button" class="absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <div class="p-4 sm:p-6 flex-grow overflow-y-auto">
-                    <div class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-3">From Past Trips</h4>
-                        <p class="text-sm text-gray-500 mb-3">Sorted by friends you travel with most often. Select multiple friends to add them all at once.</p>
-                        <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Search past companions...">
-                        <div id="companion-list-container" class="mt-3 space-y-2 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-md"></div>
+                <!-- Segmented Control -->
+                <div class="p-4 flex-shrink-0">
+                    <div class="segmented-control flex bg-gray-200 p-1 rounded-lg">
+                        <button data-tab="frequent" class="flex-1 py-1.5 rounded-md font-semibold text-sm active">Frequent</button>
+                        <button data-tab="email" class="flex-1 py-1.5 rounded-md font-semibold text-sm">By Email</button>
+                        <button data-tab="scan" class="flex-1 py-1.5 rounded-md font-semibold text-sm">Scan QR</button>
                     </div>
+                </div>
 
-                    <div class="relative py-4">
-                      <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-300"></div></div>
-                      <div class="relative flex justify-center"><span class="bg-white px-2 text-sm text-gray-500">OR</span></div>
+                <!-- Content Panels -->
+                <div class="px-6 pb-6 flex-grow overflow-y-auto">
+                    <!-- Panel 1: Frequent Friends -->
+                    <div id="panel-frequent" class="tab-panel active">
+                        <input type="search" id="companion-search" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4" placeholder="Search past companions...">
+                        <div id="companion-list-container" class="space-y-2 max-h-60 overflow-y-auto"></div>
                     </div>
-
-                    <div>
-                         <div class="flex justify-between items-center mb-1">
-                            <label for="invite-email" class="block text-sm font-medium text-gray-700">Invite by Email or Scan</label>
-                            <button id="scan-qr-code-btn" type="button" class="text-sm text-indigo-600 hover:underline font-semibold flex items-center space-x-1">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                <span>Scan to Add</span>
-                            </button>
-                        </div>
+                    <!-- Panel 2: Invite by Email -->
+                    <div id="panel-email" class="tab-panel hidden">
                         <form id="invite-member-form">
+                            <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">Invite by Email</label>
+                            <p id="invite-helper-text" class="text-xs text-gray-500 mb-3">Enter an email. We'll add them if they're a member, or help you create an invite if they're new.</p>
                             <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
                             
-                            <!-- ADDED: Hidden name field for new user invites -->
                             <div id="invite-name-wrapper" class="hidden mt-4">
                                 <label for="invite-name" class="block text-sm font-medium text-gray-700 mb-1">Friend's Full Name</label>
                                 <input type="text" id="invite-name" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Jane Doe">
                             </div>
-
-                            <p id="invite-helper-text" class="text-xs text-gray-500 mt-1">Enter an email. We'll add them if they're a member, or help you create an invite if they're new.</p>
-                            <div class="flex justify-end mt-4">
-                                <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600 flex items-center justify-center w-32 h-10">
-                                    <span class="btn-text">Add Friend</span>
-                                    <div class="spinner hidden"></div>
-                                </button>
-                            </div>
+                            
+                            <button type="submit" id="submit-invite-btn" class="w-full mt-4 bg-indigo-600 text-white py-2.5 rounded-md font-semibold hover:bg-indigo-700 flex items-center justify-center h-10">
+                                <span class="btn-text">Check Email & Invite</span>
+                                <div class="spinner hidden"></div>
+                            </button>
                         </form>
+                    </div>
+                    <!-- Panel 3: Scan QR -->
+                    <div id="panel-scan" class="tab-panel hidden text-center pt-4">
+                         <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" /></svg>
+                        <p class="mt-2 font-semibold">Scan a friend's Join Code</p>
+                        <p class="text-sm text-gray-500 mt-1">Ask your friend to show their QR code from the dashboard.</p>
+                        <button type="button" id="scan-qr-code-btn" class="w-full mt-4 bg-teal-600 text-white py-2.5 rounded-md font-semibold hover:bg-teal-700">Open Camera Scanner</button>
                     </div>
                 </div>
 
-                <div class="p-4 sm:p-6 border-t border-gray-200 flex justify-between items-center flex-shrink-0 bg-gray-50 rounded-b-xl">
-                     <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
-                     <button type="button" id="add-selected-companions-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:bg-gray-400" disabled>Add Selected Friends (0)</button>
+                <!-- Footer -->
+                <div class="p-4 bg-gray-100 border-t border-gray-200 flex-shrink-0 flex justify-between items-center">
+                    <button type="button" id="cancel-invite-btn" class="bg-gray-200 text-gray-800 px-5 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                    <button type="button" id="add-selected-companions-btn" class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:bg-gray-400" disabled>Add Selected (0)</button>
                 </div>
             </div>
         </div>
@@ -1358,7 +1387,7 @@
             if(nameInput) nameInput.required = false;
 
             const submitBtnText = submitInviteBtn.querySelector('.btn-text');
-            if (submitBtnText) submitBtnText.textContent = 'Add Friend';
+            if (submitBtnText) submitBtnText.textContent = 'Check Email & Invite';
             
             const helperText = document.getElementById('invite-helper-text');
             if(helperText) helperText.textContent = "Enter an email. We'll add them if they're a member, or help you create an invite if they're new.";
@@ -1457,10 +1486,10 @@
             const count = selectedCompanions.size;
             if (count > 0) {
                 addSelectedCompanionsBtn.disabled = false;
-                addSelectedCompanionsBtn.textContent = `Add Selected Friends (${count})`;
+                addSelectedCompanionsBtn.textContent = `Add Selected (${count})`;
             } else {
                 addSelectedCompanionsBtn.disabled = true;
-                addSelectedCompanionsBtn.textContent = 'Add Selected Friends (0)';
+                addSelectedCompanionsBtn.textContent = 'Add Selected (0)';
             }
         }
         
@@ -1793,6 +1822,30 @@
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         
         // --- ALL EVENT LISTENERS ---
+
+        // --- New Invite Modal Logic ---
+        const inviteModal = document.getElementById('invite-member-modal');
+        const tabButtons = inviteModal.querySelectorAll('.segmented-control button');
+        const tabPanels = inviteModal.querySelectorAll('.tab-panel');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                tabPanels.forEach(panel => {
+                   if (panel.id === `panel-${tabId}`) {
+                       panel.classList.remove('hidden');
+                       panel.classList.add('active');
+                   } else {
+                       panel.classList.remove('hidden', 'active');
+                       panel.classList.add('hidden');
+                   }
+                });
+            });
+        });
 
         openFeedbackHubBtn.addEventListener('click', () => {
             showView('feedback-hub-view');
@@ -2857,7 +2910,10 @@
 
         closeMyQrCodeBtn.addEventListener('click', () => closeModal(showQrCodeModal));
         showMyQrCodeIconBtn.addEventListener('click', showMyJoinCode);
-        scanQrCodeBtn.addEventListener('click', startQrScanner);
+        scanQrCodeBtn.addEventListener('click', () => { 
+            closeModal(inviteMemberModal);
+            startQrScanner();
+        });
         cancelScanQrBtn.addEventListener('click', stopQrScanner);
 
         settleUpBtn.addEventListener('click', calculateAndShowSettlement);
