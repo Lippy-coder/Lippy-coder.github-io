@@ -276,10 +276,19 @@
                         </div>
                         <form id="invite-member-form">
                             <input type="email" id="invite-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="friend@example.com">
-                            <!-- CHANGE #2: The text below has been updated -->
-                            <p class="text-xs text-gray-500 mt-1">Enter an email. We'll add them if they're a member, or help you create an invite if they're new.</p>
+                            
+                            <!-- ADDED: Hidden name field for new user invites -->
+                            <div id="invite-name-wrapper" class="hidden mt-4">
+                                <label for="invite-name" class="block text-sm font-medium text-gray-700 mb-1">Friend's Full Name</label>
+                                <input type="text" id="invite-name" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Jane Doe">
+                            </div>
+
+                            <p id="invite-helper-text" class="text-xs text-gray-500 mt-1">Enter an email. We'll add them if they're a member, or help you create an invite if they're new.</p>
                             <div class="flex justify-end mt-4">
-                                <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600">Add Friend</button>
+                                <button type="submit" id="submit-invite-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600 flex items-center justify-center w-32 h-10">
+                                    <span class="btn-text">Add Friend</span>
+                                    <div class="spinner hidden"></div>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -354,19 +363,22 @@
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
-        <!-- NEW MODAL FOR DISPLAYING THE INVITE LINK -->
-        <div id="show-invite-link-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
+        <!-- REPLACED MODAL: This is the new "Share" modal -->
+        <div id="share-invite-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 p-8 text-center flex flex-col items-center max-w-md">
-                <h3 class="text-2xl font-bold mb-2">✅ Success!</h3>
-                <p class="text-gray-600 mb-4">An account has been created for <strong id="invite-link-email"></strong> and they've been added to the trip.</p>
-                <p class="text-gray-800 font-semibold mb-2">Copy this secure link and send it to them so they can set their password:</p>
-                <div class="w-full bg-gray-100 p-2 rounded-md text-xs text-left overflow-x-auto mb-4">
-                    <code id="invite-link-text"></code>
-                </div>
-                <div class="flex space-x-4">
-                    <button type="button" id="copy-invite-link-btn" class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700">Copy Link</button>
-                    <button type="button" id="close-invite-link-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Done</button>
-                </div>
+                <h3 class="text-2xl font-bold mb-2">Invite for <span id="share-invite-name"></span></h3>
+                <p class="text-gray-600 mb-6">Your magic link is ready! Send it to your friend so they can join the trip.</p>
+                
+                <button type="button" id="share-invite-btn" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                    </svg>
+                    <span>Share Invite Link</span>
+                </button>
+
+                <button type="button" id="copy-shareable-link-btn" class="w-full mt-3 bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Copy Link</button>
+                
+                <button type="button" id="close-share-modal-btn" class="mt-6 text-sm text-gray-500 hover:underline">Done</button>
             </div>
         </div>
 
@@ -1216,93 +1228,144 @@
             }
         }
 
-        const handleInviteMemberByEmail = async () => {
+        // --- NEW/MODIFIED FUNCTION: handleInviteMemberByEmail ---
+        const handleInviteMemberByEmail = async (e) => {
+            e.preventDefault();
             const emailToAdd = document.getElementById('invite-email').value.trim().toLowerCase();
             if (!emailToAdd) return;
+
+            const nameWrapper = document.getElementById('invite-name-wrapper');
+            const nameInput = document.getElementById('invite-name');
+            const helperText = document.getElementById('invite-helper-text');
+            const submitBtnText = submitInviteBtn.querySelector('.btn-text');
+            const spinner = submitInviteBtn.querySelector('.spinner');
+            
+            submitBtnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
             submitInviteBtn.disabled = true;
-            submitInviteBtn.textContent = "Searching...";
 
             try {
-                // Check if user exists in Firestore
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", emailToAdd));
-                const querySnapshot = await getDocs(q);
+                // If name field is hidden, this is the first step: check the email
+                if (nameWrapper.classList.contains('hidden')) {
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("email", "==", emailToAdd));
+                    const querySnapshot = await getDocs(q);
 
-                if (!querySnapshot.empty) {
-                    // --- SCENARIO 1: USER EXISTS ---
-                    submitInviteBtn.textContent = "Adding...";
-                    const userToAdd = querySnapshot.docs[0].data();
-                    const success = await addUserToCurrentTrip(userToAdd.uid);
-                    if (success) {
-                        inviteMemberForm.reset();
-                        closeModal(inviteMemberModal);
+                    if (!querySnapshot.empty) {
+                        // SCENARIO 1: USER EXISTS
+                        const userToAdd = querySnapshot.docs[0].data();
+                        const success = await addUserToCurrentTrip(userToAdd.uid);
+                        if (success) {
+                            closeModal(inviteMemberModal);
+                        }
+                    } else {
+                        // SCENARIO 2: USER IS NEW - Transition UI to get name
+                        nameWrapper.classList.remove('hidden');
+                        helperText.textContent = "Looks like they're new! Add their name to send an invite.";
+                        nameInput.required = true;
+                        submitBtnText.textContent = 'Send Invite';
                     }
                 } else {
-                    // --- SCENARIO 2: USER DOES NOT EXIST ---
-                    // Prompt for the new user's name
-                    const name = prompt(`User with email "${emailToAdd}" not found.\n\nPlease enter their full name to invite them to Splitify and the trip:`);
-
-                    if (name && name.trim() !== "") {
-                        submitInviteBtn.textContent = "Inviting...";
-                        const inviteAndCreateUser = httpsCallable(functions, 'inviteAndCreateUser');
-                        
-                        // CHANGE #1: Pass the inviter's UID to the cloud function.
-                        // IMPORTANT: You must update your 'inviteAndCreateUser' cloud function
-                        // to accept 'inviterUid' and save it as the 'referredBy' field
-                        // in the new user's document.
-                        const result = await inviteAndCreateUser({ 
-                            name: name.trim(), 
-                            email: emailToAdd, 
-                            tripId: currentTrip.id,
-                            inviterUid: auth.currentUser.uid 
-                        });
-
-                        const data = result.data;
-                        if (data.success && data.link) {
-                            // Display the link for the trip owner to copy and share
-                            showInviteLinkModal(emailToAdd, data.link);
-                        } else if (data.success && data.message.includes("Existing user")) {
-                             showMessage("User added to trip successfully!", false);
-                             closeModal(inviteMemberModal);
-                        } else {
-                            throw new Error(data.message || "Failed to invite user.");
-                        }
+                    // This is the second step: we have the name, so create the user
+                    const name = nameInput.value.trim();
+                    if (!name) {
+                        showMessage("Please enter the friend's name.");
+                        return;
                     }
-                    // If user cancels the prompt, do nothing
+
+                    const inviteAndCreateUser = httpsCallable(functions, 'inviteAndCreateUser');
+                    const result = await inviteAndCreateUser({ 
+                        name: name, 
+                        email: emailToAdd, 
+                        tripId: currentTrip.id,
+                        inviterUid: auth.currentUser.uid 
+                    });
+
+                    const data = result.data;
+                    if (data.success && data.link) {
+                        // User created, now show the shareable link modal
+                        closeModal(inviteMemberModal);
+                        showShareableLinkModal(data.link, name);
+                    } else {
+                        throw new Error(data.message || "Failed to invite user.");
+                    }
                 }
             } catch (error) {
                 console.error("Error inviting member:", error);
                 showMessage(error.message);
             } finally {
+                submitBtnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
                 submitInviteBtn.disabled = false;
-                submitInviteBtn.textContent = "Add Friend";
             }
         };
         
-        function showInviteLinkModal(email, link) {
-            // Hide the 'Add Friend' modal
-            closeModal(inviteMemberModal);
+        // --- NEW FUNCTION: showShareableLinkModal ---
+        function showShareableLinkModal(link, friendName) {
+            const shareModal = document.getElementById('share-invite-modal');
+            const shareNameSpan = document.getElementById('share-invite-name');
+            const shareBtn = document.getElementById('share-invite-btn');
+            const copyBtn = document.getElementById('copy-shareable-link-btn');
+            const closeBtn = document.getElementById('close-share-modal-btn');
 
-            // Populate and show the new 'Show Link' modal
-            document.getElementById('invite-link-email').textContent = email;
-            document.getElementById('invite-link-text').textContent = link;
-            openModal(document.getElementById('show-invite-link-modal'));
+            shareNameSpan.textContent = friendName;
+
+            const shareData = {
+                title: 'Join my trip on Splitify!',
+                text: `Hey! I'm using Splitify for our "${currentTrip.name}" trip. Here's your personal link to join and set up your account.`,
+                url: link
+            };
+
+            // Feature Detection: Check if the browser supports the Web Share API
+            if (navigator.share) {
+                shareBtn.classList.remove('hidden');
+                shareBtn.onclick = async () => {
+                    try {
+                        await navigator.share(shareData);
+                        showMessage("Link shared!", false);
+                    } catch (err) {
+                        // This can happen if the user cancels the share sheet
+                        console.log("Share action was cancelled or failed:", err.message);
+                    }
+                };
+            } else {
+                // If navigator.share is not supported, hide the primary share button.
+                shareBtn.classList.add('hidden');
+            }
+
+            // Always have the copy button as a reliable fallback
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(link).then(() => {
+                    showMessage("Link copied to clipboard!", false);
+                }, () => {
+                    showMessage("Failed to copy link.");
+                });
+            };
+
+            closeBtn.onclick = () => closeModal(shareModal);
+            openModal(shareModal);
         }
 
-        // Add event listeners for the new modal's buttons
-        document.getElementById('copy-invite-link-btn').addEventListener('click', () => {
-            const linkText = document.getElementById('invite-link-text').textContent;
-            navigator.clipboard.writeText(linkText).then(() => {
-                showMessage("Link copied to clipboard!", false);
-            }, () => {
-                showMessage("Failed to copy link.");
-            });
-        });
-        
-        document.getElementById('close-invite-link-btn').addEventListener('click', () => {
-            closeModal(document.getElementById('show-invite-link-modal'));
-            inviteMemberForm.reset();
-        });
+        // --- NEW FUNCTION: resetInviteModal ---
+        function resetInviteModal() {
+            const form = document.getElementById('invite-member-form');
+            if (form) form.reset();
+
+            const nameWrapper = document.getElementById('invite-name-wrapper');
+            if (nameWrapper) nameWrapper.classList.add('hidden');
+            
+            const nameInput = document.getElementById('invite-name');
+            if(nameInput) nameInput.required = false;
+
+            const submitBtnText = submitInviteBtn.querySelector('.btn-text');
+            if (submitBtnText) submitBtnText.textContent = 'Add Friend';
+            
+            const helperText = document.getElementById('invite-helper-text');
+            if(helperText) helperText.textContent = "Enter an email. We'll add them if they're a member, or help you create an invite if they're new.";
+            
+            selectedCompanions.clear();
+            updateAddSelectedButton();
+        }
 
         async function populateCompanionList() {
             const container = document.getElementById('companion-list-container');
@@ -1725,7 +1788,7 @@
         registerForm.addEventListener('submit', (e) => { e.preventDefault(); handleRegister(); });
         createTripForm.addEventListener('submit', (e) => { e.preventDefault(); handleCreateTrip(); });
         addExpenseForm.addEventListener('submit', (e) => { e.preventDefault(); handleAddExpense(); });
-        inviteMemberForm.addEventListener('submit', (e) => { e.preventDefault(); handleInviteMemberByEmail(); });
+        inviteMemberForm.addEventListener('submit', (e) => { handleInviteMemberByEmail(e); });
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         
@@ -2747,8 +2810,14 @@
         cancelAddExpenseBtn.addEventListener('click', () => closeModal(addExpenseModal));
         cancelEditProfileBtn.addEventListener('click', () => closeModal(editProfileModal));
         cancelEditExpenseBtn.addEventListener('click', () => closeModal(editExpenseModal));
-        cancelInviteBtn.addEventListener('click', () => closeModal(inviteMemberModal));
-        closeInviteModalXBtn.addEventListener('click', () => closeModal(inviteMemberModal));
+        cancelInviteBtn.addEventListener('click', () => {
+            closeModal(inviteMemberModal);
+            resetInviteModal();
+        });
+        closeInviteModalXBtn.addEventListener('click', () => {
+            closeModal(inviteMemberModal);
+            resetInviteModal();
+        });
         cancelArchiveTripBtn.addEventListener('click', () => closeModal(archiveTripModal));
         cancelDeleteExpenseBtn.addEventListener('click', () => closeModal(deleteExpenseModal));
         cancelDeletePaymentBtn.addEventListener('click', () => closeModal(deletePaymentModal));
@@ -2760,8 +2829,7 @@
         closeAiDisplayBtnX.addEventListener('click', () => closeModal(aiReportDisplayModal));
         
         inviteMemberBtn.addEventListener('click', () => {
-            selectedCompanions.clear();
-            updateAddSelectedButton();
+            resetInviteModal();
             openModal(inviteMemberModal);
             populateCompanionList();
         });
