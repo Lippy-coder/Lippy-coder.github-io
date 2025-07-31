@@ -2427,7 +2427,12 @@
                 }
                 
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
-                if (formattedDateTime) occurredAtInput.value = formattedDateTime;
+                if (formattedDateTime) {
+                    occurredAtInput.value = formattedDateTime;
+                } else {
+                    // FIX: If AI does not find a date, insert the current date and time.
+                    occurredAtInput.value = getCurrentLocalDateTime();
+                }
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2437,6 +2442,7 @@
                 }
 
                 if (data.lineItems && data.lineItems.length > 0 && data.confidence === 'high') {
+                    // The logic to prepare itemization data remains the same
                     const totalInOriginalCents = data.total ? Math.round(data.total * 100) : 0;
                     const totalInBaseCents = Math.round(totalInOriginalCents * exchangeRate);
                     
@@ -2453,10 +2459,13 @@
                         totalInBaseCents: totalInBaseCents
                     };
 
+                    // FIX: Show the toggle button, but default to the 'Split by Amount' view.
                     splitModeToggleContainer.classList.remove('hidden');
-                    itemizedSplitSection.classList.remove('hidden');
-                    equalSplitSection.classList.add('hidden');
-                    toggleSplitModeBtn.textContent = 'Switch to Split by Amount';
+                    equalSplitSection.classList.remove('hidden'); // Show this by default
+                    itemizedSplitSection.classList.add('hidden'); // Hide this by default
+                    toggleSplitModeBtn.textContent = 'Switch to Split by Item'; // Button text should offer the alternative
+
+                    // Pre-render the itemization UI in the background so it's ready if the user switches.
                     renderItemizationUI(currentItemization);
                 }
                 
