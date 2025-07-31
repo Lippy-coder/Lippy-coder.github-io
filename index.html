@@ -2691,19 +2691,58 @@
         }
         
         function updateItemizationSummary() {
+            // *** FIX: New logic to calculate shares in original currency FOR DISPLAY ONLY ***
+            const memberSharesInOriginalCents = {};
+            currentTrip.memberUids.forEach(uid => memberSharesInOriginalCents[uid] = 0);
+            
             let assignedItemsTotalInOriginalCents = 0;
+
             document.querySelectorAll('.item-row').forEach(row => {
+                const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
+                const itemPriceInOriginalCents = item.priceInOriginalCents;
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
+
                 if (assignedAvatars.length > 0) {
-                    const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
-                    assignedItemsTotalInOriginalCents += item.priceInOriginalCents;
+                    assignedItemsTotalInOriginalCents += itemPriceInOriginalCents;
+                    const baseShare = Math.floor(itemPriceInOriginalCents / assignedAvatars.length);
+                    let remainder = itemPriceInOriginalCents % assignedAvatars.length;
+
+                    const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
+                    shuffleArray(assignedUids); // Distribute remainder randomly
+
+                    assignedUids.forEach(uid => {
+                        let userShare = baseShare;
+                        if (remainder > 0) {
+                            userShare++;
+                            remainder--;
+                        }
+                        memberSharesInOriginalCents[uid] += userShare;
+                    });
                 }
             });
 
             const liveRemainderInOriginalCents = currentItemization.totalInOriginalCents - assignedItemsTotalInOriginalCents;
 
+            // Handle splitting the unassigned remainder
+            if (liveRemainderInOriginalCents > 0 && remainderAssignments.size > 0) {
+                const sharePerPerson = Math.floor(liveRemainderInOriginalCents / remainderAssignments.size);
+                let remainder = liveRemainderInOriginalCents % remainderAssignments.size;
+                
+                const remainderUids = Array.from(remainderAssignments);
+                shuffleArray(remainderUids); // Distribute remainder randomly
+
+                remainderUids.forEach(uid => {
+                    let userShare = sharePerPerson;
+                    if(remainder > 0){
+                        userShare++;
+                        remainder--;
+                    }
+                    memberSharesInOriginalCents[uid] += userShare;
+                });
+            }
+
+            // Render the live remainder UI
             document.getElementById('live-remainder-row')?.remove(); 
-            
             if (liveRemainderInOriginalCents > 0) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'live-remainder-row';
@@ -2730,27 +2769,28 @@
                 itemizedListDiv.appendChild(remainderEl);
             }
 
-            const { memberSharesInCents } = calculateItemizedShares();
+            // Render Member Totals based on the original currency calculation
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
+            let totalSplitInOriginalCents = 0;
             
-            for (const uid in memberSharesInCents) {
-                if (memberSharesInCents[uid] > 0) {
+            for (const uid in memberSharesInOriginalCents) {
+                const shareCents = memberSharesInOriginalCents[uid];
+                totalSplitInOriginalCents += shareCents;
+                if (shareCents > 0) {
                     const profile = userProfilesCache.get(uid);
-                    const shareInOriginal = (memberSharesInCents[uid] / currentItemization.exchangeRate / 100).toFixed(2);
-                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${currentItemization.currency}</span></div>`;
+                    const shareForDisplay = (shareCents / 100).toFixed(2);
+                    summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareForDisplay} ${currentItemization.currency}</span></div>`;
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
             
-            const remainderIsAssigned = remainderAssignments.size > 0;
-            const accountedForInOriginalCents = assignedItemsTotalInOriginalCents + (remainderIsAssigned ? liveRemainderInOriginalCents : 0);
-            const differenceOriginalCents = currentItemization.totalInOriginalCents - accountedForInOriginalCents;
-
+            // Final validation display
+            const differenceOriginalCents = currentItemization.totalInOriginalCents - totalSplitInOriginalCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
 
-            if (Math.abs(differenceOriginalCents) < 1) {
+            if (Math.abs(differenceOriginalCents) < 1) { // Allow for tiny floating point dust
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
