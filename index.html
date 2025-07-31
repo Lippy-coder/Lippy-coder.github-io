@@ -423,7 +423,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.8 (QR Scan to Join)
+              Version 9.0.9 (Member Removal & UI Fixes)
             </p>
         </footer>
     </div>
@@ -973,7 +973,7 @@
                         </div>
                         <div class="flex items-center space-x-2 pl-2 flex-shrink-0">
                             ${settledBadge}
-                            ${unarchiveButton || archivedBadge}
+                            ${archivedBadge} ${unarchiveButton}
                             <div class="flex -space-x-2 overflow-hidden">
                                 ${memberAvatars}
                                 ${trip.memberUids && trip.memberUids.length > 4 ? `<div class="inline-block h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">+${trip.memberUids.length - 4}</div>` : ''}
@@ -1009,12 +1009,14 @@
             }
         });
 
+        // --- FIX #1: Corrected hasFinancialHistory function ---
+        // This function now correctly checks if a member's balance is zero,
+        // accounting for both expenses and settled payments.
         function hasFinancialHistory(memberUid) {
-            return allTripExpenses.some(expense => {
-                if (expense.isDeleted) return false;
-                if (expense.paidBy === memberUid) return true;
-                return Object.keys(expense.splitBetweenInCents || {}).includes(memberUid);
-            });
+            const balances = calculateAllBalances(currentTrip, allTripExpenses);
+            const balanceInCents = balances.get(memberUid) || 0;
+            // A user has financial history if their balance is not zero.
+            return balanceInCents !== 0;
         }
 
         async function renderTripMembers(members) {
@@ -1058,22 +1060,11 @@
                 if (isOwner && !isSelf) {
                     const canRemove = !hasFinancialHistory(member.uid);
                     if (canRemove) {
-                        removeIconHTML = `
-                            <button class="remove-member-btn remove-icon-overlay h-6 w-6 bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700" 
-                                    data-uid="${member.uid}" 
-                                    data-name="${profile.displayName}">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        `;
+                        // --- FIX #2: Collapsed to single line to prevent whitespace issues ---
+                        removeIconHTML = `<button class="remove-member-btn remove-icon-overlay h-6 w-6 bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700" data-uid="${member.uid}" data-name="${profile.displayName}"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
                     } else {
-                        removeIconHTML = `
-                            <div class="tooltip-wrapper remove-icon-overlay">
-                                <span class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                </span>
-                                <span class="tooltip-text">Cannot remove member with financial history. Settle all debts first.</span>
-                            </div>
-                        `;
+                        // --- FIX #2: Collapsed to single line to prevent whitespace issues ---
+                        removeIconHTML = `<div class="tooltip-wrapper remove-icon-overlay"><span class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></span><span class="tooltip-text">Cannot remove member with financial history. Settle all debts first.</span></div>`;
                     }
                 }
         
@@ -2945,6 +2936,15 @@
             updateSplitInputCurrency();
             if (selectedCurrency === baseCurrency || !amount) {
                 fxConversionDisplay.innerHTML = '';
+                // If in itemized mode, ensure the rate is 1
+                if (currentItemization) {
+                    currentItemization.exchangeRate = 1;
+                    currentItemization.currency = baseCurrency;
+                    currentItemization.totalInBaseCents = currentItemization.totalInOriginalCents;
+                    if(!itemizedSplitSection.classList.contains('hidden')) {
+                        updateItemizationSummary();
+                    }
+                }
                 return;
             }
             fxConversionDisplay.innerHTML = `<div class="mini-spinner"></div><span class="ml-2 text-sm text-indigo-600">Fetching rate...</span>`;
@@ -2952,6 +2952,17 @@
                 const rateData = await getExchangeRate(selectedCurrency, baseCurrency);
                 const convertedAmount = amount * rateData.conversion_rate;
                 fxConversionDisplay.innerHTML = `~ ${convertedAmount.toFixed(2)} ${baseCurrency} (1 ${selectedCurrency} = ${rateData.conversion_rate.toFixed(4)} ${baseCurrency})`;
+
+                // If in itemized mode, update the central data object
+                if (currentItemization) {
+                    currentItemization.exchangeRate = rateData.conversion_rate;
+                    currentItemization.currency = selectedCurrency;
+                    currentItemization.totalInBaseCents = Math.round(currentItemization.totalInOriginalCents * rateData.conversion_rate);
+                    // Re-render the summary if it's visible
+                     if(!itemizedSplitSection.classList.contains('hidden')) {
+                        updateItemizationSummary();
+                    }
+                }
             } catch (error) {
                 fxConversionDisplay.textContent = 'Could not get rate.';
                 showMessage(error.message);
