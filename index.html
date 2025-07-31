@@ -2389,8 +2389,9 @@
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
 
+                // CORRECTED LOGIC: Reset, then populate defaults, THEN override with AI data.
                 addExpenseForm.reset();
-                await populateExpenseModal();
+                await populateExpenseModal(); // This now sets the current time by default
                 openModal(addExpenseModal);
                 
                 const descInput = document.getElementById('expense-description');
@@ -2426,13 +2427,12 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
                 
+                // FINAL DATE FIX: Only override the default current time if the AI found a valid one.
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
-                } else {
-                    // FIX: If AI does not find a date, insert the current date and time.
-                    occurredAtInput.value = getCurrentLocalDateTime();
                 }
+                // If formattedDateTime is null, the value from populateExpenseModal() (the current time) remains.
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2442,7 +2442,6 @@
                 }
 
                 if (data.lineItems && data.lineItems.length > 0 && data.confidence === 'high') {
-                    // The logic to prepare itemization data remains the same
                     const totalInOriginalCents = data.total ? Math.round(data.total * 100) : 0;
                     const totalInBaseCents = Math.round(totalInOriginalCents * exchangeRate);
                     
@@ -2459,13 +2458,10 @@
                         totalInBaseCents: totalInBaseCents
                     };
 
-                    // FIX: Show the toggle button, but default to the 'Split by Amount' view.
                     splitModeToggleContainer.classList.remove('hidden');
-                    equalSplitSection.classList.remove('hidden'); // Show this by default
-                    itemizedSplitSection.classList.add('hidden'); // Hide this by default
-                    toggleSplitModeBtn.textContent = 'Switch to Split by Item'; // Button text should offer the alternative
-
-                    // Pre-render the itemization UI in the background so it's ready if the user switches.
+                    equalSplitSection.classList.remove('hidden');
+                    itemizedSplitSection.classList.add('hidden');
+                    toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                     renderItemizationUI(currentItemization);
                 }
                 
