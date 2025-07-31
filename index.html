@@ -2400,9 +2400,11 @@
                     aiReasoningTooltip.innerHTML = `<span class="info-icon">i<span class="tooltip-text">${data.reasoning}</span></span>`;
                     aiReasoningTooltip.classList.remove('hidden');
                 }
+                
+                // --- CHANGE 1 START: Use AI total and handle currency ---
                 if (data.total !== null) amountInput.value = data.total;
                 else amountInput.placeholder = "Enter amount manually";
-                
+
                 const detectedCurrency = data.currency;
                 if (detectedCurrency) {
                     if (!currencySelect.querySelector(`option[value="${detectedCurrency}"]`)) {
@@ -2425,30 +2427,35 @@
                     const rateData = await getExchangeRate(selectedCurrency, currentTrip.baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
+                // --- CHANGE 1 END ---
 
+
+                // --- CHANGE 2 START: Refactor itemization object creation ---
                 if (data.lineItems && data.lineItems.length > 0 && data.confidence === 'high') {
-                    const itemizationCurrency = data.currency || currentTrip.baseCurrency;
-
-                    const lineItemsInCents = data.lineItems.map(item => ({
+                    const totalInOriginalCents = data.total ? Math.round(data.total * 100) : 0;
+                    const totalInBaseCents = Math.round(totalInOriginalCents * exchangeRate) / 100 * 100;
+                    
+                    const lineItemsProcessed = data.lineItems.map(item => ({
                         ...item,
-                        priceInBaseCents: Math.round(item.price * exchangeRate * 100)
+                        priceInOriginalCents: Math.round(item.price * 100)
                     }));
                     
-                    const totalFromItemsInCents = lineItemsInCents.reduce((sum, item) => sum + item.priceInBaseCents, 0);
-                    const totalFromAiInCents = data.total ? Math.round(data.total * exchangeRate * 100) : totalFromItemsInCents;
-                    const remainderInCents = totalFromAiInCents - totalFromItemsInCents;
-
                     currentItemization = {
-                        currency: itemizationCurrency,
+                        currency: selectedCurrency,
                         exchangeRate: exchangeRate,
-                        lineItems: lineItemsInCents,
-                        remainderInCents: remainderInCents > 0 ? remainderInCents : 0,
-                        totalInBaseCents: totalFromItemsInCents + (remainderInCents > 0 ? remainderInCents : 0)
+                        lineItems: lineItemsProcessed,
+                        totalInOriginalCents: totalInOriginalCents,
+                        totalInBaseCents: totalInBaseCents // For final submission
                     };
 
                     splitModeToggleContainer.classList.remove('hidden');
-                    toggleSplitModeBtn.textContent = 'Switch to Split by Item';
+                    // Set to itemized mode by default
+                    itemizedSplitSection.classList.remove('hidden');
+                    equalSplitSection.classList.add('hidden');
+                    toggleSplitModeBtn.textContent = 'Switch to Split by Amount';
+                    renderItemizationUI(currentItemization);
                 }
+                // --- CHANGE 2 END ---
                 
                 await handleCurrencyChange();
                 autoDistributeAmount();
@@ -2609,20 +2616,20 @@
         });
         
         function calculateItemizedShares() {
-            const memberSharesInCents = {};
-            currentTrip.memberUids.forEach(uid => memberSharesInCents[uid] = 0);
+            const memberSharesInOriginalCents = {};
+            currentTrip.memberUids.forEach(uid => memberSharesInOriginalCents[uid] = 0);
             
-            let assignedItemSharesTotal = 0;
+            let assignedItemsTotalInOriginalCents = 0;
 
             document.querySelectorAll('.item-row').forEach(row => {
                 const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
-                const itemPriceInBaseCents = item.priceInBaseCents; 
+                const itemPriceInOriginalCents = item.priceInOriginalCents;
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
 
                 if (assignedAvatars.length > 0) {
-                    assignedItemSharesTotal += itemPriceInBaseCents;
-                    const baseShare = Math.floor(itemPriceInBaseCents / assignedAvatars.length);
-                    let remainder = itemPriceInBaseCents % assignedAvatars.length;
+                    assignedItemsTotalInOriginalCents += itemPriceInOriginalCents;
+                    const baseShare = Math.floor(itemPriceInOriginalCents / assignedAvatars.length);
+                    let remainder = itemPriceInOriginalCents % assignedAvatars.length;
 
                     const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
                     shuffleArray(assignedUids);
@@ -2633,16 +2640,16 @@
                             userShare++;
                             remainder--;
                         }
-                        memberSharesInCents[uid] += userShare;
+                        memberSharesInOriginalCents[uid] += userShare;
                     });
                 }
             });
             
-            const totalUnassignedCents = currentItemization.totalInBaseCents - assignedItemSharesTotal;
+            const totalUnassignedOriginalCents = currentItemization.totalInOriginalCents - assignedItemsTotalInOriginalCents;
 
-            if (totalUnassignedCents > 0 && remainderAssignments.size > 0) {
-                const sharePerPerson = Math.floor(totalUnassignedCents / remainderAssignments.size);
-                let remainder = totalUnassignedCents % remainderAssignments.size;
+            if (totalUnassignedOriginalCents > 0 && remainderAssignments.size > 0) {
+                const sharePerPerson = Math.floor(totalUnassignedOriginalCents / remainderAssignments.size);
+                let remainder = totalUnassignedOriginalCents % remainderAssignments.size;
                 
                 const remainderUids = Array.from(remainderAssignments);
                 shuffleArray(remainderUids);
@@ -2653,36 +2660,52 @@
                         userShare++;
                         remainder--;
                     }
-                    memberSharesInCents[uid] += userShare;
+                    memberSharesInOriginalCents[uid] += userShare;
                 });
             }
 
-            const finalMemberShares = {};
-            for (const uid in memberSharesInCents) {
-                if (memberSharesInCents[uid] > 0) finalMemberShares[uid] = memberSharesInCents[uid];
+            // Convert final shares to base currency cents for submission, and reconcile
+            const memberSharesInBaseCents = {};
+            let totalSplitInBaseCents = 0;
+            const rate = currentItemization.exchangeRate;
+
+            for (const uid in memberSharesInOriginalCents) {
+                if (memberSharesInOriginalCents[uid] > 0) {
+                    const baseCents = Math.round(memberSharesInOriginalCents[uid] * rate);
+                    memberSharesInBaseCents[uid] = baseCents;
+                    totalSplitInBaseCents += baseCents;
+                }
             }
-            return { memberSharesInCents: finalMemberShares };
+
+            // Reconcile rounding differences against the grand total
+            const difference = currentItemization.totalInBaseCents - totalSplitInBaseCents;
+            if (difference !== 0 && Object.keys(memberSharesInBaseCents).length > 0) {
+                const firstMemberUid = Object.keys(memberSharesInBaseCents)[0];
+                memberSharesInBaseCents[firstMemberUid] += difference;
+            }
+
+            return { memberSharesInCents: memberSharesInBaseCents };
         }
         
         function updateItemizationSummary() {
-            let assignedItemsTotalInCents = 0;
+            let assignedItemsTotalInOriginalCents = 0;
             document.querySelectorAll('.item-row').forEach(row => {
                 const assignedAvatars = row.querySelectorAll('.item-assignment-avatar.assigned');
                 if (assignedAvatars.length > 0) {
                     const item = currentItemization.lineItems[parseInt(row.dataset.index, 10)];
-                    assignedItemsTotalInCents += item.priceInBaseCents;
+                    assignedItemsTotalInOriginalCents += item.priceInOriginalCents;
                 }
             });
 
-            const liveRemainderInCents = currentItemization.totalInBaseCents - assignedItemsTotalInCents;
+            const liveRemainderInOriginalCents = currentItemization.totalInOriginalCents - assignedItemsTotalInOriginalCents;
 
             document.getElementById('live-remainder-row')?.remove(); 
             
-            if (liveRemainderInCents > 0) {
+            if (liveRemainderInOriginalCents > 0) {
                 const remainderEl = document.createElement('div');
                 remainderEl.id = 'live-remainder-row';
                 remainderEl.className = 'bg-green-50 rounded-md p-2 flex flex-col mt-3';
-                const remainderForDisplay = (liveRemainderInCents / 100 / currentItemization.exchangeRate).toFixed(2);
+                const remainderForDisplay = (liveRemainderInOriginalCents / 100).toFixed(2);
                 
                 const avatarsHTML = currentTrip.members.map(member => {
                     const profile = userProfilesCache.get(member.uid);
@@ -2704,30 +2727,33 @@
                 itemizedListDiv.appendChild(remainderEl);
             }
 
-            const { memberSharesInCents } = calculateItemizedShares();
+            const { memberSharesInCents } = calculateItemizedShares(); // This now returns base cents
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
-            let totalAssignedInCents = 0;
+            let totalAssignedInBaseCents = 0;
+
             for (const uid in memberSharesInCents) {
                 if (memberSharesInCents[uid] > 0) {
                     const profile = userProfilesCache.get(uid);
-                    const shareInOriginal = (memberSharesInCents[uid] / 100 / currentItemization.exchangeRate).toFixed(2);
+                    // Convert back to original currency for display only
+                    const shareInOriginal = (memberSharesInCents[uid] / currentItemization.exchangeRate / 100).toFixed(2);
                     summaryHTML += `<div class="flex justify-between text-sm text-gray-700"><span>${profile.displayName}</span><span class="font-medium">${shareInOriginal} ${currentItemization.currency}</span></div>`;
-                    totalAssignedInCents += memberSharesInCents[uid];
+                    totalAssignedInBaseCents += memberSharesInCents[uid];
                 }
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
             
-            const differenceCents = currentItemization.totalInBaseCents - totalAssignedInCents;
+            // Validation is now done in base currency cents for accuracy
+            const differenceCents = currentItemization.totalInBaseCents - totalAssignedInBaseCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
 
-            if (Math.abs(differenceCents) < 1) {
+            if (Math.abs(differenceCents) <= 1) { // Allow for a 1 cent rounding difference
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
             } else {
-                const diffInOriginal = (differenceCents / 100 / currentItemization.exchangeRate).toFixed(2);
+                const diffInOriginal = (differenceCents / currentItemization.exchangeRate / 100).toFixed(2);
                 validationEl.textContent = `Unassigned: ${diffInOriginal} ${currentItemization.currency}`;
                 validationEl.className += ' text-red-600';
                 submitExpenseBtn.disabled = true;
