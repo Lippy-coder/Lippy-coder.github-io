@@ -2374,8 +2374,7 @@
         async function analyzeImageWithGemini(base64Image) {
             loadingText.textContent = "Analysing Scene...";
             loadingOverlay.classList.remove('hidden-view');
-            const prompt = "Analyze this image to create an expense entry. It could be a receipt or a photo of an item/place.";
-            const payload = { prompt, image: base64Image, userLocation, baseCurrency: currentTrip.baseCurrency };
+            const payload = { image: base64Image, userLocation, baseCurrency: currentTrip.baseCurrency };
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
                     method: 'POST',
