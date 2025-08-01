@@ -85,7 +85,10 @@
                         <input type="email" id="login-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com" autocomplete="email">
                     </div>
                     <div class="mb-6">
-                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Forgot?</a>
+                        </div>
                         <input type="password" id="login-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="••••••••" autocomplete="current-password">
                     </div>
                     <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700">Login</button>
@@ -225,7 +228,7 @@
             </div>
         </div>
 
-        <!-- NEW: Feedback Hub View -->
+        <!-- Feedback Hub View -->
         <div id="feedback-hub-view" class="view hidden-view py-8">
             <header class="flex justify-between items-center mb-8">
                 <div>
@@ -248,7 +251,7 @@
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3><form id="edit-profile-form"><div class="mb-4"><label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label><select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">None</option><option value="Monzo">Monzo</option><option value="Revolut">Revolut</option></select></div><div class="mb-6"><label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label><input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith"><p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button></div></form></div></div>
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3><form id="edit-expense-form"><input type="hidden" id="edit-expense-id"><div class="mb-4"><label for="edit-expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="edit-expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save</button></div></form></div></div>
         
-        <!-- NEW "Add Friend" Modal using Segmented Control -->
+        <!-- "Add Friend" Modal using Segmented Control -->
         <div id="invite-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden-view">
             <div class="bg-gray-50 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-300">
                 <!-- Header -->
@@ -338,7 +341,6 @@
             </div>
         </div>
         
-        <!-- NEW: Submit Feedback Modal -->
         <div id="submit-feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8">
                 <h3 class="text-2xl font-bold mb-6">Submit your Idea or Bug Report</h3>
@@ -367,7 +369,6 @@
             </div>
         </div>
 
-        <!-- NEW: Remove Member Modal -->
         <div id="remove-member-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2">Remove Member</h3>
@@ -379,7 +380,6 @@
             </div>
         </div>
 
-        <!-- NEW: Delete Account Confirmation Modal -->
         <div id="delete-account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
                 <h3 class="text-2xl font-bold mb-2 text-red-700">Delete Account</h3>
@@ -394,12 +394,31 @@
             </div>
         </div>
 
+        <div id="password-reset-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view">
+            <div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8">
+                <h3 class="text-2xl font-bold mb-2">Reset Password</h3>
+                <p class="text-gray-600 mb-6">Enter your account's email address and we will send you a password reset link.</p>
+                <form id="password-reset-form">
+                    <div class="mb-4">
+                        <label for="reset-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="reset-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="you@example.com" autocomplete="email">
+                    </div>
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" id="cancel-password-reset-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center w-40 h-10">
+                            <span class="btn-text">Send Reset Link</span>
+                            <div class="spinner hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-50 hidden-view"><div id="loading-spinner" class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div><p id="loading-text" class="text-white mt-4">Analysing Scene...</p></div>
         <div id="message-box" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50"><p id="message-text"></p></div>
         <input type="file" id="profile-pic-input" class="hidden" accept="image/png, image/jpeg, image/heic, image/heif">
         <input type="file" id="receipt-upload-input" class="hidden" accept="image/*">
 
-        <!-- REPLACED MODAL: This is the new "Share" modal -->
         <div id="share-invite-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden-view">
             <div class="bg-white rounded-xl shadow-2xl m-4 p-8 text-center flex flex-col items-center max-w-md">
                 <h3 class="text-2xl font-bold mb-2">Invite for <span id="share-invite-name"></span></h3>
@@ -420,14 +439,14 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.12 (Layout Overflow Fix)
+              Version 9.0.13 (Password Reset)
             </p>
         </footer>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile, deleteUser, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel, updateDoc, arrayUnion, getDocs, deleteDoc, writeBatch, Timestamp, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
@@ -621,11 +640,13 @@
         const deleteAccountModal = document.getElementById('delete-account-modal');
         const cancelDeleteAccountBtn = document.getElementById('cancel-delete-account-btn');
         const confirmDeleteAccountBtn = document.getElementById('confirm-delete-account-btn');
+        const passwordResetModal = document.getElementById('password-reset-modal');
+        const passwordResetForm = document.getElementById('password-reset-form');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const cancelPasswordResetBtn = document.getElementById('cancel-password-reset-btn');
         
         const currencySymbols = { GBP: '£', USD: '$', EUR: '€', JPY: '¥', CAD: '$', AUD: '$' };
         const allCurrencies = { 'GBP': 'GBP (British Pound)', 'USD': 'USD (US Dollar)', 'EUR': 'EUR (Euro)', 'JPY': 'JPY (Japanese Yen)', 'CAD': 'CAD (Canadian Dollar)', 'AUD': 'AUD (Australian Dollar)' };
-        
-        // --- ALL EXISTING FUNCTIONS (calculateAllBalances, getExchangeRate, etc.) ---
         
         function calculateAllBalances(trip, allExpenses) {
             const balances = new Map();
@@ -1235,7 +1256,49 @@
                     showAuthMessage("Your email is not verified. Please check your inbox for the verification link.");
                 }
             } catch (error) { 
-                showMessage(error.message); 
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                     showAuthMessage("Incorrect email or password. Please try again.");
+                } else {
+                     showMessage(error.message);
+                }
+            }
+        };
+
+        const handlePasswordReset = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value;
+            const submitBtn = passwordResetForm.querySelector('button[type="submit"]');
+            const submitBtnText = submitBtn.querySelector('.btn-text');
+            const spinner = submitBtn.querySelector('.spinner');
+
+            if (!email) {
+                showMessage("Please enter your email address.");
+                return;
+            }
+
+            submitBtnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            cancelPasswordResetBtn.disabled = true;
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                closeModal(passwordResetModal);
+                loginTabBtn.click(); 
+                authMessageArea.className = 'mb-4 p-3 rounded-md bg-green-100 text-green-800 text-sm';
+                showAuthMessage(`Success! If an account exists for ${email}, a password reset link has been sent.`);
+            } catch (error) {
+                closeModal(passwordResetModal);
+                loginTabBtn.click();
+                authMessageArea.className = 'mb-4 p-3 rounded-md bg-green-100 text-green-800 text-sm';
+                showAuthMessage(`Success! If an account exists for ${email}, a password reset link has been sent.`);
+                console.error("Password reset error:", error);
+            } finally {
+                submitBtnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                submitBtn.disabled = false;
+                cancelPasswordResetBtn.disabled = false;
+                passwordResetForm.reset();
             }
         };
 
@@ -1372,29 +1435,23 @@
             const submitBtnText = confirmDeleteAccountBtn.querySelector('.btn-text');
             const spinner = confirmDeleteAccountBtn.querySelector('.spinner');
             
-            // Show loading state
             submitBtnText.classList.add('hidden');
             spinner.classList.remove('hidden');
             confirmDeleteAccountBtn.disabled = true;
             cancelDeleteAccountBtn.disabled = true;
 
             try {
-                // Get a reference to the Cloud Function
                 const deleteUserAccountFunction = httpsCallable(functions, 'deleteUserAccount');
-                
-                // Call the function and wait for the result
                 const result = await deleteUserAccountFunction();
 
                 if (result.data.success) {
                     showMessage("Your account has been deleted.", false);
-                    // Crucially, sign the user out to complete the process
                     await signOut(auth); 
                 }
             } catch (error) {
                 console.error("Error deleting account:", error);
                 showMessage(error.message || "An unknown error occurred.");
             } finally {
-                // Always hide loading state and close modal
                 submitBtnText.classList.remove('hidden');
                 spinner.classList.add('hidden');
                 confirmDeleteAccountBtn.disabled = false;
@@ -1419,28 +1476,24 @@
             submitInviteBtn.disabled = true;
 
             try {
-                // If name field is hidden, this is the first step: check the email
                 if (nameWrapper.classList.contains('hidden')) {
                     const usersRef = collection(db, "users");
                     const q = query(usersRef, where("email", "==", emailToAdd));
                     const querySnapshot = await getDocs(q);
 
                     if (!querySnapshot.empty) {
-                        // SCENARIO 1: USER EXISTS
                         const userToAdd = querySnapshot.docs[0].data();
                         const success = await addUserToCurrentTrip(userToAdd.uid);
                         if (success) {
                             closeModal(inviteMemberModal);
                         }
                     } else {
-                        // SCENARIO 2: USER IS NEW - Transition UI to get name
                         nameWrapper.classList.remove('hidden');
                         helperText.textContent = "Looks like they're new! Add their name to send an invite.";
                         nameInput.required = true;
                         submitBtnText.textContent = 'Send Invite';
                     }
                 } else {
-                    // This is the second step: we have the name, so create the user
                     const name = nameInput.value.trim();
                     if (!name) {
                         showMessage("Please enter the friend's name.");
@@ -1457,7 +1510,6 @@
 
                     const data = result.data;
                     if (data.success && data.link) {
-                        // User created, now show the shareable link modal
                         closeModal(inviteMemberModal);
                         showShareableLinkModal(data.link, name);
                     } else {
@@ -1489,7 +1541,6 @@
                 url: link
             };
 
-            // Feature Detection: Check if the browser supports the Web Share API
             if (navigator.share) {
                 shareBtn.classList.remove('hidden');
                 shareBtn.onclick = async () => {
@@ -1497,16 +1548,13 @@
                         await navigator.share(shareData);
                         showMessage("Link shared!", false);
                     } catch (err) {
-                        // This can happen if the user cancels the share sheet
                         console.log("Share action was cancelled or failed:", err.message);
                     }
                 };
             } else {
-                // If navigator.share is not supported, hide the primary share button.
                 shareBtn.classList.add('hidden');
             }
 
-            // Always have the copy button as a reliable fallback
             copyBtn.onclick = () => {
                 navigator.clipboard.writeText(link).then(() => {
                     showMessage("Link copied to clipboard!", false);
@@ -1964,9 +2012,6 @@
         profilePicInput.addEventListener('change', handleProfilePicUpload);
         supremoMenuBtn.addEventListener('click', () => { supremoToggleActionSheet.checked = isTripSupremoEnabled; openModal(actionSheetModal); });
         
-        // --- ALL EVENT LISTENERS ---
-
-        // --- New Invite Modal Logic ---
         const inviteModal = document.getElementById('invite-member-modal');
         const tabButtons = inviteModal.querySelectorAll('.segmented-control button');
         const tabPanels = inviteModal.querySelectorAll('.tab-panel');
@@ -2174,7 +2219,6 @@
         });
         
         confirmRemoveMemberBtn.addEventListener('click', handleRemoveMember);
-
         cancelDeleteAccountBtn.addEventListener('click', () => closeModal(deleteAccountModal));
         confirmDeleteAccountBtn.addEventListener('click', handleDeleteAccount);
         
@@ -2414,9 +2458,8 @@
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
 
-                // CORRECTED LOGIC: Reset, then populate defaults, THEN override with AI data.
                 addExpenseForm.reset();
-                await populateExpenseModal(); // This now sets the current time by default
+                await populateExpenseModal(); 
                 openModal(addExpenseModal);
                 
                 const descInput = document.getElementById('expense-description');
@@ -2452,12 +2495,10 @@
                     currencySelect.value = currentTrip.baseCurrency;
                 }
                 
-                // FINAL DATE FIX: Only override the default current time if the AI found a valid one.
                 const formattedDateTime = formatDateTimeForInput(data.transactionTimestamp);
                 if (formattedDateTime) {
                     occurredAtInput.value = formattedDateTime;
                 }
-                // If formattedDateTime is null, the value from populateExpenseModal() (the current time) remains.
                 
                 let exchangeRate = 1;
                 const selectedCurrency = currencySelect.value;
@@ -2720,7 +2761,6 @@
         }
         
         function updateItemizationSummary() {
-            // *** FIX: New logic to calculate shares in original currency FOR DISPLAY ONLY ***
             const memberSharesInOriginalCents = {};
             currentTrip.memberUids.forEach(uid => memberSharesInOriginalCents[uid] = 0);
             
@@ -2737,7 +2777,7 @@
                     let remainder = itemPriceInOriginalCents % assignedAvatars.length;
 
                     const assignedUids = Array.from(assignedAvatars).map(av => av.closest('[data-uid]').dataset.uid);
-                    shuffleArray(assignedUids); // Distribute remainder randomly
+                    shuffleArray(assignedUids); 
 
                     assignedUids.forEach(uid => {
                         let userShare = baseShare;
@@ -2752,13 +2792,12 @@
 
             const liveRemainderInOriginalCents = currentItemization.totalInOriginalCents - assignedItemsTotalInOriginalCents;
 
-            // Handle splitting the unassigned remainder
             if (liveRemainderInOriginalCents > 0 && remainderAssignments.size > 0) {
                 const sharePerPerson = Math.floor(liveRemainderInOriginalCents / remainderAssignments.size);
                 let remainder = liveRemainderInOriginalCents % remainderAssignments.size;
                 
                 const remainderUids = Array.from(remainderAssignments);
-                shuffleArray(remainderUids); // Distribute remainder randomly
+                shuffleArray(remainderUids);
 
                 remainderUids.forEach(uid => {
                     let userShare = sharePerPerson;
@@ -2770,7 +2809,6 @@
                 });
             }
 
-            // Render the live remainder UI
             document.getElementById('live-remainder-row')?.remove(); 
             if (liveRemainderInOriginalCents > 0) {
                 const remainderEl = document.createElement('div');
@@ -2798,7 +2836,6 @@
                 itemizedListDiv.appendChild(remainderEl);
             }
 
-            // Render Member Totals based on the original currency calculation
             itemizedSummaryDiv.innerHTML = '<h4 class="font-semibold text-sm mb-1 mt-3">Member Totals:</h4>';
             let summaryHTML = '';
             let totalSplitInOriginalCents = 0;
@@ -2814,12 +2851,11 @@
             }
             itemizedSummaryDiv.innerHTML += summaryHTML;
             
-            // Final validation display
             const differenceOriginalCents = currentItemization.totalInOriginalCents - totalSplitInOriginalCents;
             const validationEl = document.createElement('div');
             validationEl.className = 'text-xs text-right mt-1 min-h-[1rem] font-semibold';
 
-            if (Math.abs(differenceOriginalCents) < 1) { // Allow for tiny floating point dust
+            if (Math.abs(differenceOriginalCents) < 1) {
                 validationEl.textContent = `Total matches receipt!`;
                 validationEl.className += ' text-green-600';
                 submitExpenseBtn.disabled = false;
@@ -2970,7 +3006,6 @@
             updateSplitInputCurrency();
             if (selectedCurrency === baseCurrency || !amount) {
                 fxConversionDisplay.innerHTML = '';
-                // If in itemized mode, ensure the rate is 1
                 if (currentItemization) {
                     currentItemization.exchangeRate = 1;
                     currentItemization.currency = baseCurrency;
@@ -2987,12 +3022,10 @@
                 const convertedAmount = amount * rateData.conversion_rate;
                 fxConversionDisplay.innerHTML = `~ ${convertedAmount.toFixed(2)} ${baseCurrency} (1 ${selectedCurrency} = ${rateData.conversion_rate.toFixed(4)} ${baseCurrency})`;
 
-                // If in itemized mode, update the central data object
                 if (currentItemization) {
                     currentItemization.exchangeRate = rateData.conversion_rate;
                     currentItemization.currency = selectedCurrency;
                     currentItemization.totalInBaseCents = Math.round(currentItemization.totalInOriginalCents * rateData.conversion_rate);
-                    // Re-render the summary if it's visible
                      if(!itemizedSplitSection.classList.contains('hidden')) {
                         updateItemizationSummary();
                     }
@@ -3095,6 +3128,20 @@
             }
         }
         
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const loginEmail = document.getElementById('login-email').value;
+            document.getElementById('reset-email').value = loginEmail;
+            openModal(passwordResetModal);
+        });
+        
+        cancelPasswordResetBtn.addEventListener('click', () => {
+            closeModal(passwordResetModal);
+            passwordResetForm.reset();
+        });
+        
+        passwordResetForm.addEventListener('submit', handlePasswordReset);
+
         aiReportForm.addEventListener('submit', handleGenerateAiReport);
         copyAiReportBtn.addEventListener('click', () => { navigator.clipboard.writeText(lastAiReportMarkdown).then(() => showMessage("Report copied to clipboard!", false), () => showMessage("Failed to copy report.")); });
         loginTabBtn.addEventListener('click', () => {
