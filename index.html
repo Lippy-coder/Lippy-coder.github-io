@@ -423,7 +423,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.9 (Member Removal & UI Fixes)
+              Version 9.0.10 (Member Layout Fix)
             </p>
         </footer>
     </div>
@@ -1059,13 +1059,17 @@
                 let removeIconHTML = '';
                 if (isOwner && !isSelf) {
                     const canRemove = !hasFinancialHistory(member.uid);
+                    let iconContent;
+
                     if (canRemove) {
-                        // --- FIX #2: Collapsed to single line to prevent whitespace issues ---
-                        removeIconHTML = `<button class="remove-member-btn remove-icon-overlay h-6 w-6 bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700" data-uid="${member.uid}" data-name="${profile.displayName}"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
+                        // The clickable button for removable members
+                        iconContent = `<button class="remove-member-btn h-6 w-6 bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700" data-uid="${member.uid}" data-name="${profile.displayName}"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
                     } else {
-                        // --- FIX #2: Collapsed to single line to prevent whitespace issues ---
-                        removeIconHTML = `<div class="tooltip-wrapper remove-icon-overlay"><span class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></span><span class="tooltip-text">Cannot remove member with financial history. Settle all debts first.</span></div>`;
+                        // The tooltip structure for non-removable members
+                        iconContent = `<div class="tooltip-wrapper"><span class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></span><span class="tooltip-text">Cannot remove member with financial history. Settle all debts first.</span></div>`;
                     }
+                    // The common, absolutely positioned wrapper for both cases to ensure structural consistency
+                    removeIconHTML = `<div class="remove-icon-overlay">${iconContent}</div>`;
                 }
         
                 let avatarHTML = '';
