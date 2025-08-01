@@ -63,9 +63,6 @@
         .member-avatar-wrapper { position: relative; }
         .remove-icon-overlay { position: absolute; top: -4px; right: -4px; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .member-avatar-wrapper:hover .remove-icon-overlay { opacity: 1; }
-        .tooltip-wrapper { position: relative; cursor: not-allowed; }
-        .tooltip-wrapper .tooltip-text { visibility: hidden; width: 220px; background-color: #374151; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 110%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 12px; font-weight: normal; }
-        .tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -423,7 +420,7 @@
 
         <footer class="text-center py-4">
             <p class="text-xs text-gray-400">
-              Version 9.0.11 (Layout Overflow Fix)
+              Version 9.0.12 (Layout Overflow Fix)
             </p>
         </footer>
     </div>
@@ -1009,9 +1006,6 @@
             }
         });
 
-        // --- FIX #1: Corrected hasFinancialHistory function ---
-        // This function now correctly checks if a member's balance is zero,
-        // accounting for both expenses and settled payments.
         function hasFinancialHistory(memberUid) {
             const balances = calculateAllBalances(currentTrip, allTripExpenses);
             const balanceInCents = balances.get(memberUid) || 0;
@@ -1065,10 +1059,9 @@
                         // The clickable button for removable members
                         iconContent = `<button class="remove-member-btn h-6 w-6 bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-red-700" data-uid="${member.uid}" data-name="${profile.displayName}"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
                     } else {
-                        // The tooltip structure for non-removable members
-                        iconContent = `<div class="tooltip-wrapper"><span class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></span><span class="tooltip-text">Cannot remove member with financial history. Settle all debts first.</span></div>`;
+                        // A button that looks disabled but triggers a toast message on click.
+                        iconContent = `<button data-action="show-remove-error" class="h-6 w-6 bg-gray-400 text-white rounded-full flex items-center justify-center cursor-not-allowed"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>`;
                     }
-                    // The common, absolutely positioned wrapper for both cases to ensure structural consistency
                     removeIconHTML = `<div class="remove-icon-overlay">${iconContent}</div>`;
                 }
         
@@ -2160,14 +2153,18 @@
         });
 
         tripMembersList.addEventListener('click', (e) => {
-            const removeBtn = e.target.closest('.remove-member-btn');
-            if (removeBtn) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            
+            if (btn.classList.contains('remove-member-btn')) {
                 memberToRemove = {
-                    uid: removeBtn.dataset.uid,
-                    name: removeBtn.dataset.name
+                    uid: btn.dataset.uid,
+                    name: btn.dataset.name
                 };
                 removeMemberNameSpan.textContent = memberToRemove.name;
                 openModal(removeMemberModal);
+            } else if (btn.dataset.action === 'show-remove-error') {
+                showMessage("Cannot remove member with financial history. Settle all debts first.");
             }
         });
         
