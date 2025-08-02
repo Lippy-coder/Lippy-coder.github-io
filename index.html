@@ -2518,7 +2518,7 @@
                     }));
                     
                     currentItemization = {
-                        currency: selectedCurrency,
+                        currency: detectedCurrency || currentTrip.baseCurrency, // Store the currency from the receipt
                         exchangeRate: exchangeRate,
                         lineItems: lineItemsProcessed, // Untranslated descriptions
                         isTranslated: false, // Flag for lazy loading
@@ -2531,6 +2531,7 @@
                     itemizedSplitSection.classList.add('hidden');
                     toggleSplitModeBtn.innerHTML = 'Switch to Split by Item';
                 } else {
+                    currentItemization = null;
                     splitModeToggleContainer.classList.add('hidden');
                 }
                 
@@ -2654,54 +2655,63 @@
                 // Switching TO itemized split
                 if (currentItemization && !currentItemization.isTranslated) {
                     
-                    toggleSplitModeBtn.disabled = true;
-                    toggleSplitModeBtn.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Translating...</span>`;
+                    // SMART FRONT-END LOGIC: Check if translation is even needed.
+                    if (currentItemization.currency === currentTrip.baseCurrency) {
+                        console.log("Skipping translation: Receipt currency matches base currency.");
+                        currentItemization.isTranslated = true; // Mark as "handled" to prevent re-checks.
+                    } else {
+                        // If currencies differ, proceed with the API call.
+                        console.log(`Proceeding with translation: ${currentItemization.currency} -> ${currentTrip.baseCurrency}`);
+                        toggleSplitModeBtn.disabled = true;
+                        toggleSplitModeBtn.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Translating...</span>`;
 
-                    try {
-                        const textsToTranslate = [...new Set(currentItemization.lineItems.map(item => item.description))];
-                        
-                        if (textsToTranslate.length > 0) {
-                            const translationPayload = {
-                                task: 'translate',
-                                texts: textsToTranslate,
-                                targetCurrency: currentTrip.baseCurrency
-                            };
+                        try {
+                            const textsToTranslate = [...new Set(currentItemization.lineItems.map(item => item.description))];
+                            
+                            if (textsToTranslate.length > 0) {
+                                const translationPayload = {
+                                    task: 'translate',
+                                    texts: textsToTranslate,
+                                    targetCurrency: currentTrip.baseCurrency
+                                };
 
-                            const response = await fetch(CLOUD_FUNCTION_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(translationPayload)
-                            });
+                                const response = await fetch(CLOUD_FUNCTION_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(translationPayload)
+                                });
 
-                            if (!response.ok) {
-                                throw new Error(`Translation request failed: ${response.status}`);
+                                if (!response.ok) {
+                                    throw new Error(`Translation request failed: ${response.status}`);
+                                }
+                                
+                                const result = await response.json();
+                                if (!result.success) {
+                                    throw new Error("Translation API returned success:false");
+                                }
+
+                                const translations = result.translations;
+
+                                currentItemization.lineItems.forEach(item => {
+                                    if (translations[item.description]) {
+                                        item.description = translations[item.description];
+                                    }
+                                });
                             }
                             
-                            const result = await response.json();
-                            if (!result.success) {
-                                throw new Error("Translation API returned success:false");
-                            }
+                            currentItemization.isTranslated = true;
 
-                            const translations = result.translations;
-
-                            currentItemization.lineItems.forEach(item => {
-                                if (translations[item.description]) {
-                                    item.description = translations[item.description];
-                                }
-                            });
+                        } catch (error) {
+                            console.error("Lazy translation failed:", error);
+                            showMessage("Could not translate items. Proceeding with original text.");
+                            currentItemization.isTranslated = true;
+                        } finally {
+                            toggleSplitModeBtn.disabled = false;
                         }
-                        
-                        currentItemization.isTranslated = true;
-
-                    } catch (error) {
-                        console.error("Lazy translation failed:", error);
-                        showMessage("Could not translate items. Proceeding with original text.");
-                        currentItemization.isTranslated = true;
-                    } finally {
-                        toggleSplitModeBtn.disabled = false;
                     }
                 }
                 
+                // This part runs whether translation happened or was skipped.
                 itemizedSplitSection.classList.remove('hidden');
                 equalSplitSection.classList.add('hidden');
                 toggleSplitModeBtn.innerHTML = 'Switch to Split by Amount';
