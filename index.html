@@ -247,7 +247,7 @@
         </div>
 
         <div id="create-trip-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Create a New Trip</h3><form id="create-trip-form"><div class="mb-4"><label for="trip-name" class="block text-sm font-medium text-gray-700 mb-1">Trip Name</label><input type="text" id="trip-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Summer in Italy"></div><div class="mb-6"><label for="base-currency" class="block text-sm font-medium text-gray-700 mb-1">Base Currency</label><select id="base-currency" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="GBP">GBP (British Pound)</option><option value="USD">USD (US Dollar)</option><option value="EUR">EUR (Euro)</option><option value="JPY">JPY (Japanese Yen)</option><option value="CAD">CAD (Canadian Dollar)</option><option value="AUD">AUD (Australian Dollar)</option></select></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-create-trip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-create-trip-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Create</button></div></form></div></div>
-        <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto"><h3 class="text-2xl font-bold mb-6">Add an Expense</h3><form id="add-expense-form"><div class="mb-4"><label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><div class="flex items-center"><input type="text" id="expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Dinner, Museum tickets"><span id="ai-reasoning-tooltip" class="hidden"></span></div></div><div class="grid grid-cols-2 gap-4 mb-2"><div><label for="expense-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label><input type="number" id="expense-amount" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div><div><label for="expense-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label><select id="expense-currency" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div></div><div id="fx-conversion-display" class="h-6 mb-4 text-sm text-indigo-600 flex items-center"></div><div class="mb-4"><label for="expense-occurred-at" class="block text-sm font-medium text-gray-700 mb-1">Date & Time of Expense</label><input type="datetime-local" id="expense-occurred-at" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label><div class="flex items-center space-x-2"><select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">-- Select a Category --</option><option value="Food & Drink">Food & Drink</option><option value="Transport">Transport</option><option value="Accommodation">Accommodation</option><option value="Activities">Activities</option><option value="Shopping">Shopping</option><option value="Other">Other</option></select></div><div id="ai-category-spinner" class="mt-2 h-6 flex items-center hidden"></div></div><div class="mb-4"><label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label><select id="expense-paid-by" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div><div id="split-mode-toggle-container" class="my-4 hidden"><button type="button" id="toggle-split-mode-btn" class="w-full text-center bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-200 flex items-center justify-center h-9">Switch to Split by Item</button></div><div id="itemized-split-section" class="hidden"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Assign Items to Members</label></div><div id="itemized-list" class="space-y-3 p-3 border rounded-md bg-gray-50 max-h-48 overflow-y-auto"></div><div id="itemized-summary" class="mt-2 text-sm"></div></div><div id="equal-split-section" class="mb-6"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Split Between</label><div class="space-x-4"><button type="button" id="deselect-all-btn" class="text-sm text-red-600 hover:underline font-semibold">Deselect All</button></div></div><div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50"></div><div id="split-total-validation" class="text-xs text-right mt-1 min-h-[1rem]"></div></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-add-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center w-36 h-10"><span class="btn-text">Add Expense</span><div class="spinner hidden"></div></button></div></form></div></div>
+        <div id="add-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto"><h3 class="text-2xl font-bold mb-6">Add an Expense</h3><form id="add-expense-form"><div class="mb-4"><label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><div class="flex items-center"><input type="text" id="expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Dinner, Museum tickets"><span id="ai-reasoning-tooltip" class="hidden"></span></div></div><div class="grid grid-cols-2 gap-4 mb-2"><div><label for="expense-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label><input type="number" id="expense-amount" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="100.00"></div><div><label for="expense-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label><select id="expense-currency" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div></div><div id="fx-conversion-display" class="h-6 mb-4 text-sm text-indigo-600 flex items-center"></div><div class="mb-4"><label for="expense-occurred-at" class="block text-sm font-medium text-gray-700 mb-1">Date & Time of Expense</label><input type="datetime-local" id="expense-occurred-at" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label><div class="flex items-center space-x-2"><select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">-- Select a Category --</option><option value="Food & Drink">Food & Drink</option><option value="Transport">Transport</option><option value="Accommodation">Accommodation</option><option value="Activities">Activities</option><option value="Shopping">Shopping</option><option value="Other">Other</option></select></div><div id="ai-category-spinner" class="mt-2 h-6 flex items-center hidden"></div></div><div class="mb-4"><label for="expense-paid-by" class="block text-sm font-medium text-gray-700 mb-1">Paid By</label><select id="expense-paid-by" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></select></div><div id="split-mode-toggle-container" class="my-4 hidden"><button type="button" id="toggle-split-mode-btn" class="w-full text-center bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-200">Switch to Split by Item</button></div><div id="itemized-split-section" class="hidden"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Assign Items to Members</label></div><div id="itemized-list" class="space-y-3 p-3 border rounded-md bg-gray-50 max-h-48 overflow-y-auto"></div><div id="itemized-summary" class="mt-2 text-sm"></div></div><div id="equal-split-section" class="mb-6"><div class="flex justify-between items-center mb-2"><label class="block text-sm font-medium text-gray-700">Split Between</label><div class="space-x-4"><button type="button" id="deselect-all-btn" class="text-sm text-red-600 hover:underline font-semibold">Deselect All</button></div></div><div id="expense-split-between" class="space-y-2 p-2 border rounded-md bg-gray-50"></div><div id="split-total-validation" class="text-xs text-right mt-1 min-h-[1rem]"></div></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-add-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="submit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center w-36 h-10"><span class="btn-text">Add Expense</span><div class="spinner hidden"></div></button></div></form></div></div>
         <div id="edit-profile-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Profile & Payment Link</h3><form id="edit-profile-form"><div class="mb-4"><label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" id="profile-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="mb-4"><label for="payment-bank" class="block text-sm font-medium text-gray-700 mb-1">Payment App</label><select id="payment-bank" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"><option value="">None</option><option value="Monzo">Monzo</option><option value="Revolut">Revolut</option></select></div><div class="mb-6"><label for="payment-username" class="block text-sm font-medium text-gray-700 mb-1">Payment Username</label><input type="text" id="payment-username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., johnsmith"><p class="text-xs text-gray-500 mt-1">Your Monzo username or Revtag, without the '@'.</p></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-profile-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save Profile</button></div></form></div></div>
         <div id="edit-expense-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden-view"><div class="bg-white rounded-xl shadow-2xl m-4 w-full max-w-md p-8"><h3 class="text-2xl font-bold mb-6">Edit Expense Description</h3><form id="edit-expense-form"><input type="hidden" id="edit-expense-id"><div class="mb-4"><label for="edit-expense-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="edit-expense-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></div><div class="flex justify-end space-x-4"><button type="button" id="cancel-edit-expense-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button><button type="submit" id="confirm-edit-expense-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700">Save</button></div></form></div></div>
         
@@ -469,7 +469,6 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const functions = getFunctions(app);
-        const translateExpenseTexts = httpsCallable(functions, 'translateExpenseTexts');
         setLogLevel('error');
 
         let currentTrip = null;
@@ -2507,9 +2506,8 @@
                     const rateData = await getExchangeRate(selectedCurrency, currentTrip.baseCurrency);
                     exchangeRate = rateData.conversion_rate;
                 }
-                
-                // Show itemization button if line items exist
-                if (data.lineItems && data.lineItems.length > 0) {
+
+                if (data.lineItems && data.lineItems.length > 0 && data.confidence === 'high') {
                     const totalInOriginalCents = data.total ? Math.round(data.total * 100) : 0;
                     const totalInBaseCents = Math.round(totalInOriginalCents * exchangeRate);
                     
@@ -2521,8 +2519,7 @@
                     currentItemization = {
                         currency: selectedCurrency,
                         exchangeRate: exchangeRate,
-                        lineItems: lineItemsProcessed, // Untranslated descriptions
-                        isTranslated: false, // Flag for lazy loading
+                        lineItems: lineItemsProcessed,
                         totalInOriginalCents: totalInOriginalCents,
                         totalInBaseCents: totalInBaseCents
                     };
@@ -2530,9 +2527,8 @@
                     splitModeToggleContainer.classList.remove('hidden');
                     equalSplitSection.classList.remove('hidden');
                     itemizedSplitSection.classList.add('hidden');
-                    toggleSplitModeBtn.innerHTML = 'Switch to Split by Item';
-                } else {
-                    splitModeToggleContainer.classList.add('hidden');
+                    toggleSplitModeBtn.textContent = 'Switch to Split by Item';
+                    renderItemizationUI(currentItemization);
                 }
                 
                 await handleCurrencyChange();
@@ -2642,57 +2638,17 @@
         aiCancelBtn.addEventListener('click', closeCameraView);
         aiCaptureBtn.addEventListener('click', handleAiCapture);
 
-        toggleSplitModeBtn.addEventListener('click', async () => {
-            const isCurrentlyItemized = !itemizedSplitSection.classList.contains('hidden');
-
-            if (isCurrentlyItemized) {
-                // Switching back to equal split is simple
+        toggleSplitModeBtn.addEventListener('click', () => {
+            const isItemMode = !itemizedSplitSection.classList.contains('hidden');
+            if (isItemMode) {
                 itemizedSplitSection.classList.add('hidden');
                 equalSplitSection.classList.remove('hidden');
-                toggleSplitModeBtn.innerHTML = 'Switch to Split by Item';
+                toggleSplitModeBtn.textContent = 'Switch to Split by Item';
                 autoDistributeAmount();
             } else {
-                // Switching TO itemized split
-                if (currentItemization && !currentItemization.isTranslated) {
-                    
-                    // Show loading state to the user
-                    toggleSplitModeBtn.disabled = true;
-                    toggleSplitModeBtn.innerHTML = `<div class="mini-spinner"></div><span class="ml-2">Translating...</span>`;
-
-                    try {
-                        const textsToTranslate = [...new Set(currentItemization.lineItems.map(item => item.description))];
-                        
-                        // Only call if there's something to translate
-                        if (textsToTranslate.length > 0) {
-                            const result = await translateExpenseTexts({ 
-                                texts: textsToTranslate, 
-                                targetCurrency: currentTrip.baseCurrency 
-                            });
-                            
-                            const translations = result.data.translations;
-
-                            currentItemization.lineItems.forEach(item => {
-                                if (translations[item.description]) {
-                                    item.description = translations[item.description];
-                                }
-                            });
-                        }
-
-                        currentItemization.isTranslated = true;
-
-                    } catch (error) {
-                        console.error("Lazy translation failed:", error);
-                        showMessage("Could not translate items. Proceeding with original text.");
-                        currentItemization.isTranslated = true; // Mark as "tried" to prevent retries
-                    } finally {
-                        toggleSplitModeBtn.disabled = false;
-                        toggleSplitModeBtn.innerHTML = 'Switch to Split by Amount';
-                    }
-                }
-                
                 itemizedSplitSection.classList.remove('hidden');
                 equalSplitSection.classList.add('hidden');
-                toggleSplitModeBtn.innerHTML = 'Switch to Split by Amount';
+                toggleSplitModeBtn.textContent = 'Switch to Split by Amount';
                 renderItemizationUI(currentItemization);
             }
         });
@@ -2835,6 +2791,23 @@
             });
 
             const liveRemainderInOriginalCents = currentItemization.totalInOriginalCents - assignedItemsTotalInOriginalCents;
+
+            if (liveRemainderInOriginalCents > 0 && remainderAssignments.size > 0) {
+                const sharePerPerson = Math.floor(liveRemainderInOriginalCents / remainderAssignments.size);
+                let remainder = liveRemainderInOriginalCents % remainderAssignments.size;
+                
+                const remainderUids = Array.from(remainderAssignments);
+                shuffleArray(remainderUids);
+
+                remainderUids.forEach(uid => {
+                    let userShare = sharePerPerson;
+                    if(remainder > 0){
+                        userShare++;
+                        remainder--;
+                    }
+                    memberSharesInOriginalCents[uid] += userShare;
+                });
+            }
 
             document.getElementById('live-remainder-row')?.remove(); 
             if (liveRemainderInOriginalCents > 0) {
@@ -3252,3 +3225,4 @@
     </script>
 </body>
 </html>
+
